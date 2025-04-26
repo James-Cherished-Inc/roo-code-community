@@ -1,23 +1,23 @@
 
-# Custom Modes
+# **Custom Modes**
 
-* Researcher by @JamesCherished: Integrates Perplexity for web search and Lynx for page analysis, enabling autonomous research-augmented software engineering
+### **Researcher** by @JamesCherished: Integrates Perplexity for web search and Lynx for page analysis, enabling autonomous research-augmented software engineering
 https://github.com/James-Cherished-Inc/roo-research-mode
 
-    ** requires : Perplexity pro or Perplexity API
-    ** cost : a few cents per search for Perplexity
+    * requires : Perplexity pro or Perplexity API
+    * cost : a few cents per search for Perplexity
 
 
-* Task-Master by @JamesCherished, leveraging the tool by @eyaltoledano & co: A CLI that turns your Project's Documentation into an autonomous local task management and project implementation system.
+### **Task-Master** by @JamesCherished, leveraging the tool by @eyaltoledano & co: A CLI that turns your Project's Documentation into an autonomous local task management and project implementation system.
 https://github.com/James-Cherished-Inc/AI-task-master
 
-    ** requires : an API key from any provider
-    ** cost : free with OpenRouter free models
+    * requires : an API key from any provider
+    * cost : free with OpenRouter free models
 
 
 # My go-to Crew
 
-#### Check .roomodes for the prompts. 
+#### Check *.roomodes* for the prompts. 
 Adding .roomodes at the root of your workspace will enable the custom modes described in the file.
 Please note the specific format is required for Roo to read the modes, as of April 2025.
 
@@ -33,7 +33,7 @@ The modifications of the "classic" modes are for my personal needs and tastes. Y
 
 # My Footgun prompting
 
-#### Check .roo/ for the full system prompt
+#### Check *.roo/* for the full system prompt
 Adding .roo/ at the root of your workspace will replace the system prompt entirely for each custom mode specified.
 Please note that as of April 2025, the custom instructions set in the settings of the Roo extension are added on top of your footgun prompts. Additionally, it is only possible to footgun the system prompt for a specific prompt.
 
