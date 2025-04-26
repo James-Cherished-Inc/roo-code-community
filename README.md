@@ -22,6 +22,7 @@ Adding .roomodes at the root of your workspace will enable the custom modes desc
 Please note the specific format is required for Roo to read the modes, as of April 2025.
 
 The modifications of the "classic" modes are for my personal needs and tastes. You're free to draw inspiration from them.
+You can find them at *custom-classic-modes.md*.
 
 * Technical Writer
 * Custom Boomerang Mode
