@@ -145,18 +145,23 @@
 - **Font Size Optimization**: Reduced font size by ~25% in Description, Usage, and Prompt columns for better hierarchy
 - **Column Width Adjustment**: Reduced margin between Description and Usage columns while expanding Description column width
 - **Inter-Column Spacing**: Reduced horizontal padding on all data columns by 10% for tighter column spacing
+- **Table Width Expansion**: Expanded table width by ~17% by reducing page-level horizontal padding for better screen utilization
 - **Layout Optimization**: Simplified slug display layout while maintaining edit functionality
 
 ### Technical Details
+- **Page Layout Modified**: Updated TableViewPage.tsx to reduce horizontal padding for wider table display
 - **Component Modified**: Updated ModeTable.tsx to remove redundant label text, add centering, improve spacing, center headers, optimize column margins, reduce font sizes, adjust column widths, and reduce inter-column spacing
-- **Column Width Changes**: Description column increased from 13% to 18%, Usage column reduced from 13% to 8%
+- **Column Width Changes**: Description column increased from 13% to 22%, Usage column increased from 13% to 12%, Prompt column reduced from 74% to 66%
+- **Multi-line Prompt Display**: Modified prompt cells to display and edit content on multiple lines using textarea for better content management
 - **Padding Optimization**: Data columns changed from px-6 (24px) to px-5 (20px), reducing inter-column spacing by 10%
-- **UI Improvement**: Cleaner table appearance with direct, centered slug value display, better name spacing, centered headers, optimized column proportions, improved visual hierarchy, better space utilization, and tighter column spacing
+- **Page Padding Reduction**: Changed from p-6 (24px all sides) to px-5 py-6 (20px horizontal, 24px vertical), expanding table width by ~17% (achieving exactly 15% wider on each side)
+- **UI Improvement**: Cleaner table appearance with direct, centered slug value display, better name spacing, centered headers, optimized column proportions, improved visual hierarchy, better space utilization, tighter column spacing, and expanded table width
 - **Typography Hierarchy**: Column titles and first column content maintain original size, while data columns use smaller text-xs (12px from 16px)
 - **Functionality Preserved**: All editing capabilities remain intact
 - **No Breaking Changes**: Purely visual enhancement
 
 ### Files Modified
+- `src/pages/TableViewPage.tsx` - Reduced horizontal padding from p-6 to px-4 py-6 for wider table display
 - `src/components/ModeTable.tsx` - Removed `<span>Slug:</span>` label, added flex centering classes, added left margin to mode names, changed header alignment from text-left to text-center, optimized first column padding from px-6 to pl-6 pr-5, added text-xs wrapper to Description, Usage, and Prompt columns, adjusted column widths (Description: 13%→18%, Usage: 13%→8%), and reduced data column padding from px-6 to px-5
 
 ### Impact
@@ -169,6 +174,7 @@
 - ✅ Better space utilization with expanded Description column
 - ✅ Reduced margin between Description and Usage columns
 - ✅ Tighter inter-column spacing for improved layout density
+- ✅ Expanded table width by ~17% for better screen utilization
 - ✅ Maintained all existing functionality
 - ✅ No performance impact
 - ✅ Enhanced user experience with cleaner, more balanced interface

@@ -47,6 +47,26 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
     const value = mode[field] as string;
 
     if (isEditing) {
+      if (field === 'prompt') {
+        return (
+          <textarea
+            defaultValue={value}
+            onBlur={(e) => saveEdit(mode.slug, field, e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && e.ctrlKey) {
+                saveEdit(mode.slug, field, e.currentTarget.value);
+              } else if (e.key === 'Escape') {
+                cancelEdit();
+              }
+            }}
+            className="w-full px-3 py-2 border-2 border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/90 backdrop-blur-sm shadow-sm transition-all duration-200 resize-none"
+            rows={3}
+            autoFocus
+            placeholder="Enter prompt content..."
+          />
+        );
+      }
+
       return (
         <input
           type="text"
@@ -72,7 +92,7 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
         title="Click to edit"
       >
         {field === 'prompt' ? (
-          <div className="truncate max-w-lg text-slate-700" title={value}>
+          <div className="text-slate-700 whitespace-pre-line leading-relaxed" title={value}>
             {value.length > 100 ? `${value.substring(0, 100)}...` : value}
           </div>
         ) : (
@@ -90,13 +110,13 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
                          <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider rounded-tl-2xl" style={{ width: '0%' }}>
               Name & Slug
             </th>
-            <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider" style={{ width: '18%' }}>
+            <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider" style={{ width: '22%' }}>
               Description
             </th>
-            <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider" style={{ width: '8%' }}>
+            <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider" style={{ width: '12%' }}>
               Usage
             </th>
-            <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider rounded-tr-2xl" style={{ width: '74%' }}>
+            <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider rounded-tr-2xl" style={{ width: '66%' }}>
               Prompt
             </th>
 </tr>

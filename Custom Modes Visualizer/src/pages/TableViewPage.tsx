@@ -9,8 +9,8 @@ const TableViewPage: React.FC = () => {
   const { modes } = useModes();
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
+    <div className="px-5 py-6">
+      <div className="mb-6 text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">📋 Table View</h1>
         <p className="text-gray-600">
           Edit all modes in a comprehensive table. Click on any cell to edit the content.

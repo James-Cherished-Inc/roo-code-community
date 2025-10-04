@@ -10,7 +10,7 @@ const PromptBuilderPage: React.FC = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
+      <div className="mb-6 text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">🔧 Prompt Builder</h1>
         <p className="text-gray-600">
           Construct custom prompts by selecting base modes and adding additional instructions.

@@ -1,4 +1,5 @@
 
+For each of the 3 pages, make sure the title of the page and its subtitles are centered for a more modern holistic feel.
 
 - In the Smart View page, ensure the selection of each mode happens on a left bar where they are vertically stacked
 
