@@ -23,6 +23,7 @@ A modern, intuitive web application for managing and visualizing AI assistant mo
 
 ### ✨ Core Features
 - **Live Editing**: Real-time editing with auto-save
+- **Mode Creation**: Create new custom modes with the Create Mode feature
 - **Responsive Design**: Works perfectly on desktop and mobile
 - **Type Safety**: Full TypeScript support for reliability
 - **Fast Performance**: Built with Vite for lightning-fast development
@@ -125,8 +126,8 @@ src/
 
 ## 🔮 Future Plans
 
-- [ ] Mode creation and deletion
-- [ ] Import/export functionality
+- [ ] Mode deletion
+- [ ] Import/export functionality (JSON export available)
 - [ ] Search and filtering
 - [ ] Dark mode support
 - [ ] Keyboard shortcuts

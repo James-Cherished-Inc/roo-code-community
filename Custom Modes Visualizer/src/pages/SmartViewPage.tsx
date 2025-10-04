@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useModes } from '../context/ModeContext';
 import ModeDetail from '../components/ModeDetail';
+import CreateModeModal from '../components/CreateModeModal';
 
 /**
  * Page component for smart view showing one mode at a time with navigation
@@ -8,6 +9,7 @@ import ModeDetail from '../components/ModeDetail';
 const SmartViewPage: React.FC = () => {
   const { modes } = useModes();
   const [selectedModeIndex, setSelectedModeIndex] = useState(0);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const selectedMode = modes[selectedModeIndex];
 
@@ -30,6 +32,13 @@ const SmartViewPage: React.FC = () => {
    */
   const selectMode = (index: number) => {
     setSelectedModeIndex(index);
+  };
+
+  /**
+   * Handle create mode button click
+   */
+  const handleCreate = () => {
+    setIsCreateModalOpen(true);
   };
 
   if (!selectedMode) {
@@ -60,6 +69,17 @@ const SmartViewPage: React.FC = () => {
         {/* Mode Selection - Vertically Stacked */}
         <div className="flex-1 overflow-y-auto p-2">
           <div className="space-y-1">
+            {/* Create Mode Option */}
+            <button
+              onClick={handleCreate}
+              className="w-full text-left p-2 rounded-lg transition-all duration-200 text-sm bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 font-medium"
+            >
+              <div className="font-semibold truncate">➕ Create Mode</div>
+              <div className="text-xs mt-1 truncate text-green-600">
+                Add new mode
+              </div>
+            </button>
+
             {modes.map((mode, index) => (
               <button
                 key={mode.slug}
@@ -111,6 +131,12 @@ const SmartViewPage: React.FC = () => {
           <ModeDetail mode={selectedMode} />
         </div>
       </div>
+
+      {/* Create Mode Modal */}
+      <CreateModeModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   );
 };

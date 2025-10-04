@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useModes } from '../context/ModeContext';
 import ModeTable from '../components/ModeTable';
 import ImportModal from '../components/ImportModal';
+import CreateModeModal from '../components/CreateModeModal';
 
 /**
  * Page component for displaying all modes in an editable table view
@@ -9,6 +10,7 @@ import ImportModal from '../components/ImportModal';
 const TableViewPage: React.FC = () => {
   const { modes, exportModesToJson } = useModes();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   /**
    * Handle export to JSON file
@@ -25,6 +27,13 @@ const TableViewPage: React.FC = () => {
    */
   const handleImport = () => {
     setIsImportModalOpen(true);
+  };
+
+  /**
+   * Handle create mode button click
+   */
+  const handleCreate = () => {
+    setIsCreateModalOpen(true);
   };
 
   return (
@@ -44,6 +53,16 @@ const TableViewPage: React.FC = () => {
 
           {/* Import/Export Controls */}
           <div className="flex space-x-2">
+            <button
+              onClick={handleCreate}
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Create Mode
+            </button>
+
             <button
               onClick={handleExport}
               className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -73,6 +92,12 @@ const TableViewPage: React.FC = () => {
       <ImportModal
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
+      />
+
+      {/* Create Mode Modal */}
+      <CreateModeModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
       />
     </div>
   );

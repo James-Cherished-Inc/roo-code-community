@@ -32,10 +32,11 @@ src/
 - [x] Responsive design
 - [x] Navigation between views
 
-### Phase 2: Enhanced Features (Future)
-- [ ] Mode creation/deletion functionality
-- [ ] Import/export modes from/to JSON
-- [ ] Mode validation
+### Phase 2: Enhanced Features (In Progress)
+- [x] Mode creation functionality
+- [ ] Mode deletion functionality
+- [ ] Import/export modes from/to JSON (export available)
+- [x] Mode validation (creation form validation)
 - [ ] Search and filtering
 - [ ] Keyboard shortcuts
 - [ ] Dark mode support
@@ -84,7 +85,7 @@ src/
 
 ## Next Priorities
 1. Add testing framework
-2. Implement mode creation/deletion
+2. Implement mode deletion
 3. Add search and filtering capabilities
 4. Improve accessibility
 5. Add keyboard shortcuts
