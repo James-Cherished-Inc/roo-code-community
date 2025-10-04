@@ -45,13 +45,75 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   /**
-   * Save current modes to localStorage
+    * Save current modes to localStorage
+    */
+   const saveToLocalStorage = () => {
+     try {
+       localStorage.setItem(MODES_STORAGE_KEY, JSON.stringify(modes));
+     } catch (error) {
+       console.error('Failed to save modes to localStorage:', error);
+     }
+   };
+
+  /**
+   * Export modes to JSON file
    */
-  const saveToLocalStorage = () => {
+  const exportModesToJson = () => {
     try {
-      localStorage.setItem(MODES_STORAGE_KEY, JSON.stringify(modes));
+      const dataStr = JSON.stringify(modes, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'roo-modes-export.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      return true;
     } catch (error) {
-      console.error('Failed to save modes to localStorage:', error);
+      console.error('Failed to export modes to JSON:', error);
+      return false;
+    }
+  };
+
+  /**
+   * Import modes from JSON file with different merge strategies
+   */
+  const importModesFromJson = (jsonData: Mode[], strategy: 'replace' | 'add' | 'family') => {
+    try {
+      if (!Array.isArray(jsonData)) {
+        throw new Error('Invalid JSON format: expected array of modes');
+      }
+
+      // Validate that all items have required properties
+      for (const mode of jsonData) {
+        if (!mode.slug || !mode.name || !mode.description || !mode.usage || !mode.prompt) {
+          throw new Error('Invalid mode format: missing required properties');
+        }
+      }
+
+      let newModes: Mode[];
+      switch (strategy) {
+        case 'replace':
+          newModes = jsonData;
+          break;
+        case 'add':
+          newModes = [...modes, ...jsonData];
+          break;
+        case 'family':
+          // For family import, keep current modes and add new ones
+          newModes = [...modes, ...jsonData];
+          break;
+        default:
+          throw new Error('Invalid import strategy');
+      }
+
+      setModes(newModes);
+      return true;
+    } catch (error) {
+      console.error('Failed to import modes from JSON:', error);
+      return false;
     }
   };
 
@@ -87,6 +149,8 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     deleteMode,
     saveToLocalStorage,
     loadFromLocalStorage,
+    exportModesToJson,
+    importModesFromJson,
   };
 
   return (

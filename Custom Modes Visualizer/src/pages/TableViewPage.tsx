@@ -1,12 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useModes } from '../context/ModeContext';
 import ModeTable from '../components/ModeTable';
+import ImportModal from '../components/ImportModal';
 
 /**
  * Page component for displaying all modes in an editable table view
  */
 const TableViewPage: React.FC = () => {
-  const { modes } = useModes();
+  const { modes, exportModesToJson } = useModes();
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+  /**
+   * Handle export to JSON file
+   */
+  const handleExport = () => {
+    const success = exportModesToJson();
+    if (!success) {
+      alert('Failed to export modes. Please try again.');
+    }
+  };
+
+  /**
+   * Handle import button click
+   */
+  const handleImport = () => {
+    setIsImportModalOpen(true);
+  };
 
   return (
     <div className="px-5 py-6">
@@ -22,10 +41,39 @@ const TableViewPage: React.FC = () => {
           <span className="text-sm text-gray-500">
             {modes.length} mode{modes.length !== 1 ? 's' : ''} loaded
           </span>
+
+          {/* Import/Export Controls */}
+          <div className="flex space-x-2">
+            <button
+              onClick={handleExport}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l4-4m-4 4l-4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Save as JSON
+            </button>
+
+            <button
+              onClick={handleImport}
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              Import
+            </button>
+          </div>
         </div>
       </div>
 
       <ModeTable modes={modes} />
+
+      {/* Import Modal */}
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+      />
     </div>
   );
 };

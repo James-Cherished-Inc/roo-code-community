@@ -1,8 +1,6 @@
+- In the Table View and Smart View pages, gracefully incoroporate a multi-selection beautiful dropdown menu allowing to choose wich families to load in the current page.
+In the menu, there will be by default the Default family (containing all the default modes), and an option to import a family from a custom mode json. I think technically, what would work best is to store each family in separate json files? And on export, merge all families except the Default family?
 
-For each of the 3 pages, make sure the title of the page and its subtitles are centered for a more modern holistic feel.
 
-- In the Smart View page, ensure the selection of each mode happens on a left bar where they are vertically stacked
 
-- In the Table View page, add on top of the view the following buttons :
-    - Save as json, which saves all current mode and edits in the standardized roo code json format
-    - Import, which can import json files. Once the file selected by the user, the user must choose between 3 options in a popup : Replace current modes, Add to current modes, Import as family (which keeps current modes)
+- Prompt Builder

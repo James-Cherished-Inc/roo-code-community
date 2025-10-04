@@ -17,108 +17,152 @@ interface ModeDetailProps {
  */
 const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
   const { updateMode } = useModes();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedMode, setEditedMode] = useState<Mode>(mode);
+  const [editingField, setEditingField] = useState<keyof Mode | null>(null);
 
   /**
-   * Handle starting edit mode
+   * Handle starting edit mode for a field
    */
-  const startEdit = () => {
-    setEditedMode(mode);
-    setIsEditing(true);
+  const startEdit = (field: keyof Mode) => {
+    setEditingField(field);
   };
 
   /**
-   * Handle saving changes
+   * Handle saving changes to a field
    */
-  const saveEdit = () => {
-    updateMode(mode.slug, editedMode);
-    setIsEditing(false);
-    onUpdate?.(editedMode);
+  const saveEdit = (field: keyof Mode, value: string) => {
+    updateMode(mode.slug, { [field]: value });
+    setEditingField(null);
+    onUpdate?.({ ...mode, [field]: value });
   };
 
   /**
-   * Handle canceling edit
+   * Handle canceling edit mode
    */
   const cancelEdit = () => {
-    setEditedMode(mode);
-    setIsEditing(false);
+    setEditingField(null);
   };
 
   /**
-   * Handle input changes
+   * Render editable field content
    */
-  const handleInputChange = (field: keyof Mode, value: string) => {
-    setEditedMode(prev => ({ ...prev, [field]: value }));
+  const renderField = (field: keyof Mode, label: string, isMultiline = false) => {
+    const isEditing = editingField === field;
+    const value = mode[field] as string;
+
+    if (isEditing) {
+      if (isMultiline) {
+        return (
+          <textarea
+            defaultValue={value}
+            onBlur={(e) => saveEdit(field, e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && e.ctrlKey) {
+                saveEdit(field, e.currentTarget.value);
+              } else if (e.key === 'Escape') {
+                cancelEdit();
+              }
+            }}
+            className="w-full px-3 py-2 border-2 border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/90 backdrop-blur-sm shadow-sm transition-all duration-200 resize-none"
+            rows={isMultiline ? (field === 'prompt' ? 8 : 3) : 1}
+            autoFocus
+            placeholder={`Enter ${label.toLowerCase()}...`}
+          />
+        );
+      }
+
+      return (
+        <input
+          type="text"
+          defaultValue={value}
+          onBlur={(e) => saveEdit(field, e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              saveEdit(field, e.currentTarget.value);
+            } else if (e.key === 'Escape') {
+              cancelEdit();
+            }
+          }}
+          className="w-full px-3 py-2 border-2 border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/90 backdrop-blur-sm shadow-sm transition-all duration-200"
+          autoFocus
+        />
+      );
+    }
+
+    return (
+      <div
+        className="cursor-pointer inline-block"
+        onDoubleClick={() => startEdit(field)}
+        title={`Double-click to edit ${label.toLowerCase()}`}
+      >
+        {field === 'prompt' ? (
+          <div className="text-slate-700 whitespace-pre-line leading-relaxed" title={value}>
+            {value.length > 150 ? `${value.substring(0, 150)}...` : value}
+          </div>
+        ) : (
+          <span className="text-slate-700">{value}</span>
+        )}
+      </div>
+    );
+  };
+
+  /**
+   * Render simple editable value (for headers)
+   */
+  const renderSimpleField = (field: keyof Mode) => {
+    const isEditing = editingField === field;
+    const value = mode[field] as string;
+
+    if (isEditing) {
+      return (
+        <input
+          type="text"
+          defaultValue={value}
+          onBlur={(e) => saveEdit(field, e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              saveEdit(field, e.currentTarget.value);
+            } else if (e.key === 'Escape') {
+              cancelEdit();
+            }
+          }}
+          className="bg-transparent border-b-2 border-indigo-300 focus:outline-none focus:border-indigo-500 px-1"
+          autoFocus
+        />
+      );
+    }
+
+    return (
+      <span
+        className="cursor-pointer hover:text-indigo-600 transition-colors"
+        onDoubleClick={() => startEdit(field)}
+        title={`Double-click to edit`}
+      >
+        {value}
+      </span>
+    );
   };
 
   return (
     <div className="bg-white shadow rounded-lg p-6">
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">{mode.name}</h2>
-          <p className="text-sm text-gray-500 mt-1">Slug: {mode.slug}</p>
-        </div>
-        <div className="flex space-x-2">
-          {!isEditing ? (
-            <button
-              onClick={startEdit}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              ✏️ Edit
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={saveEdit}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-              >
-                💾 Save
-              </button>
-              <button
-                onClick={cancelEdit}
-                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-              >
-                ❌ Cancel
-              </button>
-            </>
-          )}
+      {/* Header with editable name and slug */}
+      <div className="mb-6 pb-4 border-b border-gray-200">
+        <div className="space-y-2">
+          <div className="text-2xl font-bold text-gray-900">
+            {renderSimpleField('name')}
+          </div>
+          <div className="text-sm text-gray-500">
+            {renderSimpleField('slug')}
+          </div>
         </div>
       </div>
 
       <div className="space-y-6">
-        {/* Name Field */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Mode Name
-          </label>
-          {isEditing ? (
-            <input
-              type="text"
-              value={editedMode.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          ) : (
-            <p className="text-lg text-gray-900">{mode.name}</p>
-          )}
-        </div>
-
         {/* Description Field */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Description
           </label>
-          {isEditing ? (
-            <textarea
-              value={editedMode.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          ) : (
-            <p className="text-gray-700">{mode.description}</p>
-          )}
+          {renderField('description', 'Description', true)}
         </div>
 
         {/* Usage Field */}
@@ -126,16 +170,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Usage Guidelines
           </label>
-          {isEditing ? (
-            <textarea
-              value={editedMode.usage}
-              onChange={(e) => handleInputChange('usage', e.target.value)}
-              rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          ) : (
-            <p className="text-gray-700">{mode.usage}</p>
-          )}
+          {renderField('usage', 'Usage Guidelines', true)}
         </div>
 
         {/* Prompt Field */}
@@ -143,21 +178,15 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             System Prompt
           </label>
-          {isEditing ? (
-            <textarea
-              value={editedMode.prompt}
-              onChange={(e) => handleInputChange('prompt', e.target.value)}
-              rows={10}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-            />
-          ) : (
-            <div className="bg-gray-50 p-4 rounded-md">
-              <pre className="whitespace-pre-wrap text-sm text-gray-800">
-                {mode.prompt}
-              </pre>
-            </div>
-          )}
+          {renderField('prompt', 'System Prompt', true)}
         </div>
+      </div>
+
+      {/* Edit Instructions */}
+      <div className="mt-6 p-3 bg-blue-50 rounded-md">
+        <p className="text-xs text-blue-600">
+          💡 Double-click on any field to edit it. Press Enter to save or Escape to cancel.
+        </p>
       </div>
     </div>
   );

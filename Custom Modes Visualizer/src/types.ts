@@ -31,4 +31,6 @@ export interface ModeContextType {
   deleteMode: (slug: string) => void;
   saveToLocalStorage: () => void;
   loadFromLocalStorage: () => void;
+  exportModesToJson: () => boolean;
+  importModesFromJson: (jsonData: Mode[], strategy: 'replace' | 'add' | 'family') => boolean;
 }
