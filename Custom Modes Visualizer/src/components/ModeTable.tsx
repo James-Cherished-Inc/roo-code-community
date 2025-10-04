@@ -75,7 +75,7 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
                 cancelEdit();
               }
             }}
-            className="w-full px-3 py-2 border-2 border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/90 backdrop-blur-sm shadow-sm transition-all duration-200 resize-none"
+            className="w-full px-3 py-2 border-2 border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/90 backdrop-blur-sm shadow-sm transition-all duration-200 resize"
             rows={3}
             autoFocus
             placeholder="Enter prompt content..."
