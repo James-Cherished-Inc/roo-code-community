@@ -2,15 +2,19 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useModes } from '../context/ModeContext';
 import ModeDetail from '../components/ModeDetail';
 import CreateModeModal from '../components/CreateModeModal';
+import ImportModal from '../components/ImportModal';
+import ExportModal from '../components/ExportModal';
 import FamilySelector from '../components/FamilySelector';
 
 /**
  * Page component for smart view showing one mode at a time with navigation
  */
 const SmartViewPage: React.FC = () => {
-   const { modes, selectedFamilies } = useModes();
-   const [selectedModeIndex, setSelectedModeIndex] = useState(0);
-   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const { modes, selectedFamilies } = useModes();
+    const [selectedModeIndex, setSelectedModeIndex] = useState(0);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
    // Filter modes based on selected families
    const filteredModes = useMemo(() => {
@@ -53,6 +57,20 @@ const SmartViewPage: React.FC = () => {
    */
   const handleCreate = () => {
     setIsCreateModalOpen(true);
+  };
+
+  /**
+   * Handle import button click
+   */
+  const handleImport = () => {
+    setIsImportModalOpen(true);
+  };
+
+  /**
+   * Handle export modes (opens modal)
+   */
+  const handleExport = () => {
+    setIsExportModalOpen(true);
   };
 
   if (filteredModes.length === 0) {
@@ -126,6 +144,28 @@ const SmartViewPage: React.FC = () => {
            <p className="text-xs text-gray-600">
              Select a mode to view and edit
            </p>
+           {/* Import/Export Controls */}
+           <div className="mt-2 flex flex-col space-y-1">
+             <button
+               onClick={handleExport}
+               className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs leading-3 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500"
+               title="Export selected modes in JSON or YAML format"
+             >
+               <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l4-4m-4 4l-4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+               </svg>
+               Export
+             </button>
+             <button
+               onClick={handleImport}
+               className="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-3 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500"
+             >
+               <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+               </svg>
+               Import
+             </button>
+           </div>
            <div className="mt-2 text-xs text-gray-500">
              {selectedModeIndex + 1} of {filteredModes.length} modes
            </div>
@@ -199,6 +239,19 @@ const SmartViewPage: React.FC = () => {
           <ModeDetail mode={selectedMode} />
         </div>
       </div>
+
+      {/* Import Modal */}
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+      />
+
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        availableModes={filteredModes}
+      />
 
       {/* Create Mode Modal */}
       <CreateModeModal
