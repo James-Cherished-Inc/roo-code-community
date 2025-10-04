@@ -134,6 +134,45 @@
 - Minimal bundle size with tree shaking
 - HMR (Hot Module Replacement) for rapid development
 
+## [2025-10-04] - Table View UI Enhancement
+
+### Changed
+- **Slug Label Removal**: Removed "Slug:" prefix from the first column in Table View for cleaner presentation
+- **Slug Centering**: Added center alignment to slug text for better visual balance
+- **Name Spacing**: Added 5px left margin to mode names for improved visual separation
+- **Header Centering**: Centered all column titles in the table header row for consistency
+- **Column Margin Optimization**: Reduced right padding of first column by 5px for better table proportions
+- **Font Size Optimization**: Reduced font size by ~25% in Description, Usage, and Prompt columns for better hierarchy
+- **Column Width Adjustment**: Reduced margin between Description and Usage columns while expanding Description column width
+- **Inter-Column Spacing**: Reduced horizontal padding on all data columns by 10% for tighter column spacing
+- **Layout Optimization**: Simplified slug display layout while maintaining edit functionality
+
+### Technical Details
+- **Component Modified**: Updated ModeTable.tsx to remove redundant label text, add centering, improve spacing, center headers, optimize column margins, reduce font sizes, adjust column widths, and reduce inter-column spacing
+- **Column Width Changes**: Description column increased from 13% to 18%, Usage column reduced from 13% to 8%
+- **Padding Optimization**: Data columns changed from px-6 (24px) to px-5 (20px), reducing inter-column spacing by 10%
+- **UI Improvement**: Cleaner table appearance with direct, centered slug value display, better name spacing, centered headers, optimized column proportions, improved visual hierarchy, better space utilization, and tighter column spacing
+- **Typography Hierarchy**: Column titles and first column content maintain original size, while data columns use smaller text-xs (12px from 16px)
+- **Functionality Preserved**: All editing capabilities remain intact
+- **No Breaking Changes**: Purely visual enhancement
+
+### Files Modified
+- `src/components/ModeTable.tsx` - Removed `<span>Slug:</span>` label, added flex centering classes, added left margin to mode names, changed header alignment from text-left to text-center, optimized first column padding from px-6 to pl-6 pr-5, added text-xs wrapper to Description, Usage, and Prompt columns, adjusted column widths (Description: 13%→18%, Usage: 13%→8%), and reduced data column padding from px-6 to px-5
+
+### Impact
+- ✅ Improved visual clarity in Table View
+- ✅ Better visual balance with centered slug text and headers
+- ✅ Enhanced visual separation with proper spacing
+- ✅ Consistent alignment throughout the table
+- ✅ Optimized column proportions with reduced right margin
+- ✅ Improved typography hierarchy with smaller data column text
+- ✅ Better space utilization with expanded Description column
+- ✅ Reduced margin between Description and Usage columns
+- ✅ Tighter inter-column spacing for improved layout density
+- ✅ Maintained all existing functionality
+- ✅ No performance impact
+- ✅ Enhanced user experience with cleaner, more balanced interface
+
 ---
 
 *This changelog follows the format: [Date] - Description of changes. Each entry includes what was added, technical details, and any relevant notes.*

@@ -72,7 +72,7 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
         title="Click to edit"
       >
         {field === 'prompt' ? (
-          <div className="truncate max-w-xs text-slate-700" title={value}>
+          <div className="truncate max-w-lg text-slate-700" title={value}>
             {value.length > 100 ? `${value.substring(0, 100)}...` : value}
           </div>
         ) : (
@@ -87,22 +87,19 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
       <table className="min-w-full divide-y divide-slate-200/50">
         <thead className="bg-gradient-to-r from-slate-50 to-slate-100/80">
           <tr>
-            <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider rounded-tl-2xl">
-              Mode
+                         <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider rounded-tl-2xl" style={{ width: '0%' }}>
+              Name & Slug
             </th>
-            <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-              Name
-            </th>
-            <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+            <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider" style={{ width: '18%' }}>
               Description
             </th>
-            <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+            <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider" style={{ width: '8%' }}>
               Usage
             </th>
-            <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider rounded-tr-2xl">
+            <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider rounded-tr-2xl" style={{ width: '74%' }}>
               Prompt
             </th>
-          </tr>
+</tr>
         </thead>
         <tbody className="bg-white/50 divide-y divide-slate-200/30">
           {modes.map((mode, index) => (
@@ -110,20 +107,22 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
               key={mode.slug}
               className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-md rounded-xl"
             >
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-800 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-                {mode.slug}
+              <td className="pl-6 pr-5 py-4">
+                <div className="flex flex-col gap-1">
+                  <div className="ml-1">{renderCell(mode, 'name')}</div>
+                  <div className="text-xs text-slate-500 flex items-center justify-center">
+                    {renderCell(mode, 'slug')}
+                  </div>
+                </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {renderCell(mode, 'name')}
+              <td className="px-5 py-4">
+                <div className="text-xs">{renderCell(mode, 'description')}</div>
               </td>
-              <td className="px-6 py-4">
-                {renderCell(mode, 'description')}
+              <td className="px-5 py-4">
+                <div className="text-xs">{renderCell(mode, 'usage')}</div>
               </td>
-              <td className="px-6 py-4">
-                {renderCell(mode, 'usage')}
-              </td>
-              <td className="px-6 py-4">
-                {renderCell(mode, 'prompt')}
+              <td className="px-5 py-4">
+                <div className="text-xs">{renderCell(mode, 'prompt')}</div>
               </td>
             </tr>
           ))}
