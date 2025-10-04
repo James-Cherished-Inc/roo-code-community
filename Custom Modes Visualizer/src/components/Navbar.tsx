@@ -23,22 +23,22 @@ const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange }) => {
 
   return (
     <nav className="backdrop-blur-lg bg-white/80 border-b border-white/20 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-20">
-          {/* Logo/Title */}
-          <div className="flex items-center">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              🦘 Roo Modes Visualizer
-            </h1>
-          </div>
+      <div className="flex items-center h-20 px-4 sm:px-6 lg:px-8">
+        {/* Logo/Title */}
+        <div className="flex-shrink-0">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            🦘 Roo Modes Visualizer
+          </h1>
+        </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex space-x-1">
+        {/* Navigation Tabs */}
+        <div className="flex-1 flex justify-center">
+          <div className="flex space-x-6">
             {views.map((view) => (
               <button
                 key={view.id}
                 onClick={() => onViewChange(view.id)}
-                className={`relative inline-flex items-center px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
+                className={`relative inline-flex items-center px-8 py-3 w-64 h-full rounded-xl text-lg font-medium transition-all duration-300 transform hover:scale-105 ${
                   activeView === view.id
                     ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/50 backdrop-blur-sm'
@@ -52,13 +52,13 @@ const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange }) => {
               </button>
             ))}
           </div>
+        </div>
 
-          {/* Version indicator */}
-          <div className="flex items-center">
-            <span className="px-3 py-1 text-xs bg-slate-100 text-slate-600 rounded-full font-medium">
-              v0.1.0
-            </span>
-          </div>
+        {/* Version indicator */}
+        <div className="flex-shrink-0">
+          <span className="px-3 py-1 text-xs bg-slate-100 text-slate-600 rounded-full font-medium">
+            v0.1.0
+          </span>
         </div>
       </div>
     </nav>

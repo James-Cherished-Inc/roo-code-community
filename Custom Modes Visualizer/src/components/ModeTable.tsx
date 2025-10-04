@@ -20,44 +20,11 @@ const DeleteIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" })
 );
 
 /**
- * Delete confirmation modal component
- */
-const DeleteConfirmationModal: React.FC<{
-  modeName: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}> = ({ modeName, onConfirm, onCancel }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Deletion</h3>
-      <p className="text-gray-600 mb-6">
-        Are you sure you want to delete the mode "{modeName}"? This action cannot be undone.
-      </p>
-      <div className="flex justify-end space-x-3">
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={onConfirm}
-          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
-);
-
-/**
  * Table component for displaying and editing mode data
  */
 const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
   const { updateMode, deleteMode } = useModes();
   const [editingCell, setEditingCell] = useState<{ slug: string; field: keyof Mode } | null>(null);
-  const [deleteConfirmation, setDeleteConfirmation] = useState<{ slug: string; name: string } | null>(null);
 
   /**
    * Handle starting edit mode for a cell
@@ -82,27 +49,10 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
   };
 
   /**
-   * Handle delete mode request
+   * Handle delete mode request - immediate deletion without confirmation
    */
   const handleDeleteMode = (mode: Mode) => {
-    setDeleteConfirmation({ slug: mode.slug, name: mode.name });
-  };
-
-  /**
-   * Handle confirmed delete
-   */
-  const confirmDelete = () => {
-    if (deleteConfirmation) {
-      deleteMode(deleteConfirmation.slug);
-      setDeleteConfirmation(null);
-    }
-  };
-
-  /**
-   * Handle cancel delete
-   */
-  const cancelDelete = () => {
-    setDeleteConfirmation(null);
+    deleteMode(mode.slug);
   };
 
   /**
@@ -222,15 +172,6 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
           ))}
         </tbody>
       </table>
-
-      {/* Delete confirmation modal */}
-      {deleteConfirmation && (
-        <DeleteConfirmationModal
-          modeName={deleteConfirmation.name}
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
-      )}
     </div>
   );
 };

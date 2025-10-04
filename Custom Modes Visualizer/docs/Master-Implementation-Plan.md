@@ -35,7 +35,7 @@ src/
 ### Phase 2: Enhanced Features (In Progress)
 - [x] Mode creation functionality
 - [ ] Mode deletion functionality
-- [x] Import/export modes from/to JSON (export available)
+- [x] Import/export modes in JSON and YAML formats with selective export
 - [x] Mode validation (creation form validation)
 - [x] Family-based organization system with multi-select dropdown
 - [x] Family filtering in Table View and Smart View

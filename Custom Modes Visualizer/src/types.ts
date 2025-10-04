@@ -19,6 +19,37 @@ export type Mode = {
 };
 
 /**
+ * Export/import format for modes (used in YAML/JSON files)
+ */
+export type ExportMode = {
+  /** Unique identifier for the mode */
+  slug: string;
+  /** Display name of the mode */
+  name: string;
+  /** Brief description of the mode's purpose */
+  description: string;
+  /** The prompt text (maps to roleDefinition in export) */
+  roleDefinition: string;
+  /** When to use this mode (maps to whenToUse in export) */
+  whenToUse: string;
+  /** Groups this mode belongs to */
+  groups: string[];
+};
+
+/**
+ * Container format for exported modes
+ */
+export type ExportFormat = {
+  /** Array of modes to export */
+  customModes: ExportMode[];
+};
+
+/**
+ * Supported export/import formats
+ */
+export type FormatType = 'json' | 'yaml';
+
+/**
  * Represents a family of modes for organization
  */
 export type ModeFamily = {
@@ -56,7 +87,9 @@ export interface ModeContextType {
   saveToLocalStorage: () => void;
   loadFromLocalStorage: () => void;
   exportModesToJson: () => boolean;
-  importModesFromJson: (jsonData: Mode[], strategy: 'replace' | 'add' | 'family') => boolean;
+  exportSelectedModes: (format: FormatType, selectedSlugs: string[]) => boolean;
+  importModesFromJson: (jsonData: Mode[], strategy: 'replace' | 'add' | 'family', familyName?: string) => boolean;
+  importFromFile: (file: File, strategy?: 'replace' | 'add' | 'family', familyName?: string) => Promise<boolean>;
   exportFamilyToJson: (familyId: string) => boolean;
-  importFamilyFromJson: (jsonData: ModeFamily, modes: Mode[]) => boolean;
+  importFamilyFromJson: (jsonData: ModeFamily, modes: Mode[], newFamilyName?: string) => boolean;
 }

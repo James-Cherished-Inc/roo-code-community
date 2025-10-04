@@ -1,10 +1,21 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { Mode, ModeContextType, ModeFamily } from '../types';
+import type { Mode, ModeContextType, ModeFamily, FormatType } from '../types';
 
 // Load initial data from JSON file
 import modesData from '../data/modes.json';
 import defaultFamilyData from '../data/default-family.json';
 import standaloneFamilyData from '../data/standalone-family.json';
+
+// Import conversion utilities
+import {
+  modeToExportMode,
+  exportModeToMode,
+  detectFileFormat,
+  parseFileContent,
+  validateExportFormat,
+  serializeExportFormat,
+  downloadFile
+} from '../utils/formatConversion';
 
 const MODES_STORAGE_KEY = 'roo-modes-visualizer-modes';
 const FAMILIES_STORAGE_KEY = 'roo-modes-visualizer-families';
@@ -22,7 +33,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    // Initialize state with data from JSON file
    const [modes, setModes] = useState<Mode[]>(modesData);
    const [families, setFamilies] = useState<ModeFamily[]>([defaultFamilyData, standaloneFamilyData]);
-   const [selectedFamilies, setSelectedFamilies] = useState<string[]>(['default']);
+   const [selectedFamilies, setSelectedFamilies] = useState<string[]>(['default', 'standalone']);
 
   /**
    * Update a specific mode by slug
@@ -151,7 +162,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   /**
    * Import family from JSON file
    */
-  const importFamilyFromJson = (familyData: ModeFamily, modesData: Mode[]) => {
+  const importFamilyFromJson = (familyData: ModeFamily, modesData: Mode[], newFamilyName?: string) => {
     try {
       // Validate family data
       if (!familyData.id || !familyData.name) {
@@ -165,16 +176,27 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       }
 
+      // Use new family name if provided, otherwise use original
+      const finalFamilyName = newFamilyName?.trim() || familyData.name;
+      const finalFamilyId = newFamilyName ? finalFamilyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') : familyData.id;
+
+      // Create new family data with updated name/id if necessary
+      const finalFamilyData: ModeFamily = {
+        ...familyData,
+        name: finalFamilyName,
+        id: finalFamilyId
+      };
+
       // Add family if it doesn't exist
-      const existingFamily = families.find(f => f.id === familyData.id);
+      const existingFamily = families.find(f => f.id === finalFamilyId);
       if (!existingFamily) {
-        addFamily(familyData);
+        addFamily(finalFamilyData);
       }
 
       // Add modes with family assignment
       const modesWithFamily = modesData.map(mode => ({
         ...mode,
-        family: familyData.id
+        family: finalFamilyId
       }));
 
       setModes(prevModes => [...prevModes, ...modesWithFamily]);
@@ -185,10 +207,78 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+   /**
+    * Export selected modes in specified format
+    */
+   const exportSelectedModes = (format: FormatType, selectedSlugs: string[]): boolean => {
+     try {
+       // Get selected modes
+       const selectedModes = modes.filter(mode => selectedSlugs.includes(mode.slug));
+
+       if (selectedModes.length === 0) {
+         console.error('No modes selected for export');
+         return false;
+       }
+
+       // Convert to export format
+       const exportModes = selectedModes.map(modeToExportMode);
+       const exportData = { customModes: exportModes };
+
+       // Serialize to string
+       const content = serializeExportFormat(exportData, format);
+
+       // Download file
+       const mimeType = format === 'json' ? 'application/json' : 'application/x-yaml';
+       const extension = format === 'json' ? '.json' : '.yaml';
+       const filename = `roo-modes-export${extension}`;
+
+       downloadFile(content, filename, mimeType);
+       return true;
+     } catch (error) {
+       console.error('Failed to export selected modes:', error);
+       return false;
+     }
+   };
+
+   /**
+    * Import modes from file (auto-detects format)
+    */
+   const importFromFile = async (file: File, strategy: 'replace' | 'add' | 'family' = 'add', familyName?: string): Promise<boolean> => {
+     try {
+       // Detect format from filename
+       const format = detectFileFormat(file.name);
+       if (!format) {
+         console.error('Unsupported file format. Please use .json or .yaml/.yml files');
+         return false;
+       }
+
+       // Read file content
+       const text = await file.text();
+
+       // Parse content
+       const parsedData = parseFileContent(text, format);
+
+       // Validate structure
+       if (!validateExportFormat(parsedData)) {
+         console.error('Invalid file structure. Expected { customModes: [...] }');
+         return false;
+       }
+
+       // Convert to internal format
+       const modes = parsedData.customModes.map(exportModeToMode);
+
+       // Import using existing logic with strategy
+       return importModesFromJson(modes, strategy, familyName);
+     } catch (error) {
+       console.error('Failed to import from file:', error);
+       return false;
+     }
+   };
+
   /**
    * Import modes from JSON file with different merge strategies
    */
-  const importModesFromJson = (jsonData: Mode[], strategy: 'replace' | 'add' | 'family') => {
+  const importModesFromJson = (jsonData: Mode[], strategy: 'replace' | 'add' | 'family', familyName?: string) => {
     try {
       if (!Array.isArray(jsonData)) {
         throw new Error('Invalid JSON format: expected array of modes');
@@ -210,8 +300,34 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           newModes = [...modes, ...jsonData];
           break;
         case 'family':
-          // For family import, keep current modes and add new ones
-          newModes = [...modes, ...jsonData];
+          // For family import, create new family and assign modes to it
+          if (familyName) {
+            // Create slug from family name (lowercase, replace spaces with hyphens)
+            const familyId = familyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+            // Create new family if it doesn't exist
+            const existingFamily = families.find(f => f.id === familyId);
+            if (!existingFamily) {
+              const newFamily: ModeFamily = {
+                id: familyId,
+                name: familyName,
+                description: `Imported family: ${familyName}`,
+                color: '#3B82F6' // Default blue color
+              };
+              addFamily(newFamily);
+            }
+
+            // Assign all imported modes to this family
+            const modesWithFamily = jsonData.map(mode => ({
+              ...mode,
+              family: familyId
+            }));
+
+            newModes = [...modes, ...modesWithFamily];
+          } else {
+            // Fallback: just add without family assignment
+            newModes = [...modes, ...jsonData];
+          }
           break;
         default:
           throw new Error('Invalid import strategy');
@@ -286,7 +402,9 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     saveToLocalStorage,
     loadFromLocalStorage,
     exportModesToJson,
+    exportSelectedModes,
     importModesFromJson,
+    importFromFile,
     exportFamilyToJson,
     importFamilyFromJson,
   };

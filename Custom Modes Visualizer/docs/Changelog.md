@@ -1,5 +1,132 @@
 # Changelog - Roo Modes Visualizer
 
+## [2025-10-04] - YAML/JSON Export & Import Enhancement
+
+### Added
+- **Dual-Format Support**: Added comprehensive YAML and JSON export/import functionality with selective mode export
+- **ExportModal Component**: New modal allowing users to select specific modes and choose export format (YAML/JSON)
+- **Enhanced ImportModal**: Updated to accept both .json and .yaml/.yml files with automatic format detection
+- **Format Conversion Utilities**: Complete data transformation system between internal Mode structure and export formats
+- **Selective Export**: Users can now choose exactly which modes to export instead of exporting all custom modes
+- **Format Validation**: Robust validation for both YAML and JSON formats with clear error messages
+
+### Technical Details
+- **Dependencies Added**: `js-yaml@^4.1.0` for YAML parsing, `@types/js-yaml@^4.0.9` for TypeScript support
+- **Data Mapping**: Implemented conversion between internal Mode interface and export format (roleDefinition ↔ prompt, whenToUse ↔ usage, fixed groups array)
+- **Import Strategy**: All imported modes automatically assigned "standalone" family
+- **File Format Detection**: Automatic detection based on file extension (.json, .yaml, .yml)
+- **Error Handling**: Comprehensive validation with user-friendly error messages
+- **Type Safety**: Full TypeScript support with new interfaces (ExportMode, ExportFormat, FormatType)
+
+### Files Created
+- `src/components/ExportModal.tsx` - Mode selection modal with format picker
+- `src/utils/formatConversion.ts` - Data transformation utilities and file handling
+- `docs/YAML-JSON-Export-Import-Plan.md` - Detailed implementation plan
+- `docs/Export-Import-Guide.md` - User guide for export/import features
+
+### Files Modified
+- `src/types.ts` - Added ExportMode, ExportFormat, FormatType interfaces and updated ModeContextType
+- `src/context/ModeContext.tsx` - Added exportSelectedModes and importFromFile functions
+- `src/components/ImportModal.tsx` - Enhanced to support YAML files and auto-detection
+- `src/pages/TableViewPage.tsx` - Integrated ExportModal and updated export button
+- `docs/Master-Implementation-Plan.md` - Updated import/export feature status
+- `package.json` - Added js-yaml and @types/js-yaml dependencies
+
+### Features Implemented
+- ✅ **ExportModal**: Checkbox selection of modes, format choice (JSON/YAML), bulk actions
+- ✅ **Format Support**: Both JSON and YAML formats with proper serialization
+- ✅ **Import Enhancement**: Auto-detection of file formats, validation, error handling
+- ✅ **Data Integrity**: Complete round-trip compatibility between export/import
+- ✅ **User Experience**: Intuitive modal interfaces with clear feedback and error messages
+- ✅ **Performance**: Efficient file processing and minimal bundle size impact
+
+### Validation & Testing
+- **Build Success**: Project compiles without errors with new dependencies
+- **Type Safety**: Full TypeScript coverage for all new functionality
+- **Format Conversion**: Tested internal ↔ export format transformations
+- **Error Scenarios**: Comprehensive handling of malformed files and edge cases
+- **Browser Compatibility**: Uses standard File API with fallbacks
+
+### User Experience Improvements
+- **Flexible Export**: Choose specific modes instead of all-or-nothing export
+- **Format Choice**: Pick preferred format (YAML for readability, JSON for programmatic use)
+- **Seamless Import**: Drag-and-drop any supported file format without manual selection
+- **Clear Feedback**: Progress indicators, success messages, and helpful error descriptions
+- **Backup/Restore**: Easy way to backup and restore custom mode configurations
+
+### Impact
+- **Enhanced Functionality**: Users can now selectively export modes in preferred formats
+- **Better Workflow**: Import supports multiple formats with automatic detection
+- **Data Portability**: Easy sharing and backup of mode configurations across instances
+- **Future-Ready**: Foundation for additional format support and advanced features
+- **No Breaking Changes**: Existing functionality preserved while adding new capabilities
+
+---
+
+## [2025-10-04] - Table View Default Display All Families & Family Rename
+
+### Changed
+- **Default Family Selection**: Modified Table View to display all families by default instead of only the Default family
+- **Initial State**: Updated selectedFamilies initial state in ModeContext to include all available families
+- **Default Family Name**: Renamed "Default" family to "Default Modes" for clearer naming
+
+### Technical Details
+- **Root Cause**: selectedFamilies was initialized with only ['default'], limiting Table View to Default family modes
+- **Solution**: Changed initialization in ModeContext.tsx to ['default', 'standalone'] to include all existing families
+- **State Management**: Preserved existing localStorage loading logic for user customizations
+- **Backward Compatibility**: Users can still customize family selections per session
+- **Naming**: Updated family name in static data for better clarity
+
+### Files Modified
+- `src/context/ModeContext.tsx` - Changed selectedFamilies initial state from ['default'] to ['default', 'standalone']
+- `src/data/default-family.json` - Renamed family name from "Default" to "Default Modes"
+
+### Impact
+- **Enhanced User Experience**: Users now see all available modes immediately upon accessing Table View
+- **Better Discoverability**: Standalone and custom families are visible without manual selection
+- **Clearer Naming**: "Default Modes" is more descriptive than just "Default"
+- **No Breaking Changes**: Existing functionality preserved, localStorage preferences still respected
+- **Performance**: Minimal impact - same filtering logic, just different default selection
+
+### Testing Status
+- ✅ Table View now displays modes from both Default Modes and Standalone families by default
+- ✅ FamilySelector correctly shows "All" as initial display text
+- ✅ LocalStorage loading still works for saved custom selections
+- ✅ No impact on Smart View or other functionality
+
+---
+
+## [2025-10-04] - Work in Progress Popup for Prompt Builder
+
+### Added
+- **WIP Modal**: Added a modal popup that displays "Work in Progress - Preview Only" when accessing the Prompt Builder page
+- **Auto-Trigger**: Modal automatically shows when the Prompt Builder page loads using useEffect hook
+- **Dismissible**: Modal includes an "I Understand" button to dismiss the warning
+- **Visual Warning**: Modal uses warning icon and styling to clearly indicate preview status
+
+### Technical Details
+- **State Management**: Added showPopup state with useEffect to trigger on component mount
+- **Modal Design**: Consistent with existing modal patterns (CreateModeModal) using fixed overlay and centered content
+- **User Experience**: Non-blocking modal that allows users to proceed while being informed of the preview status
+- **Accessibility**: Proper modal structure with focus management and overlay backdrop
+
+### Files Modified
+- `src/pages/PromptBuilderPage.tsx` - Added modal state, useEffect, and JSX modal component with warning content
+
+### Impact
+- **User Awareness**: Users are now clearly informed that the Prompt Builder is in development
+- **Expectation Setting**: Sets appropriate expectations for functionality limitations
+- **No Functionality Impact**: Modal only adds informational overlay without affecting existing features
+- **Future-Ready**: Easy to remove or modify when Prompt Builder reaches production status
+
+### Testing Status
+- ✅ Modal displays automatically on page load
+- ✅ Modal can be dismissed with "I Understand" button
+- ✅ Underlying Prompt Builder functionality remains intact
+- ✅ Modal styling consistent with application design
+
+---
+
 ## [2025-10-04] - TypeError Bug Fix: Undefined Mode Access
 
 ### Fixed

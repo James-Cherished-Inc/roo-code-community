@@ -2,18 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useModes } from '../context/ModeContext';
 import type { ModeFamily } from '../types';
 
-interface FamilyImportData {
-  family: ModeFamily;
-  modes: import('../types').Mode[];
-}
-
 /**
  * Multi-select dropdown component for choosing mode families to display
  */
 const FamilySelector: React.FC = () => {
-  const { families, selectedFamilies, setSelectedFamilies, importFamilyFromJson } = useModes();
+  const { families, selectedFamilies, setSelectedFamilies, importFromFile } = useModes();
   const [isOpen, setIsOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [showFamilyNameModal, setShowFamilyNameModal] = useState(false);
+  const [pendingImportData, setPendingImportData] = useState<{ file: File } | null>(null);
+  const [newFamilyName, setNewFamilyName] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -47,39 +45,61 @@ const FamilySelector: React.FC = () => {
     setSelectedFamilies([]);
   };
 
-  // Handle family import
-  const handleImportFamily = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle file selection for family import
+  const handleFileSelection = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.name.toLowerCase().endsWith('.json')) {
-      alert('Please select a valid JSON file');
+    const isYamlFile = file.name.toLowerCase().endsWith('.yaml') || file.name.toLowerCase().endsWith('.yml');
+    const isJsonFile = file.name.toLowerCase().endsWith('.json');
+
+    if (!isYamlFile && !isJsonFile) {
+      alert('Please select a valid JSON or YAML file');
+      return;
+    }
+
+    // Show family name modal
+    setPendingImportData({ file });
+    setNewFamilyName(''); // Start with empty name
+    setShowFamilyNameModal(true);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Handle family import with name
+  const handleConfirmFamilyImport = async () => {
+    if (!pendingImportData?.file || !newFamilyName.trim()) {
+      alert('Please enter a family name');
       return;
     }
 
     setIsImporting(true);
+    setShowFamilyNameModal(false);
+
     try {
-      const text = await file.text();
-      const importData: FamilyImportData = JSON.parse(text);
-
-      if (!importData.family || !importData.modes) {
-        throw new Error('Invalid family import format');
-      }
-
-      const success = importFamilyFromJson(importData.family, importData.modes);
+      const success = await importFromFile(pendingImportData.file, 'family', newFamilyName.trim());
       if (success) {
-        alert(`Successfully imported family "${importData.family.name}" with ${importData.modes.length} modes`);
+        const formatName = pendingImportData.file.name.toLowerCase().endsWith('.yaml') || pendingImportData.file.name.toLowerCase().endsWith('.yml') ? 'YAML' : 'JSON';
+        alert(`Successfully imported modes from ${formatName} file as family "${newFamilyName.trim()}"`);
       } else {
-        alert('Failed to import family. Please check the file format.');
+        alert('Failed to import modes. Please check the file format.');
       }
     } catch (error) {
-      alert('Invalid JSON file format for family import');
+      alert('Failed to import modes');
     } finally {
       setIsImporting(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      setPendingImportData(null);
+      setNewFamilyName('');
     }
+  };
+
+  // Cancel family import
+  const handleCancelFamilyImport = () => {
+    setShowFamilyNameModal(false);
+    setPendingImportData(null);
+    setNewFamilyName('');
   };
 
   // Trigger file input for import
@@ -183,11 +203,66 @@ const FamilySelector: React.FC = () => {
         <input
           ref={fileInputRef}
           type="file"
-          accept=".json"
-          onChange={handleImportFamily}
+          accept=".json,.yaml,.yml"
+          onChange={handleFileSelection}
           className="hidden"
         />
       </div>
+
+      {/* Family Name Modal */}
+      {showFamilyNameModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Import Family</h2>
+              <button
+                onClick={handleCancelFamilyImport}
+                className="text-gray-400 hover:text-gray-600"
+                disabled={isImporting}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Family Name
+              </label>
+              <input
+                type="text"
+                value={newFamilyName}
+                onChange={(e) => setNewFamilyName(e.target.value)}
+                placeholder="Enter family name"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                disabled={isImporting}
+                required
+              />
+              <p className="mt-2 text-sm text-gray-500">
+                All imported modes will be grouped under this family name
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleCancelFamilyImport}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                disabled={isImporting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmFamilyImport}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                disabled={isImporting || !newFamilyName.trim()}
+              >
+                {isImporting ? 'Importing...' : 'Import Family'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
