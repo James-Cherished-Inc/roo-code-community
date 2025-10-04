@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useModes } from '../context/ModeContext';
 import ModeTable from '../components/ModeTable';
 import ImportModal from '../components/ImportModal';
 import CreateModeModal from '../components/CreateModeModal';
+import FamilySelector from '../components/FamilySelector';
 
 /**
  * Page component for displaying all modes in an editable table view
  */
 const TableViewPage: React.FC = () => {
-  const { modes, exportModesToJson } = useModes();
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+   const { modes, selectedFamilies, exportModesToJson } = useModes();
+   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+   // Filter modes based on selected families
+   const filteredModes = useMemo(() => {
+     if (selectedFamilies.length === 0) return [];
+     return modes.filter(mode => mode.family && selectedFamilies.includes(mode.family));
+   }, [modes, selectedFamilies]);
 
   /**
    * Handle export to JSON file
@@ -46,10 +53,13 @@ const TableViewPage: React.FC = () => {
       </div>
 
       <div className="mb-4">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500">
-            {modes.length} mode{modes.length !== 1 ? 's' : ''} loaded
-          </span>
+         <div className="flex items-center justify-between">
+           <div className="flex items-center space-x-4">
+             <FamilySelector />
+             <span className="text-sm text-gray-500">
+               {filteredModes.length} mode{filteredModes.length !== 1 ? 's' : ''} loaded
+             </span>
+           </div>
 
           {/* Import/Export Controls */}
           <div className="flex space-x-2">
@@ -66,11 +76,12 @@ const TableViewPage: React.FC = () => {
             <button
               onClick={handleExport}
               className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              title="Export custom modes (excluding Default family)"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l4-4m-4 4l-4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Save as JSON
+              Export Custom Modes
             </button>
 
             <button
@@ -86,7 +97,7 @@ const TableViewPage: React.FC = () => {
         </div>
       </div>
 
-      <ModeTable modes={modes} />
+      <ModeTable modes={filteredModes} />
 
       {/* Import Modal */}
       <ImportModal

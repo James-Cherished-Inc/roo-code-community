@@ -1,0 +1,7 @@
+{
+  "id": "default",
+  "name": "Default",
+  "description": "Built-in default modes for the Roo system",
+  "color": "#3B82F6",
+  "isDefault": true
+}

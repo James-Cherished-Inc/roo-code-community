@@ -35,9 +35,11 @@ src/
 ### Phase 2: Enhanced Features (In Progress)
 - [x] Mode creation functionality
 - [ ] Mode deletion functionality
-- [ ] Import/export modes from/to JSON (export available)
+- [x] Import/export modes from/to JSON (export available)
 - [x] Mode validation (creation form validation)
-- [ ] Search and filtering
+- [x] Family-based organization system with multi-select dropdown
+- [x] Family filtering in Table View and Smart View
+- [ ] Search and filtering (within families)
 - [ ] Keyboard shortcuts
 - [ ] Dark mode support
 - [ ] Drag and drop reordering
@@ -73,22 +75,26 @@ src/
 **Reason**: Components grouped by feature (pages, components) rather than type, making it easier to locate and maintain related code.
 
 ### Data Persistence
-**Decision**: localStorage with JSON fallback
-**Reason**: Client-side only application, localStorage provides simple persistence without backend complexity.
+**Decision**: localStorage with JSON fallback + Family-based organization
+**Reason**: Client-side only application, localStorage provides simple persistence without backend complexity. Family system enables better organization and selective export/import of custom modes.
+
+### Mode Organization
+**Decision**: Family-based organization system
+**Reason**: Provides logical grouping of modes, enables selective filtering and export, improves user experience when dealing with large numbers of modes.
 
 ## Current State
 - ✅ Core functionality implemented and working
-- ✅ All three views functional
+- ✅ All three views functional with family filtering
 - ✅ Live editing with auto-save
+- ✅ Family-based organization system
+- ✅ Selective mode filtering by families
 - ✅ Responsive design
 - ✅ Clean, maintainable code structure
 
 ## Next Priorities
 1. Add testing framework
-2. Implement mode deletion
-3. Add search and filtering capabilities
-4. Improve accessibility
-5. Add keyboard shortcuts
+2. Add search and filtering capabilities
+3. Improve accessibility
 
 ## Risks and Mitigations
 - **Browser localStorage limitations**: Mitigated by JSON fallback and user notifications

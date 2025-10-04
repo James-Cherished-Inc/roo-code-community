@@ -104,7 +104,8 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
       name: formData.name!.trim(),
       description: formData.description!.trim(),
       usage: formData.usage!.trim(),
-      prompt: formData.prompt!.trim()
+      prompt: formData.prompt!.trim(),
+      family: 'standalone' // Assign new modes to standalone family by default
     };
 
     addMode(newMode);

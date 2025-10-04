@@ -1,14 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { Mode, ModeContextType } from '../types';
+import type { Mode, ModeContextType, ModeFamily } from '../types';
 
 // Load initial data from JSON file
 import modesData from '../data/modes.json';
+import defaultFamilyData from '../data/default-family.json';
+import standaloneFamilyData from '../data/standalone-family.json';
 
-// Local storage key
 const MODES_STORAGE_KEY = 'roo-modes-visualizer-modes';
+const FAMILIES_STORAGE_KEY = 'roo-modes-visualizer-families';
+const SELECTED_FAMILIES_STORAGE_KEY = 'roo-modes-visualizer-selected-families';
 
 /**
- * Context for managing mode data throughout the application
+ * Context for managing mode and family data throughout the application
  */
 const ModeContext = createContext<ModeContextType | undefined>(undefined);
 
@@ -16,8 +19,10 @@ const ModeContext = createContext<ModeContextType | undefined>(undefined);
  * Provider component that manages the mode state
  */
 export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Initialize state with data from JSON file
-  const [modes, setModes] = useState<Mode[]>(modesData);
+   // Initialize state with data from JSON file
+   const [modes, setModes] = useState<Mode[]>(modesData);
+   const [families, setFamilies] = useState<ModeFamily[]>([defaultFamilyData, standaloneFamilyData]);
+   const [selectedFamilies, setSelectedFamilies] = useState<string[]>(['default']);
 
   /**
    * Update a specific mode by slug
@@ -45,34 +50,137 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   /**
-    * Save current modes to localStorage
+   * Add a new family
+   */
+  const addFamily = (family: ModeFamily) => {
+    setFamilies(prevFamilies => [...prevFamilies, family]);
+  };
+
+  /**
+   * Update a family by id
+   */
+  const updateFamily = (id: string, updates: Partial<ModeFamily>) => {
+    setFamilies(prevFamilies =>
+      prevFamilies.map(family =>
+        family.id === id ? { ...family, ...updates } : family
+      )
+    );
+  };
+
+  /**
+   * Delete a family by id
+   */
+  const deleteFamily = (id: string) => {
+    if (id === 'default') return; // Can't delete default family
+    setFamilies(prevFamilies => prevFamilies.filter(family => family.id !== id));
+    // Also remove from selected families
+    setSelectedFamilies(prevSelected => prevSelected.filter(familyId => familyId !== id));
+  };
+
+  /**
+   * Save current modes and families to localStorage
     */
    const saveToLocalStorage = () => {
      try {
        localStorage.setItem(MODES_STORAGE_KEY, JSON.stringify(modes));
+       localStorage.setItem(FAMILIES_STORAGE_KEY, JSON.stringify(families));
+       localStorage.setItem(SELECTED_FAMILIES_STORAGE_KEY, JSON.stringify(selectedFamilies));
      } catch (error) {
-       console.error('Failed to save modes to localStorage:', error);
+       console.error('Failed to save data to localStorage:', error);
      }
    };
 
   /**
-   * Export modes to JSON file
+   * Export modes to JSON file (merge all families except Default)
+    */
+   const exportModesToJson = () => {
+     try {
+       // Get all modes except those from the Default family
+       const customModes = modes.filter(mode => mode.family !== 'default');
+       const dataStr = JSON.stringify(customModes, null, 2);
+       const dataBlob = new Blob([dataStr], { type: 'application/json' });
+       const url = URL.createObjectURL(dataBlob);
+       const link = document.createElement('a');
+       link.href = url;
+       link.download = 'roo-modes-export.json';
+       document.body.appendChild(link);
+       link.click();
+       document.body.removeChild(link);
+       URL.revokeObjectURL(url);
+       return true;
+     } catch (error) {
+       console.error('Failed to export modes to JSON:', error);
+       return false;
+     }
+   };
+
+  /**
+   * Export a specific family to JSON file
    */
-  const exportModesToJson = () => {
+  const exportFamilyToJson = (familyId: string) => {
     try {
-      const dataStr = JSON.stringify(modes, null, 2);
+      const family = families.find(f => f.id === familyId);
+      const familyModes = modes.filter(mode => mode.family === familyId);
+
+      if (!family) {
+        throw new Error('Family not found');
+      }
+
+      const exportData = {
+        family: family,
+        modes: familyModes
+      };
+
+      const dataStr = JSON.stringify(exportData, null, 2);
       const dataBlob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(dataBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'roo-modes-export.json';
+      link.download = `roo-family-${familyId}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       return true;
     } catch (error) {
-      console.error('Failed to export modes to JSON:', error);
+      console.error('Failed to export family to JSON:', error);
+      return false;
+    }
+  };
+
+  /**
+   * Import family from JSON file
+   */
+  const importFamilyFromJson = (familyData: ModeFamily, modesData: Mode[]) => {
+    try {
+      // Validate family data
+      if (!familyData.id || !familyData.name) {
+        throw new Error('Invalid family format');
+      }
+
+      // Validate modes data
+      for (const mode of modesData) {
+        if (!mode.slug || !mode.name) {
+          throw new Error('Invalid mode format in family import');
+        }
+      }
+
+      // Add family if it doesn't exist
+      const existingFamily = families.find(f => f.id === familyData.id);
+      if (!existingFamily) {
+        addFamily(familyData);
+      }
+
+      // Add modes with family assignment
+      const modesWithFamily = modesData.map(mode => ({
+        ...mode,
+        family: familyData.id
+      }));
+
+      setModes(prevModes => [...prevModes, ...modesWithFamily]);
+      return true;
+    } catch (error) {
+      console.error('Failed to import family from JSON:', error);
       return false;
     }
   };
@@ -118,17 +226,39 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   /**
-   * Load modes from localStorage
+   * Load modes and families from localStorage
    */
   const loadFromLocalStorage = () => {
     try {
-      const saved = localStorage.getItem(MODES_STORAGE_KEY);
-      if (saved) {
-        const parsedModes = JSON.parse(saved);
+      const savedModes = localStorage.getItem(MODES_STORAGE_KEY);
+      if (savedModes) {
+        const parsedModes = JSON.parse(savedModes);
         setModes(parsedModes);
       }
+
+      const savedFamilies = localStorage.getItem(FAMILIES_STORAGE_KEY);
+      if (savedFamilies) {
+        const parsedFamilies = JSON.parse(savedFamilies);
+        // Ensure default and standalone families are always present
+        const hasDefaultFamily = parsedFamilies.some((f: ModeFamily) => f.id === 'default');
+        const hasStandaloneFamily = parsedFamilies.some((f: ModeFamily) => f.id === 'standalone');
+        let familiesWithRequired = parsedFamilies;
+        if (!hasDefaultFamily) {
+          familiesWithRequired = [defaultFamilyData, ...familiesWithRequired];
+        }
+        if (!hasStandaloneFamily) {
+          familiesWithRequired = [...familiesWithRequired, standaloneFamilyData];
+        }
+        setFamilies(familiesWithRequired);
+      }
+
+      const savedSelectedFamilies = localStorage.getItem(SELECTED_FAMILIES_STORAGE_KEY);
+      if (savedSelectedFamilies) {
+        const parsedSelected = JSON.parse(savedSelectedFamilies);
+        setSelectedFamilies(parsedSelected);
+      }
     } catch (error) {
-      console.error('Failed to load modes from localStorage:', error);
+      console.error('Failed to load data from localStorage:', error);
     }
   };
 
@@ -137,20 +267,28 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadFromLocalStorage();
   }, []);
 
-  // Auto-save to localStorage whenever modes change
+  // Auto-save to localStorage whenever modes, families, or selected families change
   useEffect(() => {
     saveToLocalStorage();
-  }, [modes]);
+  }, [modes, families, selectedFamilies]);
 
   const contextValue: ModeContextType = {
     modes,
+    families,
+    selectedFamilies,
     updateMode,
     addMode,
     deleteMode,
+    addFamily,
+    updateFamily,
+    deleteFamily,
+    setSelectedFamilies,
     saveToLocalStorage,
     loadFromLocalStorage,
     exportModesToJson,
     importModesFromJson,
+    exportFamilyToJson,
+    importFamilyFromJson,
   };
 
   return (

@@ -122,7 +122,7 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
 </tr>
         </thead>
         <tbody className="bg-white/50 divide-y divide-slate-200/30">
-          {modes.map((mode, index) => (
+          {modes.map((mode) => (
             <tr
               key={mode.slug}
               className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-md rounded-xl"

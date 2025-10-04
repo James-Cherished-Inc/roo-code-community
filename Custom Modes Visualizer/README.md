@@ -24,6 +24,9 @@ A modern, intuitive web application for managing and visualizing AI assistant mo
 ### ✨ Core Features
 - **Live Editing**: Real-time editing with auto-save
 - **Mode Creation**: Create new custom modes with the Create Mode feature
+- **Family Organization**: Organize modes into families for better management
+- **Family Filtering**: Multi-select dropdown to filter modes by family in all views
+- **Selective Export**: Export only custom modes (excluding Default family)
 - **Responsive Design**: Works perfectly on desktop and mobile
 - **Type Safety**: Full TypeScript support for reliability
 - **Fast Performance**: Built with Vite for lightning-fast development
@@ -74,30 +77,33 @@ The built files will be in the `dist/` directory, ready for deployment.
 3. Your changes are automatically saved to browser storage
 
 ### Editing Modes
-- **Table View**: Click on any cell to edit inline
-- **Smart View**: Use the detailed form for comprehensive editing
+- **Table View**: Click on any cell to edit inline, use family selector to filter modes
+- **Smart View**: Use the detailed form for comprehensive editing, use family selector to filter modes
 - **Prompt Builder**: Select a base mode and customize as needed
 
 ### Views Overview
 
 #### Table View
-Perfect for quick edits and getting an overview of all modes. Click any field to edit directly.
+Perfect for quick edits and getting an overview of all modes. Click any field to edit directly. Use the family selector to filter modes by family.
 
 #### Smart View
-Ideal for deep editing of individual modes. Navigate through modes with tabs or arrow buttons.
+Ideal for deep editing of individual modes. Navigate through modes with tabs or arrow buttons. Use the family selector to filter modes by family.
 
 #### Prompt Builder
-Create custom prompts by selecting base modes and adding specific instructions. Copy the result to use elsewhere.
+Create custom prompts by selecting base modes and adding specific instructions. Copy the result.
 
 ## 🎯 Current Modes
 
-The application comes pre-loaded with these Roo modes:
+The application comes pre-loaded with these Roo modes, organized in the **Default** family:
 
 - **🏗️ Architect**: Plans system architecture and technical designs
 - **💻 Code**: Writes and modifies code
 - **🐛 Debug**: Troubleshoots issues and diagnoses problems
 - **❓ Ask**: Provides explanations and answers questions
 - **🎯 Orchestrator**: Coordinates complex multi-step projects
+
+### Family Organization
+Modes are organized into families for better management. The Default family contains all built-in modes. You can create custom families and organize your modes accordingly.
 
 ## 🛠️ Tech Stack
 
@@ -116,10 +122,13 @@ src/
 │   ├── ModeTable.tsx    # Editable table component
 │   ├── ModeDetail.tsx   # Detailed mode editing
 │   ├── PromptBuilder.tsx # Prompt construction UI
-│   └── Navbar.tsx       # Navigation component
+│   ├── Navbar.tsx       # Navigation component
+│   └── FamilySelector.tsx # Multi-select family filter dropdown
 ├── pages/              # Page-level components
 ├── context/            # React Context for state
 ├── data/               # Static data files
+│   ├── modes.json       # Mode definitions with family assignments
+│   └── default-family.json # Default family configuration
 ├── types.ts            # TypeScript definitions
 └── App.tsx             # Main application component
 ```
@@ -127,8 +136,6 @@ src/
 ## 🔮 Future Plans
 
 - [ ] Mode deletion
-- [ ] Import/export functionality (JSON export available)
-- [ ] Search and filtering
 - [ ] Dark mode support
 - [ ] Keyboard shortcuts
 - [ ] Mode templates and presets
@@ -153,7 +160,6 @@ We welcome contributions! Here's how to get involved:
 ## 📄 Documentation
 
 - **[Master Implementation Plan](./docs/Master-Implementation-Plan.md)** - Technical roadmap and decisions
-- **[Developer Guide](./docs/Developer-Guide.md)** - Detailed code explanations
 - **[Changelog](./docs/Changelog.md)** - Version history and changes
 
 ## 📝 License
@@ -162,10 +168,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- Built for the Roo AI assistant system
-- Inspired by modern web development best practices
-- Thanks to the React, TypeScript, and Tailwind CSS communities
+- Thanks to the Roo Code, Cline, React, TypeScript, and Tailwind CSS communities
 
 ---
 
-**Made with ❤️ for the Roo community**
+**Made with ❤️ by Roo for the Roo community**
