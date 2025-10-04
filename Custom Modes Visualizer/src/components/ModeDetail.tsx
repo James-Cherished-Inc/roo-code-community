@@ -13,11 +13,53 @@ interface ModeDetailProps {
 }
 
 /**
+ * Simple red cross icon component
+ */
+const DeleteIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
+/**
+ * Delete confirmation modal component
+ */
+const DeleteConfirmationModal: React.FC<{
+  modeName: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}> = ({ modeName, onConfirm, onCancel }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Deletion</h3>
+      <p className="text-gray-600 mb-6">
+        Are you sure you want to delete the mode "{modeName}"? This action cannot be undone.
+      </p>
+      <div className="flex justify-end space-x-3">
+        <button
+          onClick={onCancel}
+          className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={onConfirm}
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+/**
  * Component for displaying and editing a single mode in detail
  */
 const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
-  const { updateMode } = useModes();
+  const { updateMode, deleteMode } = useModes();
   const [editingField, setEditingField] = useState<keyof Mode | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   // Defensive check for undefined mode
   if (!mode) {
@@ -49,6 +91,28 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
    */
   const cancelEdit = () => {
     setEditingField(null);
+  };
+
+  /**
+   * Handle delete mode request
+   */
+  const handleDeleteMode = () => {
+    setShowDeleteConfirmation(true);
+  };
+
+  /**
+   * Handle confirmed delete
+   */
+  const confirmDelete = () => {
+    deleteMode(mode.slug);
+    setShowDeleteConfirmation(false);
+  };
+
+  /**
+   * Handle cancel delete
+   */
+  const cancelDelete = () => {
+    setShowDeleteConfirmation(false);
   };
 
   /**
@@ -154,14 +218,24 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
   return (
     <div className="bg-white shadow rounded-lg p-6">
       {/* Header with editable name and slug */}
-      <div className="mb-6 pb-4 border-b border-gray-200">
-        <div className="space-y-2">
-          <div className="text-2xl font-bold text-gray-900">
-            {renderSimpleField('name')}
+      <div className="mb-6 pb-4 border-b border-gray-200 relative">
+        <div className="flex justify-between items-start">
+          <div className="space-y-2 flex-1">
+            <div className="text-2xl font-bold text-gray-900">
+              {renderSimpleField('name')}
+            </div>
+            <div className="text-sm text-gray-500">
+              {renderSimpleField('slug')}
+            </div>
           </div>
-          <div className="text-sm text-gray-500">
-            {renderSimpleField('slug')}
-          </div>
+          {/* Delete mode button */}
+          <button
+            onClick={handleDeleteMode}
+            className="ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors duration-200"
+            title="Delete mode"
+          >
+            <DeleteIcon className="w-5 h-5" />
+          </button>
         </div>
       </div>
 
@@ -197,6 +271,15 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
           💡 Double-click on any field to edit it. Press Enter to save or Escape to cancel.
         </p>
       </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirmation && (
+        <DeleteConfirmationModal
+          modeName={mode.name}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
+      )}
     </div>
   );
 };

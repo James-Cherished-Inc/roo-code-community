@@ -11,11 +11,53 @@ interface ModeTableProps {
 }
 
 /**
+ * Simple red cross icon component
+ */
+const DeleteIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
+/**
+ * Delete confirmation modal component
+ */
+const DeleteConfirmationModal: React.FC<{
+  modeName: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}> = ({ modeName, onConfirm, onCancel }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Deletion</h3>
+      <p className="text-gray-600 mb-6">
+        Are you sure you want to delete the mode "{modeName}"? This action cannot be undone.
+      </p>
+      <div className="flex justify-end space-x-3">
+        <button
+          onClick={onCancel}
+          className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={onConfirm}
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+/**
  * Table component for displaying and editing mode data
  */
 const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
-  const { updateMode } = useModes();
+  const { updateMode, deleteMode } = useModes();
   const [editingCell, setEditingCell] = useState<{ slug: string; field: keyof Mode } | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ slug: string; name: string } | null>(null);
 
   /**
    * Handle starting edit mode for a cell
@@ -37,6 +79,30 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
    */
   const cancelEdit = () => {
     setEditingCell(null);
+  };
+
+  /**
+   * Handle delete mode request
+   */
+  const handleDeleteMode = (mode: Mode) => {
+    setDeleteConfirmation({ slug: mode.slug, name: mode.name });
+  };
+
+  /**
+   * Handle confirmed delete
+   */
+  const confirmDelete = () => {
+    if (deleteConfirmation) {
+      deleteMode(deleteConfirmation.slug);
+      setDeleteConfirmation(null);
+    }
+  };
+
+  /**
+   * Handle cancel delete
+   */
+  const cancelDelete = () => {
+    setDeleteConfirmation(null);
   };
 
   /**
@@ -125,15 +191,23 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
           {modes.map((mode) => (
             <tr
               key={mode.slug}
-              className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-md rounded-xl"
+              className="group hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-md rounded-xl relative"
             >
-              <td className="pl-6 pr-5 py-4">
+              <td className="pl-6 pr-5 py-4 relative">
                 <div className="flex flex-col gap-1">
                   <div className="ml-1">{renderCell(mode, 'name')}</div>
                   <div className="text-xs text-slate-500 flex items-center justify-center">
                     {renderCell(mode, 'slug')}
                   </div>
                 </div>
+                {/* Delete button - appears on row hover */}
+                <button
+                  onClick={() => handleDeleteMode(mode)}
+                  className="absolute bottom-2 right-4 opacity-0 group-hover:opacity-100 hover:opacity-100 text-red-500 hover:text-red-700 transition-all duration-200 p-1 rounded-full hover:bg-red-50"
+                  title="Delete mode"
+                >
+                  <DeleteIcon className="w-4 h-4" />
+                </button>
               </td>
               <td className="px-5 py-4">
                 <div className="text-xs">{renderCell(mode, 'description')}</div>
@@ -148,6 +222,15 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
           ))}
         </tbody>
       </table>
+
+      {/* Delete confirmation modal */}
+      {deleteConfirmation && (
+        <DeleteConfirmationModal
+          modeName={deleteConfirmation.name}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
+      )}
     </div>
   );
 };
