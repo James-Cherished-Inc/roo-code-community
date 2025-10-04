@@ -45,3 +45,7 @@ The modifications of the system prompts maintain all the tools instructions but 
 Please give credit to the respective owners of the work you use or draw inspiration from, when possible. Thanks!
 
 Please open a PR or contact me on X (@JamesCherished) to have your project included here. Thanks!
+
+# Get started with Roo
+
+https://docs.roocode.com/
