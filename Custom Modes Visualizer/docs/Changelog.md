@@ -1,5 +1,28 @@
 # Changelog - Roo Modes Visualizer
 
+## [2025-10-04] - Tailwind CSS v4 Compatibility Fix
+
+### Fixed
+- **PostCSS Configuration**: Resolved Tailwind CSS v4 compatibility issue by updating CSS import syntax from `@tailwind` directives to `@import "tailwindcss"`
+- **Build Error**: Fixed "Cannot apply unknown utility class" error during development server startup
+- **Styling System**: Ensured Tailwind utilities are properly loaded with v4 PostCSS plugin
+
+### Technical Details
+- **Tailwind Version**: Upgraded CSS import to Tailwind CSS v4 syntax
+- **PostCSS Plugin**: Maintained compatibility with `@tailwindcss/postcss` v4.1.14
+- **Configuration**: Retained existing `tailwind.config.js` structure (compatible with v4)
+- **Impact**: No functional changes - purely a build/configuration fix
+
+### Files Modified
+- `src/index.css` - Changed from `@tailwind base; @tailwind components; @tailwind utilities;` to `@import "tailwindcss";`
+
+### Solution
+- Root cause: Tailwind CSS v4 uses `@import "tailwindcss";` instead of separate `@tailwind` directives
+- PostCSS plugin v4 expects the new import syntax for proper utility loading
+- Development server now starts without errors
+
+---
+
 ## [2025-10-04] - UI Modernization Complete
 
 ### Added
