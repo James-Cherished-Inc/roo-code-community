@@ -19,6 +19,15 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
   const { updateMode } = useModes();
   const [editingField, setEditingField] = useState<keyof Mode | null>(null);
 
+  // Defensive check for undefined mode
+  if (!mode) {
+    return (
+      <div className="bg-white shadow rounded-lg p-6 flex items-center justify-center">
+        <div className="text-gray-500">Loading mode...</div>
+      </div>
+    );
+  }
+
   /**
    * Handle starting edit mode for a field
    */

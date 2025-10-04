@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useModes } from '../context/ModeContext';
 import ModeDetail from '../components/ModeDetail';
 import CreateModeModal from '../components/CreateModeModal';
@@ -17,6 +17,13 @@ const SmartViewPage: React.FC = () => {
      if (selectedFamilies.length === 0) return [];
      return modes.filter(mode => mode.family && selectedFamilies.includes(mode.family));
    }, [modes, selectedFamilies]);
+
+   // Clamp selectedModeIndex when filteredModes changes
+   useEffect(() => {
+     if (selectedModeIndex >= filteredModes.length && filteredModes.length > 0) {
+       setSelectedModeIndex(filteredModes.length - 1);
+     }
+   }, [filteredModes.length, selectedModeIndex]);
 
   const selectedMode = filteredModes[selectedModeIndex];
 

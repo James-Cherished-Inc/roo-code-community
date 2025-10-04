@@ -1,5 +1,36 @@
 # Changelog - Roo Modes Visualizer
 
+## [2025-10-04] - TypeError Bug Fix: Undefined Mode Access
+
+### Fixed
+- **TypeError in ModeDetail**: Resolved "Cannot read properties of undefined (reading 'name')" error occurring when selectedMode becomes undefined in Smart View
+- **Index Bounds Checking**: Added useEffect in SmartViewPage to clamp selectedModeIndex when filteredModes changes, preventing out-of-bounds access
+- **Defensive Programming**: Added null check in ModeDetail component to gracefully handle undefined mode prop
+
+### Technical Details
+- **Root Cause**: When family selection filters modes, selectedModeIndex could exceed filteredModes.length, causing selectedMode to be undefined
+- **Solution**: Implemented index clamping with useEffect that adjusts selectedModeIndex when filteredModes changes
+- **Fallback UI**: Added loading state in ModeDetail when mode prop is undefined
+- **State Management**: Preserved existing state logic while adding bounds checking
+
+### Files Modified
+- `src/pages/SmartViewPage.tsx` - Added useEffect for index clamping and imported useEffect
+- `src/components/ModeDetail.tsx` - Added defensive null check with loading UI
+
+### Impact
+- **Stability**: Application no longer crashes when switching between family filters
+- **User Experience**: Graceful handling of edge cases with appropriate loading states
+- **Data Integrity**: Prevents undefined mode access while maintaining all existing functionality
+- **Performance**: Minimal impact - lightweight bounds checking with no additional renders
+
+### Testing Status
+- ✅ Manual testing confirmed error is resolved
+- ✅ Switching between family filters works without crashes
+- ✅ All existing functionality preserved
+- ✅ Loading states display appropriately during transitions
+
+---
+
 ## [2025-10-04] - Create Mode Feature Implementation
 
 ### Added
