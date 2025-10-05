@@ -382,6 +382,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
         </div>
       </div>
 
+
       {/* Edit Instructions */}
       <div className="mt-6 p-3 bg-blue-50 rounded-md">
         <p className="text-xs text-blue-600">

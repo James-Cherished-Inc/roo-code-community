@@ -5,6 +5,7 @@ import CreateModeModal from '../components/CreateModeModal';
 import ImportModal from '../components/ImportModal';
 import ExportModal from '../components/ExportModal';
 import FamilySelector from '../components/FamilySelector';
+import RedundancyHighlighter from '../components/RedundancyHighlighter';
 
 /**
  * Page component for smart view showing one mode at a time with navigation
@@ -15,6 +16,7 @@ const SmartViewPage: React.FC = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [isRedundancyPanelCollapsed, setIsRedundancyPanelCollapsed] = useState(false);
 
    // Filter modes based on selected families
    const filteredModes = useMemo(() => {
@@ -73,9 +75,16 @@ const SmartViewPage: React.FC = () => {
     setIsExportModalOpen(true);
   };
 
+  /**
+   * Handle redundancy panel toggle
+   */
+  const toggleRedundancyPanel = () => {
+    setIsRedundancyPanelCollapsed(!isRedundancyPanelCollapsed);
+  };
+
   if (filteredModes.length === 0) {
     return (
-      <div className="flex h-screen">
+      <div className="flex w-screen fixed inset-x-0 top-20 bottom-0" style={{ margin: 0, padding: 0, height: 'calc(100vh - 5rem)' }}>
         {/* Left Sidebar - Mode Selection */}
         <div className="w-40 bg-gray-50 border-r border-gray-200 flex flex-col">
           {/* Sidebar Header */}
@@ -135,7 +144,7 @@ const SmartViewPage: React.FC = () => {
   // This variable is now declared after the early return check
 
   return (
-    <div className="flex h-screen">
+    <div className="flex w-screen fixed inset-x-0 top-20 bottom-0" style={{ margin: 0, padding: 0, height: 'calc(100vh - 5rem)' }}>
       {/* Left Sidebar - Mode Selection */}
       <div className="w-40 bg-gray-50 border-r border-gray-200 flex flex-col">
         {/* Sidebar Header */}
@@ -233,11 +242,79 @@ const SmartViewPage: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Mode Detail - Full Content Area */}
-        <div className="flex-1 overflow-y-auto">
-          <ModeDetail mode={selectedMode} />
+      <div className="flex-1 flex overflow-hidden">
+        {/* Main Panel - Mode Detail */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto">
+            <ModeDetail mode={selectedMode} />
+          </div>
         </div>
+
+        {/* Collapsible Right Panel - Cross-Mode Redundancy Analysis */}
+        {filteredModes.length > 1 && (
+          <div className={`${
+            isRedundancyPanelCollapsed ? 'w-12' : 'w-64 sm:w-80 lg:w-96'
+          } bg-white border-l border-gray-200 flex flex-col transition-all duration-300 ease-in-out`}>
+            {/* Collapsed State - Just Toggle Button */}
+            {isRedundancyPanelCollapsed ? (
+              <div className="flex flex-col items-center justify-center h-full p-2">
+                <button
+                  onClick={toggleRedundancyPanel}
+                  className="w-full h-full min-h-[48px] bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center"
+                  title="Expand Cross-Mode Redundancy Analysis Panel"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              /* Expanded State - Full Panel */
+              <>
+                {/* Panel Header with Collapse Button */}
+                <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex justify-between items-center">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                      🔍 Cross-Mode Redundancy Analysis
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Compare prompts across all modes
+                    </p>
+                  </div>
+                  <button
+                    onClick={toggleRedundancyPanel}
+                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    title="Collapse Cross-Mode Redundancy Analysis Panel"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Quick Tips */}
+                <div className="px-4 py-2 bg-blue-50 border-b border-blue-200">
+                  <p className="text-xs text-blue-700">
+                    💡 <strong>Tip:</strong> Right-click on highlighted words to exclude them or show only their occurrences.
+                  </p>
+                </div>
+
+                {/* Panel Content */}
+                <div className="flex-1 overflow-y-auto">
+                  <RedundancyHighlighter
+                    prompts={filteredModes.map(m => ({
+                      content: m.prompt,
+                      id: m.slug,
+                      name: m.name
+                    }))}
+                    showPromptNames={true}
+                    className="max-w-none"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Import Modal */}
