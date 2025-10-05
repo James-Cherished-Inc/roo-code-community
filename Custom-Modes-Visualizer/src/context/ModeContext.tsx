@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { Mode, ModeContextType, ModeFamily, FormatType } from '../types';
+import type { Mode, ModeContextType, ModeFamily, FormatType, GlobalConfig } from '../types';
 
 // Load initial data from JSON file
 import modesData from '../data/modes.json';
@@ -14,12 +14,14 @@ import {
   parseFileContent,
   validateExportFormat,
   serializeExportFormat,
-  downloadFile
+  downloadFile,
+  resolveSlugConflicts
 } from '../utils/formatConversion';
 
 const MODES_STORAGE_KEY = 'roo-modes-visualizer-modes';
 const FAMILIES_STORAGE_KEY = 'roo-modes-visualizer-families';
 const SELECTED_FAMILIES_STORAGE_KEY = 'roo-modes-visualizer-selected-families';
+const GLOBAL_MODES_CONFIG_KEY = 'roo-modes-visualizer-global-config';
 
 /**
  * Context for managing mode and family data throughout the application
@@ -31,9 +33,10 @@ const ModeContext = createContext<ModeContextType | undefined>(undefined);
  */
 export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
    // Initialize state with data from JSON file
-   const [modes, setModes] = useState<Mode[]>(modesData);
-   const [families, setFamilies] = useState<ModeFamily[]>([defaultFamilyData, standaloneFamilyData]);
-   const [selectedFamilies, setSelectedFamilies] = useState<string[]>(['default', 'standalone']);
+    const [modes, setModes] = useState<Mode[]>(modesData);
+    const [families, setFamilies] = useState<ModeFamily[]>([defaultFamilyData, standaloneFamilyData]);
+    const [selectedFamilies, setSelectedFamilies] = useState<string[]>(['default', 'standalone']);
+    const [globalConfig, setGlobalConfig] = useState<GlobalConfig>({ forAllModes: '' });
 
   /**
    * Update a specific mode by slug
@@ -44,6 +47,13 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         mode.slug === slug ? { ...mode, ...updates } : mode
       )
     );
+  };
+
+  /**
+   * Update the global configuration
+   */
+  const updateGlobalConfig = (updates: Partial<GlobalConfig>) => {
+    setGlobalConfig(prevConfig => ({ ...prevConfig, ...updates }));
   };
 
   /**
@@ -96,6 +106,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
        localStorage.setItem(MODES_STORAGE_KEY, JSON.stringify(modes));
        localStorage.setItem(FAMILIES_STORAGE_KEY, JSON.stringify(families));
        localStorage.setItem(SELECTED_FAMILIES_STORAGE_KEY, JSON.stringify(selectedFamilies));
+       localStorage.setItem(GLOBAL_MODES_CONFIG_KEY, JSON.stringify(globalConfig));
      } catch (error) {
        console.error('Failed to save data to localStorage:', error);
      }
@@ -242,14 +253,15 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
    /**
     * Import modes from file (auto-detects format)
+    * Returns success status and information about any renamed modes
     */
-   const importFromFile = async (file: File, strategy: 'replace' | 'add' | 'family' = 'add', familyName?: string): Promise<boolean> => {
+   const importFromFile = async (file: File, strategy: 'replace' | 'add' | 'family' = 'add', familyName?: string): Promise<{ success: boolean, renamedModes: { original: string, new: string }[] }> => {
      try {
        // Detect format from filename
        const format = detectFileFormat(file.name);
        if (!format) {
          console.error('Unsupported file format. Please use .json or .yaml/.yml files');
-         return false;
+         return { success: false, renamedModes: [] };
        }
 
        // Read file content
@@ -261,7 +273,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
        // Validate structure
        if (!validateExportFormat(parsedData)) {
          console.error('Invalid file structure. Expected { customModes: [...] }');
-         return false;
+         return { success: false, renamedModes: [] };
        }
 
        // Convert to internal format
@@ -271,12 +283,13 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
        return importModesFromJson(modes, strategy, familyName);
      } catch (error) {
        console.error('Failed to import from file:', error);
-       return false;
+       return { success: false, renamedModes: [] };
      }
    };
 
   /**
    * Import modes from JSON file with different merge strategies
+   * Returns success status and information about any renamed modes
    */
   const importModesFromJson = (jsonData: Mode[], strategy: 'replace' | 'add' | 'family', familyName?: string) => {
     try {
@@ -292,12 +305,17 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       let newModes: Mode[];
+      let renamedModes: { original: string, new: string }[] = [];
+
       switch (strategy) {
         case 'replace':
           newModes = jsonData;
           break;
         case 'add':
-          newModes = [...modes, ...jsonData];
+          // Resolve slug conflicts by renaming conflicting modes
+          const { resolvedModes, renamedModes: conflictsResolved } = resolveSlugConflicts(jsonData, modes);
+          newModes = [...modes, ...resolvedModes];
+          renamedModes = conflictsResolved;
           break;
         case 'family':
           // For family import, create new family and assign modes to it
@@ -317,16 +335,19 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               addFamily(newFamily);
             }
 
-            // Assign all imported modes to this family
+            // Resolve slug conflicts within family import as well
             const modesWithFamily = jsonData.map(mode => ({
               ...mode,
               family: familyId
             }));
-
-            newModes = [...modes, ...modesWithFamily];
+            const { resolvedModes: resolvedFamilyModes, renamedModes: familyConflictsResolved } = resolveSlugConflicts(modesWithFamily, modes);
+            newModes = [...modes, ...resolvedFamilyModes];
+            renamedModes = familyConflictsResolved;
           } else {
-            // Fallback: just add without family assignment
-            newModes = [...modes, ...jsonData];
+            // Fallback: just add without family assignment (with conflict resolution)
+            const { resolvedModes, renamedModes: fallbackConflictsResolved } = resolveSlugConflicts(jsonData, modes);
+            newModes = [...modes, ...resolvedModes];
+            renamedModes = fallbackConflictsResolved;
           }
           break;
         default:
@@ -334,9 +355,39 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       setModes(newModes);
-      return true;
+      return { success: true, renamedModes };
     } catch (error) {
       console.error('Failed to import modes from JSON:', error);
+      return { success: false, renamedModes: [] };
+    }
+  };
+
+  /**
+   * Reset modes to initial default state
+   */
+  const resetModes = () => {
+    try {
+      // Reset modes to initial data from JSON file
+      setModes(modesData);
+
+      // Reset families to default + standalone
+      setFamilies([defaultFamilyData, standaloneFamilyData]);
+
+      // Reset selected families to ['default', 'standalone']
+      setSelectedFamilies(['default', 'standalone']);
+
+      // Reset global config to empty
+      setGlobalConfig({ forAllModes: '' });
+
+      // Clear localStorage
+      localStorage.removeItem(MODES_STORAGE_KEY);
+      localStorage.removeItem(FAMILIES_STORAGE_KEY);
+      localStorage.removeItem(SELECTED_FAMILIES_STORAGE_KEY);
+      localStorage.removeItem(GLOBAL_MODES_CONFIG_KEY);
+
+      return true;
+    } catch (error) {
+      console.error('Failed to reset modes:', error);
       return false;
     }
   };
@@ -373,6 +424,12 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const parsedSelected = JSON.parse(savedSelectedFamilies);
         setSelectedFamilies(parsedSelected);
       }
+
+      const savedGlobalConfig = localStorage.getItem(GLOBAL_MODES_CONFIG_KEY);
+      if (savedGlobalConfig) {
+        const parsedGlobalConfig = JSON.parse(savedGlobalConfig);
+        setGlobalConfig(parsedGlobalConfig);
+      }
     } catch (error) {
       console.error('Failed to load data from localStorage:', error);
     }
@@ -407,6 +464,9 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     importFromFile,
     exportFamilyToJson,
     importFamilyFromJson,
+    resetModes,
+    globalConfig,
+    updateGlobalConfig,
   };
 
   return (

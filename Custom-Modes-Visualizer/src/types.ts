@@ -71,6 +71,14 @@ export type ModeFamily = {
 export type ViewType = 'table' | 'smart' | 'prompt-builder';
 
 /**
+ * Global configuration for all modes
+ */
+export interface GlobalConfig {
+  /** Common instructions applied to all modes */
+  forAllModes: string;
+}
+
+/**
  * State management interface for mode data
  */
 export interface ModeContextType {
@@ -88,8 +96,11 @@ export interface ModeContextType {
   loadFromLocalStorage: () => void;
   exportModesToJson: () => boolean;
   exportSelectedModes: (format: FormatType, selectedSlugs: string[]) => boolean;
-  importModesFromJson: (jsonData: Mode[], strategy: 'replace' | 'add' | 'family', familyName?: string) => boolean;
-  importFromFile: (file: File, strategy?: 'replace' | 'add' | 'family', familyName?: string) => Promise<boolean>;
+  importModesFromJson: (jsonData: Mode[], strategy: 'replace' | 'add' | 'family', familyName?: string) => { success: boolean, renamedModes: { original: string, new: string }[] };
+  importFromFile: (file: File, strategy?: 'replace' | 'add' | 'family', familyName?: string) => Promise<{ success: boolean, renamedModes: { original: string, new: string }[] }>;
   exportFamilyToJson: (familyId: string) => boolean;
   importFamilyFromJson: (jsonData: ModeFamily, modes: Mode[], newFamilyName?: string) => boolean;
+  resetModes: () => boolean;
+  globalConfig: GlobalConfig;
+  updateGlobalConfig: (updates: Partial<GlobalConfig>) => void;
 }

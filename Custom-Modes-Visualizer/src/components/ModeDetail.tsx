@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { Mode } from '../types';
 import { useModes } from '../context/ModeContext';
 
@@ -60,6 +60,60 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
   const { updateMode, deleteMode } = useModes();
   const [editingField, setEditingField] = useState<keyof Mode | null>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [textareaDimensions, setTextareaDimensions] = useState<{ [field: string]: { width: number; height: number } | null }>({});
+
+  // Ref for the currently editing textarea
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Storage key for textarea dimensions per mode
+  const getStorageKey = (field: string) => `mode-${mode.slug}-${field}-dimensions`;
+
+  // Load saved dimensions from sessionStorage
+  useEffect(() => {
+    const savedDimensions: { [field: string]: { width: number; height: number } } = {};
+    const fields = ['prompt', 'description', 'usage'];
+
+    fields.forEach(field => {
+      const storageKey = getStorageKey(field);
+      const stored = sessionStorage.getItem(storageKey);
+      if (stored) {
+        try {
+          savedDimensions[field] = JSON.parse(stored);
+        } catch (e) {
+          console.warn(`Failed to parse stored dimensions for ${field}:`, e);
+        }
+      }
+    });
+
+    setTextareaDimensions(savedDimensions);
+  }, [mode.slug]);
+
+  // Handle textarea resize and save dimensions
+  const handleTextareaResize = (field: string) => {
+    if (textareaRef.current) {
+      const rect = textareaRef.current.getBoundingClientRect();
+      const dimensions = { width: rect.width, height: rect.height };
+      setTextareaDimensions(prev => ({ ...prev, [field]: dimensions }));
+
+      // Save to sessionStorage
+      const storageKey = getStorageKey(field);
+      sessionStorage.setItem(storageKey, JSON.stringify(dimensions));
+    }
+  };
+
+  // Setup ResizeObserver for textarea resize detection
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea || !editingField) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      handleTextareaResize(editingField as string);
+    });
+
+    resizeObserver.observe(textarea);
+
+    return () => resizeObserver.disconnect();
+  }, [editingField]);
 
   // Defensive check for undefined mode
   if (!mode) {
@@ -124,8 +178,17 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
 
     if (isEditing) {
       if (isMultiline) {
+        const savedDimensions = textareaDimensions[field];
+        const defaultRows = field === 'prompt' ? 8 : 3;
+        const style = savedDimensions ? {
+          width: `${savedDimensions.width}px`,
+          height: `${savedDimensions.height}px`,
+          minHeight: '60px' // Minimum height to prevent too small textarea
+        } : {};
+
         return (
           <textarea
+            ref={textareaRef}
             defaultValue={value}
             onBlur={(e) => saveEdit(field, e.target.value)}
             onKeyDown={(e) => {
@@ -136,7 +199,8 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
               }
             }}
             className="w-full px-3 py-2 border-2 border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/90 backdrop-blur-sm shadow-sm transition-all duration-200 resize"
-            rows={isMultiline ? (field === 'prompt' ? 8 : 3) : 1}
+            rows={savedDimensions ? undefined : defaultRows}
+            style={style}
             autoFocus
             placeholder={`Enter ${label.toLowerCase()}...`}
           />
@@ -163,13 +227,13 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
 
     return (
       <div
-        className="cursor-pointer inline-block"
+        className="cursor-pointer inline-block w-full"
         onDoubleClick={() => startEdit(field)}
         title={`Double-click to edit ${label.toLowerCase()}`}
       >
         {field === 'prompt' ? (
           <div className="text-slate-700 whitespace-pre-line leading-relaxed" title={value}>
-            {value.length > 150 ? `${value.substring(0, 150)}...` : value}
+            {value}
           </div>
         ) : (
           <span className="text-slate-700">{value}</span>

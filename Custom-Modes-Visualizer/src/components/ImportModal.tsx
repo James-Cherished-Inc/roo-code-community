@@ -20,6 +20,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [renamedModes, setRenamedModes] = useState<{ original: string, new: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /**
@@ -46,24 +47,33 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose }) => {
     setIsProcessing(true);
     setError(null);
     setSuccess(null);
+    setRenamedModes([]);
 
     try {
-      const success = await importFromFile(file, importStrategy, importStrategy === 'family' ? familyName : undefined);
+      const result = await importFromFile(file, importStrategy, importStrategy === 'family' ? familyName : undefined);
 
-      if (success) {
+      if (result.success) {
         const formatName = isYamlFile ? 'YAML' : 'JSON';
         const strategyText = importStrategy === 'family' && familyName ? `${importStrategy} (${familyName})` : importStrategy;
-        setSuccess(`Successfully imported modes from ${formatName} file using ${strategyText} strategy`);
+
+        if (result.renamedModes.length > 0) {
+          setRenamedModes(result.renamedModes);
+          setSuccess(`Successfully imported modes from ${formatName} file using ${strategyText} strategy. Some modes were renamed to avoid conflicts.`);
+        } else {
+          setSuccess(`Successfully imported modes from ${formatName} file using ${strategyText} strategy`);
+        }
+
         setTimeout(() => {
           onClose();
           // Reset form after successful import
           setSuccess(null);
+          setRenamedModes([]);
           setImportStrategy('add');
           setFamilyName('');
           if (fileInputRef.current) {
             fileInputRef.current.value = '';
           }
-        }, 1500);
+        }, result.renamedModes.length > 0 ? 3000 : 1500); // Show longer if there are renames to read
       } else {
         setError('Failed to import modes. Please check the file format and try again.');
       }
@@ -210,6 +220,29 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose }) => {
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               <span className="text-green-800 text-sm">{success}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Renamed Modes Information */}
+        {renamedModes.length > 0 && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <div className="flex mb-2">
+              <svg className="w-5 h-5 text-blue-400 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div className="text-blue-800 text-sm">
+                <div className="font-medium mb-1">The following modes were renamed to avoid conflicts:</div>
+                <ul className="space-y-1">
+                  {renamedModes.map(({ original, new: newSlug }) => (
+                    <li key={original} className="text-xs">
+                      <span className="font-mono bg-blue-100 px-1 py-0.5 rounded">{original}</span>
+                      {' → '}
+                      <span className="font-mono bg-blue-100 px-1 py-0.5 rounded">{newSlug}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         )}

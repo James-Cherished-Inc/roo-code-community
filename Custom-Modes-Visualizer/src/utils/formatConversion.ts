@@ -5,6 +5,60 @@ import * as yaml from 'js-yaml';
 const DEFAULT_GROUPS = ["read", "edit", "browser", "command", "mcp"];
 
 /**
+ * Detects slug conflicts between existing and imported modes
+ */
+export function detectSlugConflicts(existingModes: Mode[], importedModes: Mode[]): Mode[] {
+  const existingSlugs = new Set(existingModes.map(mode => mode.slug));
+  return importedModes.filter(mode => existingSlugs.has(mode.slug));
+}
+
+/**
+ * Generates a unique slug by adding an incremental suffix
+ */
+export function generateUniqueSlug(baseSlug: string, existingSlugs: Set<string>): string {
+  let counter = 2;
+  let newSlug = `${baseSlug}-${counter}`;
+
+  while (existingSlugs.has(newSlug)) {
+    counter++;
+    newSlug = `${baseSlug}-${counter}`;
+  }
+
+  return newSlug;
+}
+
+/**
+ * Resolves slug conflicts by renaming conflicting modes
+ * Returns the resolved modes and information about renamed modes for user feedback
+ */
+export function resolveSlugConflicts(
+  importedModes: Mode[],
+  existingModes: Mode[]
+): { resolvedModes: Mode[], renamedModes: { original: string, new: string }[] } {
+  const existingSlugs = new Set(existingModes.map(mode => mode.slug));
+  const resolvedModes = [...importedModes];
+  const renamedModes: { original: string, new: string }[] = [];
+
+  resolvedModes.forEach((mode, index) => {
+    if (existingSlugs.has(mode.slug)) {
+      const originalSlug = mode.slug;
+      const newSlug = generateUniqueSlug(originalSlug, existingSlugs);
+
+      // Update the mode with the new slug
+      resolvedModes[index] = { ...mode, slug: newSlug };
+
+      // Track the rename
+      renamedModes.push({ original: originalSlug, new: newSlug });
+
+      // Add the new slug to the set to avoid future conflicts
+      existingSlugs.add(newSlug);
+    }
+  });
+
+  return { resolvedModes, renamedModes };
+}
+
+/**
  * Converts a Mode to ExportMode format
  */
 export function modeToExportMode(mode: Mode): ExportMode {

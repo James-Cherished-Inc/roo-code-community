@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { Mode } from '../types';
 import { useModes } from '../context/ModeContext';
 
@@ -25,6 +25,114 @@ const DeleteIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" })
 const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
   const { updateMode, deleteMode } = useModes();
   const [editingCell, setEditingCell] = useState<{ slug: string; field: keyof Mode } | null>(null);
+  const [textareaDimensions, setTextareaDimensions] = useState<{ [key: string]: { width: number; height: number } | null }>({});
+
+  // Ref for the currently editing textarea
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Storage key for textarea dimensions per mode and field
+  const getStorageKey = (slug: string, field: string) => `table-${slug}-${field}-dimensions`;
+
+  // Load saved dimensions from sessionStorage
+  useEffect(() => {
+    const savedDimensions: { [key: string]: { width: number; height: number } } = {};
+
+    modes.forEach(mode => {
+      const fields = ['prompt', 'description', 'usage'];
+      fields.forEach(field => {
+        const storageKey = getStorageKey(mode.slug, field);
+        const stored = sessionStorage.getItem(storageKey);
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            // Validate the parsed data has required properties
+            if (parsed && typeof parsed.width === 'number' && typeof parsed.height === 'number') {
+              savedDimensions[storageKey] = parsed;
+            } else {
+              console.warn(`Invalid dimension data for ${field}:`, parsed);
+              sessionStorage.removeItem(storageKey); // Clean up invalid data
+            }
+          } catch (e) {
+            console.warn(`Failed to parse stored dimensions for ${field}:`, e);
+            sessionStorage.removeItem(storageKey); // Clean up corrupted data
+          }
+        }
+      });
+    });
+
+    setTextareaDimensions(savedDimensions);
+  }, [modes]);
+
+  // Debug function to clear all stored dimensions (temporary)
+  const clearStoredDimensions = () => {
+    modes.forEach(mode => {
+      const fields = ['prompt', 'description', 'usage'];
+      fields.forEach(field => {
+        const storageKey = getStorageKey(mode.slug, field);
+        sessionStorage.removeItem(storageKey);
+      });
+    });
+    // Force re-render by clearing state
+    setTextareaDimensions({});
+    console.log('All stored dimensions cleared');
+  };
+
+  // Clear stored dimensions for all modes
+  const clearAllStoredDimensions = () => {
+    modes.forEach(mode => {
+      const fields = ['prompt', 'description', 'usage'];
+      fields.forEach(field => {
+        const storageKey = getStorageKey(mode.slug, field);
+        sessionStorage.removeItem(storageKey);
+      });
+    });
+    // Clear state to force re-render
+    setTextareaDimensions({});
+    console.log('All table dimensions cleared');
+  };
+
+  // Make clear function available globally for testing
+  if (typeof window !== 'undefined') {
+    (window as any).clearTableDimensions = clearAllStoredDimensions;
+  }
+
+  // Listen for hard refresh to clear dimensions
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Clear dimensions when page is refreshed/closed
+      clearAllStoredDimensions();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [modes]);
+
+  // Handle textarea resize and save dimensions
+  const handleTextareaResize = (slug: string, field: string) => {
+    if (textareaRef.current) {
+      const rect = textareaRef.current.getBoundingClientRect();
+      const dimensions = { width: rect.width, height: rect.height };
+      const storageKey = getStorageKey(slug, field);
+      setTextareaDimensions(prev => ({ ...prev, [storageKey]: dimensions }));
+
+      // Save to sessionStorage
+      sessionStorage.setItem(storageKey, JSON.stringify(dimensions));
+    }
+  };
+
+  // Setup ResizeObserver for textarea resize detection
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea || !editingCell) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      handleTextareaResize(editingCell.slug, editingCell.field);
+    });
+
+    resizeObserver.observe(textarea);
+
+    return () => resizeObserver.disconnect();
+  }, [editingCell]);
 
   /**
    * Handle starting edit mode for a cell
@@ -64,8 +172,17 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
 
     if (isEditing) {
       if (field === 'prompt') {
+        const storageKey = getStorageKey(mode.slug, field);
+        const savedDimensions = textareaDimensions[storageKey];
+        const style = savedDimensions ? {
+          width: `${savedDimensions.width}px`,
+          height: `${savedDimensions.height}px`,
+          minHeight: '40px' // Minimum height for table cell
+        } : {};
+
         return (
           <textarea
+            ref={textareaRef}
             defaultValue={value}
             onBlur={(e) => saveEdit(mode.slug, field, e.target.value)}
             onKeyDown={(e) => {
@@ -76,7 +193,8 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
               }
             }}
             className="w-full px-3 py-2 border-2 border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/90 backdrop-blur-sm shadow-sm transition-all duration-200 resize"
-            rows={3}
+            rows={savedDimensions ? undefined : 3}
+            style={style}
             autoFocus
             placeholder="Enter prompt content..."
           />
@@ -101,15 +219,50 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
       );
     }
 
+    const storageKey = getStorageKey(mode.slug, field);
+    const savedDimensions = field === 'prompt' ? textareaDimensions[storageKey] : null;
+
+    // Apply saved dimensions to the cell display for prompt field
+    const cellStyle = savedDimensions ? {
+      width: `${savedDimensions.width}px`,
+      minHeight: `${Math.max(savedDimensions.height, 60)}px`,
+      height: 'auto',
+      overflow: 'hidden',
+      display: 'flex',
+      alignItems: 'flex-start',
+      padding: '8px 12px',
+      borderRadius: '8px'
+    } : {};
+
     return (
       <div
-        className="cursor-pointer hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 px-3 py-2 rounded-lg min-h-[2.5rem] flex items-center transition-all duration-200 hover:shadow-sm border border-transparent hover:border-indigo-200/50"
+        className={`cursor-pointer hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 px-3 py-2 rounded-lg min-h-[2.5rem] flex items-center transition-all duration-200 hover:shadow-sm border border-transparent hover:border-indigo-200/50 ${savedDimensions ? 'justify-start' : 'justify-center'}`}
         onClick={() => startEdit(mode.slug, field)}
         title="Click to edit"
+        style={cellStyle}
       >
         {field === 'prompt' ? (
-          <div className="text-slate-700 whitespace-pre-line leading-relaxed" title={value}>
-            {value.length > 100 ? `${value.substring(0, 100)}...` : value}
+          <div className="text-slate-700 w-full h-full" title={value} style={{
+            height: savedDimensions ? `${savedDimensions.height - 16}px` : 'auto',
+            overflow: 'hidden',
+            wordWrap: 'break-word',
+            whiteSpace: 'pre-line',
+            lineHeight: '1.4',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-start'
+          }}>
+            <div style={{
+              flex: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: savedDimensions ? Math.floor((savedDimensions.height - 16) / 20) : 2,
+              WebkitBoxOrient: 'vertical',
+              lineHeight: '1.4'
+            }}>
+              {value}
+            </div>
           </div>
         ) : (
           <span className="text-slate-700">{value}</span>

@@ -1,5 +1,123 @@
 # Changelog - Roo Modes Visualizer
 
+## [2025-10-05] - Global Configuration Field Addition
+
+### Added
+- **For All Modes Field**: Added a global "For All Modes" multiple-lines field below the Table view for common instructions that apply to all modes
+- **GlobalConfig Interface**: New TypeScript interface for managing global configuration state across all modes
+- **GlobalModesField Component**: Dedicated component for editing global instructions with modern UI and editing capabilities
+- **Persistent Storage**: Global configuration automatically saves to localStorage and loads on application startup
+- **Reset Integration**: Global configuration properly resets when modes are reset to default state
+
+### Technical Details
+- **State Management**: Added globalConfig state to ModeContext with dedicated updateGlobalConfig function
+- **TypeScript Integration**: Extended ModeContextType interface and created GlobalConfig type for type safety
+- **UI Implementation**: GlobalModesField component features inline editing, auto-save, keyboard shortcuts (Ctrl+Enter to save, Esc to cancel)
+- **Storage Keys**: Added GLOBAL_MODES_CONFIG_KEY for localStorage persistence alongside existing keys
+- **Reset Logic**: Global configuration clears when resetModes() is called, maintaining clean state
+
+### Files Created
+- `src/components/GlobalModesField.tsx` - New component for editing global instructions with modern styling
+
+### Files Modified
+- `src/types.ts` - Added GlobalConfig interface and updated ModeContextType to include global configuration
+- `src/context/ModeContext.tsx` - Added global configuration state, update functions, and localStorage persistence
+- `src/pages/TableViewPage.tsx` - Integrated GlobalModesField component below the ModeTable
+- `README.md` - Updated features list to include Global Configuration capability
+
+### Features Implemented
+- ✅ **Global Instructions Field**: Large text area for entering instructions that apply to all modes
+- ✅ **Modern UI**: Glassmorphism styling consistent with application design language
+- ✅ **Edit-in-Place**: Click to edit with save/cancel functionality and keyboard shortcuts
+- ✅ **Auto-Save**: Changes automatically persist to localStorage
+- ✅ **Reset Integration**: Properly clears when application is reset to defaults
+- ✅ **Responsive Design**: Works seamlessly on desktop and mobile devices
+
+### User Experience Improvements
+- **Centralized Configuration**: Single place to manage instructions that apply across all modes
+- **Intuitive Editing**: Familiar click-to-edit pattern with visual feedback
+- **Keyboard Shortcuts**: Power user features for efficient editing (Ctrl+Enter, Esc)
+- **Visual Clarity**: Clear labeling and placeholder text guide users
+- **Seamless Integration**: Fits naturally below the table without disrupting existing workflow
+
+### Testing Status
+- ✅ Manual testing confirmed field displays correctly in Table View
+- ✅ Edit functionality works with proper save/cancel behavior
+- ✅ Keyboard shortcuts (Ctrl+Enter, Esc) function correctly
+- ✅ localStorage persistence verified (saves and loads properly)
+- ✅ Reset functionality clears global configuration as expected
+- ✅ Responsive design verified on different screen sizes
+- ✅ No breaking changes to existing functionality
+
+### Impact
+- **Enhanced Functionality**: Users can now set global instructions that apply to all modes
+- **Better Organization**: Centralized place for common configuration instead of duplicating across modes
+- **Improved Workflow**: Reduces need to repeat common instructions in individual mode prompts
+- **Future-Ready**: Foundation for additional global configuration options
+- **No Performance Impact**: Lightweight implementation with minimal bundle size increase
+
+### Usage
+The "For All Modes" field appears below the modes table in Table View. Users can:
+1. Click on the field to start editing global instructions
+2. Enter common instructions that should apply to all modes
+3. Use Ctrl+Enter to save or Esc to cancel
+4. Instructions are automatically saved and will persist across sessions
+
+---
+
+## [2025-10-05] - Reset Button Icon Update
+
+### Changed
+- **Reset Icon Enhancement**: Updated reset button icon from reset arrows to a true circling back arrow icon for improved semantic clarity and visual consistency
+
+### Technical Details
+- **Icon Change**: Replaced the clockwise circling arrow icon with the arrow-uturn-left icon for better representation of the "go back" or "reset to default" action
+- **SVG Path Update**: Changed from complex reset arrows path to cleaner arrow-uturn-left path: `m9 15-6-6m0 0 6-6m-6 6h12a6 6 0 0 1 0 12h-3`
+- **Visual Semantics**: New icon more clearly communicates the reset/restore nature of the action
+
+### Files Modified
+- `src/pages/TableViewPage.tsx` - Updated reset button SVG icon from reset arrows to arrow-uturn-left
+
+### Impact
+- **Enhanced User Understanding**: Arrow-uturn-left icon provides clearer visual indication of returning to default state
+- **Consistent Semantics**: Icon now better matches the reset/restore functionality
+- **Improved UX**: More intuitive icon that users associate with "back" or "reset" actions
+
+---
+
+## [2025-10-04] - Reset Functionality Enhancement
+
+### Added
+- **Reset Button Enhancement**: Changed reset button from refresh icon to reset arrows icon for better semantic clarity
+- **Orange Destructive Styling**: Updated ResetConfirmationModal colors from red to orange theme to indicate destructive action while maintaining visual consistency
+- **Enhanced Reset UI**: Icon-only reset button with tooltip maintains clean interface design while clearly communicating destructive action
+- **Page Refresh Integration**: Reset action now includes automatic page refresh for complete state restoration
+
+### Changed
+- **Reset Button Icon**: Replaced refresh/rotate icon with trash can icon in Table View for better user understanding of destructive action
+- **Modal Color Scheme**: Updated confirmation modal from red accent theme to orange theme for consistent destructive action indication across the interface
+- **Visual Consistency**: Reset button and confirmation modal now use matching orange color scheme for cohesive user experience
+
+### Technical Details
+- **Icon Update**: Changed SVG path from refresh arrows to reset arrows icon while maintaining same button dimensions and hover states
+- **Color Consistency**: Updated all red-600, red-700, and red-500 classes to orange equivalents (orange-600, orange-700, orange-500)
+- **UI Semantics**: Reset arrows icon provides clearer visual indication of state restoration rather than data deletion
+- **Page Refresh**: Added `window.location.reload()` after reset for complete state restoration
+- **Accessibility**: Maintained tooltip text and ARIA labels while improving visual semantics
+
+### Files Modified
+- `src/pages/TableViewPage.tsx` - Updated reset button icon from refresh to reset arrows and added page refresh after reset
+- `src/components/ResetConfirmationModal.tsx` - Changed modal colors from red theme to orange theme
+
+### Impact
+- **Enhanced User Understanding**: Reset arrows icon clearly communicates state restoration nature of reset action
+- **Visual Consistency**: Orange color scheme provides consistent indication of destructive actions across the interface
+- **Better UX**: Icon-only design maintains clean interface while tooltip provides clear functionality description
+- **Complete State Restoration**: Page refresh ensures all state is properly reset and interface reflects changes immediately
+- **Improved Semantics**: Visual elements now better match the reset/restore nature of the operation
+
+---
+
 ## [2025-10-04] - YAML/JSON Export & Import Enhancement
 
 ### Added
@@ -623,6 +741,60 @@
 - ✅ wrangler deploy command executes without errors
 - ✅ Application deployed and accessible at production URL
 - ✅ All existing functionality preserved during deployment process
+
+## [2025-10-04] - Reset Functionality Implementation
+
+### Added
+- **Reset Modes Feature**: Added comprehensive reset functionality to restore the application to its original default state
+- **Reset Button**: Added reset button in Table View next to the mode counter with refresh icon (no text for clean UI)
+- **Confirmation Modal**: Created `ResetConfirmationModal` component with warning message and confirmation buttons
+- **Reset Function**: Implemented `resetModes()` function in ModeContext that resets modes, families, and localStorage
+- **TypeScript Integration**: Updated `ModeContextType` interface to include `resetModes` function
+
+### Technical Details
+- **Reset Logic**: Resets modes to original modes.json data, families to default+standalone, selectedFamilies to ['default', 'standalone']
+- **Storage Management**: Clears all localStorage keys related to modes, families, and selected families
+- **Confirmation Dialog**: Modal uses warning styling with red accent colors and detailed explanation of what will be reset
+- **UI Integration**: Reset button positioned after "N modes loaded" text in TableViewPage with orange accent color
+- **Accessibility**: Proper ARIA labels, modal roles, and keyboard navigation support
+
+### Files Created
+- `src/components/ResetConfirmationModal.tsx` - Confirmation dialog with warning message and action buttons
+
+### Files Modified
+- `src/types.ts` - Added `resetModes: () => boolean` to `ModeContextType` interface
+- `src/context/ModeContext.tsx` - Added `resetModes()` function and integrated it into context value
+- `src/pages/TableViewPage.tsx` - Added reset button, modal state management, and confirmation handler
+
+### Features Implemented
+- ✅ **Complete Reset**: Resets all modes to default, removes custom modes, restores original families
+- ✅ **Data Safety**: Clears localStorage completely while preserving core functionality
+- ✅ **User Confirmation**: Warning dialog prevents accidental resets with detailed explanation
+- ✅ **Clean UI**: Icon-only reset button maintains clean interface design
+- ✅ **Type Safety**: Full TypeScript integration with proper interfaces
+
+### User Experience Improvements
+- **Intuitive Placement**: Reset button easily accessible next to mode counter in Table View
+- **Clear Warning**: Confirmation modal explains exactly what will be reset and consequences
+- **Visual Feedback**: Orange accent color indicates destructive action, red for confirmation
+- **Non-Disruptive**: Modal overlay doesn't break workflow, easy to cancel
+- **Immediate Effect**: Reset happens instantly with no additional steps required
+
+### Testing Status
+- ✅ Manual testing confirmed reset functionality works correctly
+- ✅ Confirmation modal displays and functions properly
+- ✅ Reset button appears in correct location with proper styling
+- ✅ All custom modes and families removed after reset
+- ✅ Default modes restored correctly from modes.json
+- ✅ localStorage completely cleared of application data
+- ✅ No breaking changes to existing functionality
+
+### Impact
+- **Data Management**: Users can now easily restore application to clean state
+- **Customization Recovery**: Helpful when custom modes become too numerous or problematic
+- **Fresh Start**: Provides clean slate without requiring browser data clearing or reinstallation
+- **User Control**: Gives users full control over their mode collection
+- **Future-Ready**: Foundation for additional reset options (selective reset, backup before reset)
 
 ---
 

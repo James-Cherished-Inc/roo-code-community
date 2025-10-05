@@ -39,6 +39,7 @@ src/
 - [x] Mode validation (creation form validation)
 - [x] Family-based organization system with multi-select dropdown
 - [x] Family filtering in Table View and Smart View
+- [x] Reset functionality to restore default modes and clear customizations with page refresh
 - [ ] Search and filtering (within families)
 - [ ] Keyboard shortcuts
 - [ ] Dark mode support
@@ -53,12 +54,12 @@ src/
 - [ ] Plugin system
 
 ### Phase 4: Production Ready (Future)
+- [x] Deployment configuration (Cloudflare Workers)
 - [ ] Testing suite (Unit, Integration, E2E)
 - [ ] Performance optimization
 - [ ] Accessibility (a11y) compliance
 - [ ] Internationalization (i18n)
 - [ ] Documentation completion
-- [ ] Deployment configuration
 
 ## Key Decisions
 
@@ -81,6 +82,10 @@ src/
 ### Mode Organization
 **Decision**: Family-based organization system
 **Reason**: Provides logical grouping of modes, enables selective filtering and export, improves user experience when dealing with large numbers of modes.
+
+### Reset Functionality
+**Decision**: Reset to original default modes with confirmation dialog, icon-only reset arrows button with orange destructive styling and automatic page refresh
+**Reason**: Users need a way to restore the application to its original state after making customizations, removing the need to manually clear browser data or reinstall the application. Orange color scheme indicates destructive action while reset arrows icon clearly communicates state restoration semantics. Page refresh ensures complete state restoration and immediate visual feedback.
 
 ## Current State
 - ✅ Core functionality implemented and working

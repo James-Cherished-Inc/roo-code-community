@@ -26,6 +26,7 @@ A modern, intuitive web application for managing and visualizing AI assistant mo
 - **Mode Creation**: Create new custom modes with the Create Mode feature
 - **Family Organization**: Organize modes into families for better management
 - **Family Filtering**: Multi-select dropdown to filter modes by family in all views
+- **Global Configuration**: Set common instructions that apply to all modes
 - **Selective Export**: Export only custom modes (excluding Default family)
 - **Responsive Design**: Works perfectly on desktop and mobile
 - **Type Safety**: Full TypeScript support for reliability
