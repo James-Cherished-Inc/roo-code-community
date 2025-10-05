@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useModes } from '../context/ModeContext';
 import type { Mode } from '../types';
+import EmojiSelector from './EmojiSelector';
 
 /**
  * Props for the CreateModeModal component
@@ -22,6 +23,7 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
     usage: '',
     prompt: ''
   });
+  const [selectedEmoji, setSelectedEmoji] = useState<string>('');
   const [errors, setErrors] = useState<Partial<Record<keyof Mode, string>>>({});
 
   /**
@@ -36,6 +38,7 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
         usage: '',
         prompt: ''
       });
+      setSelectedEmoji('');
       setErrors({});
     }
   }, [isOpen]);
@@ -101,7 +104,7 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
     // Create new mode with all required fields
     const newMode: Mode = {
       slug: formData.slug!.trim(),
-      name: formData.name!.trim(),
+      name: `${selectedEmoji} ${formData.name!.trim()}`.trim(),
       description: formData.description!.trim(),
       usage: formData.usage!.trim(),
       prompt: formData.prompt!.trim(),
@@ -130,6 +133,12 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
           </h3>
 
           <div className="space-y-4">
+            {/* Emoji Selector */}
+            <EmojiSelector
+              selectedEmoji={selectedEmoji}
+              onEmojiSelect={setSelectedEmoji}
+            />
+
             {/* Slug Field */}
             <div>
               <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
