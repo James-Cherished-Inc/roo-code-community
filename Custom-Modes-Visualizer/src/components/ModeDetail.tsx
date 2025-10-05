@@ -78,9 +78,17 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
       const stored = sessionStorage.getItem(storageKey);
       if (stored) {
         try {
-          savedDimensions[field] = JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          // Validate parsed data structure
+          if (parsed && typeof parsed.width === 'number' && typeof parsed.height === 'number') {
+            savedDimensions[field] = parsed;
+          } else {
+            console.warn(`Invalid dimension data for ${field}, removing corrupted data`);
+            sessionStorage.removeItem(storageKey);
+          }
         } catch (e) {
-          console.warn(`Failed to parse stored dimensions for ${field}:`, e);
+          console.warn(`Failed to parse stored dimensions for ${field}, cleaning up:`, e);
+          sessionStorage.removeItem(storageKey);
         }
       }
     });
@@ -107,12 +115,16 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
     if (!textarea || !editingField) return;
 
     const resizeObserver = new ResizeObserver(() => {
-      handleTextareaResize(editingField as string);
+      if (editingField) {
+        handleTextareaResize(editingField);
+      }
     });
 
     resizeObserver.observe(textarea);
 
-    return () => resizeObserver.disconnect();
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, [editingField]);
 
   // Defensive check for undefined mode

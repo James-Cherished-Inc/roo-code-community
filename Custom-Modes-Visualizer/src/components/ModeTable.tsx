@@ -63,20 +63,6 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
     setTextareaDimensions(savedDimensions);
   }, [modes]);
 
-  // Debug function to clear all stored dimensions (temporary)
-  const clearStoredDimensions = () => {
-    modes.forEach(mode => {
-      const fields = ['prompt', 'description', 'usage'];
-      fields.forEach(field => {
-        const storageKey = getStorageKey(mode.slug, field);
-        sessionStorage.removeItem(storageKey);
-      });
-    });
-    // Force re-render by clearing state
-    setTextareaDimensions({});
-    console.log('All stored dimensions cleared');
-  };
-
   // Clear stored dimensions for all modes
   const clearAllStoredDimensions = () => {
     modes.forEach(mode => {
@@ -105,7 +91,7 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [modes]);
+  }, []); // Empty dependency array - only run once on mount
 
   // Handle textarea resize and save dimensions
   const handleTextareaResize = (slug: string, field: string) => {
@@ -126,12 +112,16 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
     if (!textarea || !editingCell) return;
 
     const resizeObserver = new ResizeObserver(() => {
-      handleTextareaResize(editingCell.slug, editingCell.field);
+      if (editingCell) {
+        handleTextareaResize(editingCell.slug, editingCell.field);
+      }
     });
 
     resizeObserver.observe(textarea);
 
-    return () => resizeObserver.disconnect();
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, [editingCell]);
 
   /**

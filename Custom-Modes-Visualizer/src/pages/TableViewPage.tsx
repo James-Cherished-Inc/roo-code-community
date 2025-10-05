@@ -56,15 +56,16 @@ const TableViewPage: React.FC = () => {
     * Handle reset confirmation
     */
    const handleResetConfirm = () => {
-     // Clear stored table dimensions before reset
-     const modes = filteredModes.length > 0 ? filteredModes : [];
-     modes.forEach(mode => {
-       const fields = ['prompt', 'description', 'usage'];
-       fields.forEach(field => {
-         const storageKey = `table-${mode.slug}-${field}-dimensions`;
-         sessionStorage.removeItem(storageKey);
+     // Clear stored table dimensions for all currently filtered modes
+     if (filteredModes.length > 0) {
+       filteredModes.forEach(mode => {
+         const fields = ['prompt', 'description', 'usage'];
+         fields.forEach(field => {
+           const storageKey = `table-${mode.slug}-${field}-dimensions`;
+           sessionStorage.removeItem(storageKey);
+         });
        });
-     });
+     }
 
      resetModes();
      // Perform hard refresh after reset
