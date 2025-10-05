@@ -3,6 +3,15 @@ import { useModes } from '../context/ModeContext';
 import type { Mode, FormatType } from '../types';
 
 /**
+ * Warning icon component for tooltips
+ */
+const WarningIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+  </svg>
+);
+
+/**
  * Props for the ExportModal component
  */
 interface ExportModalProps {
@@ -108,7 +117,18 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, availableMod
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Export Modes</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-gray-900">Export Modes</h2>
+            <div className="relative group">
+              <WarningIcon className="w-5 h-5 text-amber-500 hover:text-amber-600 cursor-help transition-colors duration-200" />
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-lg">
+                "🌐 All-Modes Custom Instructions" field is not exported
+                <br />
+                So exported files can work out-of-the-box with Roo Code.
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
+              </div>
+            </div>
+          </div>
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600"

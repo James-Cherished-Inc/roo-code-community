@@ -22,6 +22,15 @@ const DeleteIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" })
 );
 
 /**
+ * Simple copy icon component
+ */
+const CopyIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+  </svg>
+);
+
+/**
  * Delete confirmation modal component
  */
 const DeleteConfirmationModal: React.FC<{
@@ -61,6 +70,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
   const [editingField, setEditingField] = useState<keyof Mode | null>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [textareaDimensions, setTextareaDimensions] = useState<{ [field: string]: { width: number; height: number } | null }>({});
+  const [copyMessage, setCopyMessage] = useState(false);
 
   // Ref for the currently editing textarea
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -182,6 +192,20 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
   };
 
   /**
+   * Handle copying content to clipboard
+   */
+  const handleCopyToClipboard = async (content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      // Show copy success message
+      setCopyMessage(true);
+      setTimeout(() => setCopyMessage(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
+  /**
    * Render editable field content
    */
   const renderField = (field: keyof Mode, label: string, isMultiline = false) => {
@@ -238,18 +262,35 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
     }
 
     return (
-      <div
-        className="cursor-pointer inline-block w-full"
-        onDoubleClick={() => startEdit(field)}
-        title={`Double-click to edit ${label.toLowerCase()}`}
-      >
-        {field === 'prompt' ? (
-          <div className="text-slate-700 whitespace-pre-line leading-relaxed" title={value}>
-            {value}
-          </div>
-        ) : (
-          <span className="text-slate-700">{value}</span>
-        )}
+      <div className="relative">
+        <div
+          className="cursor-pointer inline-block w-full"
+          onDoubleClick={() => startEdit(field)}
+          title={`Double-click to edit ${label.toLowerCase()}`}
+        >
+          {field === 'prompt' ? (
+            <>
+              {/* Copy button for prompt field only */}
+              {value && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCopyToClipboard(value);
+                  }}
+                  className="absolute top-0 right-0 p-1 text-gray-400 hover:text-indigo-600 transition-colors duration-200 rounded-sm hover:bg-indigo-50 z-10"
+                  title="Copy prompt to clipboard"
+                >
+                  <CopyIcon className="w-4 h-4" />
+                </button>
+              )}
+              <div className="text-slate-700 whitespace-pre-line leading-relaxed pr-8" title={value}>
+                {value}
+              </div>
+            </>
+          ) : (
+            <span className="text-slate-700">{value}</span>
+          )}
+        </div>
       </div>
     );
   };
@@ -347,6 +388,13 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
           💡 Double-click on any field to edit it. Press Enter to save or Escape to cancel.
         </p>
       </div>
+
+      {/* Copy success message */}
+      {copyMessage && (
+        <div className="mt-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded-md text-sm shadow-lg animate-fade-in-up">
+          Prompt copied to clipboard! ✅
+        </div>
+      )}
 
       {/* Delete confirmation modal */}
       {showDeleteConfirmation && (
