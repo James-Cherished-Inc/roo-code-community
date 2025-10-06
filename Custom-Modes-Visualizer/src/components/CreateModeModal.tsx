@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useModes } from '../context/ModeContext';
-import type { Mode } from '../types';
+import type { Mode, ModeFamily } from '../types';
 import EmojiSelector from './EmojiSelector';
+import FamilySelectionModal from './FamilySelectionModal';
 
 /**
  * Props for the CreateModeModal component
@@ -24,6 +25,8 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
     prompt: ''
   });
   const [selectedEmoji, setSelectedEmoji] = useState<string>('');
+  const [selectedFamily, setSelectedFamily] = useState<ModeFamily | null>(null);
+  const [showFamilySelectionModal, setShowFamilySelectionModal] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof Mode, string>>>({});
 
   /**
@@ -39,6 +42,7 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
         prompt: ''
       });
       setSelectedEmoji('');
+      setSelectedFamily(null);
       setErrors({});
     }
   }, [isOpen]);
@@ -108,7 +112,7 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
       description: formData.description!.trim(),
       usage: formData.usage!.trim(),
       prompt: formData.prompt!.trim(),
-      family: 'standalone' // Assign new modes to standalone family by default
+      family: selectedFamily?.id || undefined // Use selected family or undefined for no family
     };
 
     addMode(newMode);
@@ -241,6 +245,52 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
                 <p className="mt-1 text-sm text-red-600">{errors.prompt}</p>
               )}
             </div>
+
+            {/* Family Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Family
+              </label>
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setShowFamilySelectionModal(true)}
+                  className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                >
+                  {selectedFamily ? (
+                    <>
+                      {selectedFamily.color && (
+                        <div
+                          className="w-3 h-3 rounded-full border border-gray-300"
+                          style={{ backgroundColor: selectedFamily.color }}
+                        />
+                      )}
+                      <span>{selectedFamily.name}</span>
+                    </>
+                  ) : (
+                    <span className="text-gray-500">No family selected</span>
+                  )}
+                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {selectedFamily && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFamily(null)}
+                    className="text-gray-400 hover:text-gray-600 p-1"
+                    title="Clear family selection"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Optionally assign this mode to a family for organization
+              </p>
+            </div>
           </div>
 
           {/* Action Buttons */}
@@ -261,6 +311,17 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
           </div>
         </div>
       </div>
+
+      {/* Family Selection Modal */}
+      <FamilySelectionModal
+        isOpen={showFamilySelectionModal}
+        onClose={() => setShowFamilySelectionModal(false)}
+        onFamilySelect={(family) => {
+          setSelectedFamily(family);
+          setShowFamilySelectionModal(false);
+        }}
+        excludeFamilies={['default']} // Don't allow selecting the default family for new modes
+      />
     </div>
   );
 };

@@ -2,6 +2,10 @@
 
 /* Modern global styles */
 @layer base {
+  /* Prevent textarea infinite growth in Smart View */
+  .textarea-max-height {
+    max-height: 600px;
+  }
   body {
     @apply font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;

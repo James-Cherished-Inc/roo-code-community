@@ -354,6 +354,25 @@ const RedundancyHighlighter: React.FC<RedundancyHighlighterProps> = ({
             </div>
           </div>
         )}
+
+        {/* Interactive Tips */}
+        {showRedundancies && analysisResult.analysis.size > 0 && (
+          <div className="mt-3 pt-3 border-t border-gray-200">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200 shadow-sm">
+              <div className="text-sm text-blue-800">
+                <div className="mb-2">
+                  <strong>💡 Interactive Tips:</strong>
+                </div>
+                <div className="space-y-1 text-xs">
+                  <div>• Click any highlighted word to show only that word</div>
+                  <div>• Right-click for context menu (Exclude or Show Only)</div>
+                  <div>• Click outside or press Escape to reset filters</div>
+                  <div>• Hover to see frequency details</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Prompts Display */}
@@ -381,17 +400,6 @@ const RedundancyHighlighter: React.FC<RedundancyHighlighterProps> = ({
               <div><strong>Light yellow:</strong> Words appearing in 2-3 modes</div>
               <div><strong>Medium yellow:</strong> Words appearing in 4+ modes</div>
               <div><strong>Orange:</strong> Words appearing in most/all modes</div>
-            </div>
-            <div className="mt-3 pt-2 border-t border-blue-200">
-              <div className="mb-2">
-                <strong>💡 Interactive Tips:</strong>
-              </div>
-              <div className="space-y-1 text-xs">
-                <div>• Click any highlighted word to show only that word</div>
-                <div>• Right-click for context menu (Exclude or Show Only)</div>
-                <div>• Click outside or press Escape to reset filters</div>
-                <div>• Hover to see frequency details</div>
-              </div>
             </div>
           </div>
         </div>

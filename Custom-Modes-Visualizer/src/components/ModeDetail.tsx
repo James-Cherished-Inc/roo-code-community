@@ -79,38 +79,46 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
   const getStorageKey = (field: string) => `mode-${mode.slug}-${field}-dimensions`;
 
   // Load saved dimensions from sessionStorage
-  useEffect(() => {
-    const savedDimensions: { [field: string]: { width: number; height: number } } = {};
-    const fields = ['prompt', 'description', 'usage'];
+   useEffect(() => {
+     const savedDimensions: { [field: string]: { width: number; height: number } } = {};
+     const fields = ['prompt', 'description', 'usage'];
 
-    fields.forEach(field => {
-      const storageKey = getStorageKey(field);
-      const stored = sessionStorage.getItem(storageKey);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          // Validate parsed data structure
-          if (parsed && typeof parsed.width === 'number' && typeof parsed.height === 'number') {
-            savedDimensions[field] = parsed;
-          } else {
-            console.warn(`Invalid dimension data for ${field}, removing corrupted data`);
-            sessionStorage.removeItem(storageKey);
-          }
-        } catch (e) {
-          console.warn(`Failed to parse stored dimensions for ${field}, cleaning up:`, e);
-          sessionStorage.removeItem(storageKey);
-        }
-      }
-    });
+     fields.forEach(field => {
+       const storageKey = getStorageKey(field);
+       const stored = sessionStorage.getItem(storageKey);
+       if (stored) {
+         try {
+           const parsed = JSON.parse(stored);
+           // Validate parsed data structure and ensure reasonable bounds
+           if (parsed && typeof parsed.width === 'number' && typeof parsed.height === 'number') {
+             // Ensure reasonable dimensions with upper bounds for maximum editing width
+             savedDimensions[field] = {
+               width: Math.max(Math.min(parsed.width, 1400), 1000), // Between 1000px and 1400px width for maximum editing width
+               height: Math.max(Math.min(parsed.height, 600), 200) // Between 200px and 600px height
+             };
+           } else {
+             console.warn(`Invalid dimension data for ${field}, removing corrupted data`);
+             sessionStorage.removeItem(storageKey);
+           }
+         } catch (e) {
+           console.warn(`Failed to parse stored dimensions for ${field}, cleaning up:`, e);
+           sessionStorage.removeItem(storageKey);
+         }
+       }
+     });
 
-    setTextareaDimensions(savedDimensions);
-  }, [mode.slug]);
+     setTextareaDimensions(savedDimensions);
+   }, [mode.slug]);
 
   // Handle textarea resize and save dimensions
   const handleTextareaResize = (field: string) => {
     if (textareaRef.current) {
       const rect = textareaRef.current.getBoundingClientRect();
-      const dimensions = { width: rect.width, height: rect.height };
+      // Use the actual dimensions from the textarea, with reasonable bounds for maximum editing width
+      const dimensions = {
+        width: Math.max(rect.width, 1000), // Minimum 1000px width for maximum editing width
+        height: Math.min(Math.max(rect.height, 200), 600) // Between 200px and 600px height
+      };
       setTextareaDimensions(prev => ({ ...prev, [field]: dimensions }));
 
       // Save to sessionStorage
@@ -215,12 +223,19 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
     if (isEditing) {
       if (isMultiline) {
         const savedDimensions = textareaDimensions[field];
-        const defaultRows = field === 'prompt' ? 8 : 3;
+        // Calculate default rows based on content length for prompts - more generous sizing
+        const defaultRows = field === 'prompt'
+          ? Math.max(10, Math.min(25, Math.ceil(value.length / 60))) // At least 10 rows, up to 25 rows based on content
+          : 4;
         const style = savedDimensions ? {
-          width: `${savedDimensions.width}px`,
-          height: `${savedDimensions.height}px`,
-          minHeight: '60px' // Minimum height to prevent too small textarea
-        } : {};
+          width: `${Math.max(savedDimensions.width, 1000)}px`, // Use saved width directly, minimum 1000px for maximum editing width
+          height: `${Math.max(savedDimensions.height, 200)}px`, // Use saved height directly, minimum 200px
+          minHeight: '200px', // Reasonable minimum height
+          maxWidth: 'calc(100vw - 14rem)' // Leave space for sidebar and some margin
+        } : {
+          maxWidth: 'calc(100vw - 14rem)', // Leave space for sidebar and some margin
+          minWidth: '1000px' // Minimum width for maximum editing width
+        };
 
         return (
           <textarea
@@ -234,7 +249,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
                 cancelEdit();
               }
             }}
-            className="w-full px-3 py-2 border-2 border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/90 backdrop-blur-sm shadow-sm transition-all duration-200 resize"
+            className="w-full px-3 py-3 border-2 border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/90 backdrop-blur-sm shadow-sm transition-all duration-200 resize whitespace-pre-line leading-relaxed pr-8 textarea-max-height"
             rows={savedDimensions ? undefined : defaultRows}
             style={style}
             autoFocus
@@ -262,9 +277,9 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
     }
 
     return (
-      <div className="relative">
+      <div className="relative w-full">
         <div
-          className="cursor-pointer inline-block w-full"
+          className="cursor-pointer w-full"
           onDoubleClick={() => startEdit(field)}
           title={`Double-click to edit ${label.toLowerCase()}`}
         >
@@ -283,7 +298,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
                   <CopyIcon className="w-4 h-4" />
                 </button>
               )}
-              <div className="text-slate-700 whitespace-pre-line leading-relaxed pr-8" title={value}>
+              <div className="text-slate-700 whitespace-pre-line leading-relaxed pr-8 w-full break-words" title={value}>
                 {value}
               </div>
             </>
@@ -333,11 +348,11 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <div className="bg-white shadow rounded-lg px-8 py-6 h-full w-full max-w-none">
       {/* Header with editable name and slug */}
       <div className="mb-6 pb-4 border-b border-gray-200 relative">
         <div className="flex justify-between items-start">
-          <div className="space-y-2 flex-1">
+          <div className="space-y-2 flex-1 min-w-0">
             <div className="text-2xl font-bold text-gray-900">
               {renderSimpleField('name')}
             </div>
@@ -348,7 +363,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
           {/* Delete mode button */}
           <button
             onClick={handleDeleteMode}
-            className="ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors duration-200"
+            className="ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors duration-200 flex-shrink-0"
             title="Delete mode"
           >
             <DeleteIcon className="w-5 h-5" />
@@ -356,9 +371,9 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 w-full max-w-none">
         {/* Description Field */}
-        <div>
+        <div className="w-full">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Description
           </label>
@@ -366,7 +381,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
         </div>
 
         {/* Usage Field */}
-        <div>
+        <div className="w-full">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Usage Guidelines
           </label>
@@ -374,7 +389,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
         </div>
 
         {/* Prompt Field */}
-        <div>
+        <div className="w-full">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             System Prompt
           </label>
