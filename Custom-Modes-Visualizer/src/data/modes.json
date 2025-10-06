@@ -40,7 +40,7 @@
     "family": "default"
   },
   {
-    "slug": "architect",
+    "slug": "cherished-architect",
     "name": "🏗️ Architect",
     "description": "Plans system architecture and technical designs",
     "usage": "Use for initial planning of complex tasks and systems",
@@ -48,7 +48,7 @@
     "family": "cherished"
   },
   {
-    "slug": "code",
+    "slug": "cherished-code",
     "name": "💻 Code",
     "description": "Advanced software engineering writing and editing code",
     "usage": "Use for implementing features and fixing bugs",
@@ -56,7 +56,7 @@
     "family": "cherished"
   },
   {
-    "slug": "debug",
+    "slug": "cherished-debug",
     "name": "🐛 Debug",
     "description": "Troubleshoots issues, Diagnoses, Test",
     "usage": "Use when investigating issues and errors and to write automated tests",
@@ -64,7 +64,7 @@
     "family": "cherished"
   },
   {
-    "slug": "ask",
+    "slug": "cherished-ask",
     "name": "❓ Mentor",
     "description": "Provides explanations and answers to questions related with leading software engineering projects or complex codebases. Engages in helpful chats and mentorship.",
     "usage": "Use to ask or chat about choices, your codebase or to understand concepts or technical know-how",
@@ -72,7 +72,7 @@
     "family": "cherished"
   },
   {
-    "slug": "orchestrator",
+    "slug": "cherished-orchestrator",
     "name": "Boomerang",
     "description": "Coordinates complex multi-step projects",
     "usage": "Use for breaking down large tasks into subtasks",
@@ -80,7 +80,7 @@
     "family": "cherished"
   },
   {
-    "slug": "technical-writer",
+    "slug": "cherished-technical-writer",
     "name": "Technical Writer",
     "description": "Software Engineering Technical Writer ",
     "usage": "Use to maintain the project documentation or update the changelog. Use after major code changes or direction shifts to update documentation.",
@@ -88,7 +88,7 @@
     "family": "cherished"
   },
   {
-    "slug": "simple-code",
+    "slug": "cherished-simple-code",
     "name": "⚡ Simple Coder",
     "description": "An efficient coder for light edits with a minimal prompt",
     "usage": "Use for minor edits and very quick or straightforward tasks",
