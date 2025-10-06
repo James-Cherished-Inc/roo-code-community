@@ -341,6 +341,16 @@ const RedundancyHighlighter: React.FC<RedundancyHighlighterProps> = ({
                   Most frequent: {analysisResult.stats.mostFrequent.slice(0, 3).map(w => `"${w.word}" (${w.frequency})`).join(', ')}
                 </div>
               )}
+              {showOnlyWord && analysisResult.analysis.has(showOnlyWord) && (() => {
+                const occurrence = analysisResult.analysis.get(showOnlyWord)!;
+                const modeNameMap = new Map(prompts.map(p => [p.id, p.name || p.id]));
+                const modeNames = Array.from(occurrence.modes).map(id => modeNameMap.get(id) || id).join(', ');
+                return (
+                  <div>
+                    <strong>"{showOnlyWord}"</strong> appears in: {modeNames}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         )}
