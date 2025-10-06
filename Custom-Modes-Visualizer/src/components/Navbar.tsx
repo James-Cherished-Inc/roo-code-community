@@ -57,7 +57,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange }) => {
         {/* Version indicator */}
         <div className="flex-shrink-0">
           <span className="px-3 py-1 text-xs bg-slate-100 text-slate-600 rounded-full font-medium">
-            v0.1.0
+            v2.4.0
           </span>
         </div>
       </div>
