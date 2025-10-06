@@ -386,7 +386,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
       {/* Edit Instructions */}
       <div className="mt-6 p-3 bg-blue-50 rounded-md">
         <p className="text-xs text-blue-600">
-          💡 Double-click on any field to edit it. Press Enter to save or Escape to cancel.
+          💡 Double-click on any field to edit it. Press Ctrl+Enter to save or Escape to cancel.
         </p>
       </div>
 
