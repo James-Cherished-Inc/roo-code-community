@@ -5,6 +5,7 @@ import type { Mode, ModeContextType, ModeFamily, FormatType, GlobalConfig } from
 import modesData from '../data/modes.json';
 import defaultFamilyData from '../data/default-family.json';
 import standaloneFamilyData from '../data/standalone-family.json';
+import cherishedFamilyData from '../data/cherished-family.json';
 
 // Import conversion utilities
 import {
@@ -34,7 +35,7 @@ const ModeContext = createContext<ModeContextType | undefined>(undefined);
 export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
    // Initialize state with data from JSON file
     const [modes, setModes] = useState<Mode[]>(modesData);
-    const [families, setFamilies] = useState<ModeFamily[]>([defaultFamilyData, standaloneFamilyData]);
+    const [families, setFamilies] = useState<ModeFamily[]>([defaultFamilyData, standaloneFamilyData, cherishedFamilyData]);
     const [selectedFamilies, setSelectedFamilies] = useState<string[]>(['default', 'standalone']);
     const [globalConfig, setGlobalConfig] = useState<GlobalConfig>({ forAllModes: '' });
 
@@ -370,8 +371,8 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Reset modes to initial data from JSON file
       setModes(modesData);
 
-      // Reset families to default + standalone
-      setFamilies([defaultFamilyData, standaloneFamilyData]);
+      // Reset families to default + standalone + cherished
+      setFamilies([defaultFamilyData, standaloneFamilyData, cherishedFamilyData]);
 
       // Reset selected families to ['default', 'standalone']
       setSelectedFamilies(['default', 'standalone']);

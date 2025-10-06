@@ -86,7 +86,7 @@ const SmartViewPage: React.FC = () => {
     return (
       <div className="flex w-screen fixed inset-x-0 top-20 bottom-0" style={{ margin: 0, padding: 0, height: 'calc(100vh - 5rem)' }}>
         {/* Left Sidebar - Mode Selection */}
-        <div className="w-40 bg-gray-50 border-r border-gray-200 flex flex-col">
+        <div className="w-48 bg-gray-50 border-r border-gray-200 flex flex-col">
           {/* Sidebar Header */}
           <div className="p-4 border-b border-gray-200">
             <h1 className="text-lg font-bold text-gray-900 mb-2">🎯 Smart View</h1>
@@ -94,7 +94,7 @@ const SmartViewPage: React.FC = () => {
               Select a mode to view and edit
             </p>
             <div className="mt-2 text-xs text-gray-500">
-              0 of 0 modes
+              0 modes loaded
             </div>
             <div className="mt-2">
               <FamilySelector />
@@ -146,7 +146,7 @@ const SmartViewPage: React.FC = () => {
   return (
     <div className="flex w-screen fixed inset-x-0 top-20 bottom-0" style={{ margin: 0, padding: 0, height: 'calc(100vh - 5rem)' }}>
       {/* Left Sidebar - Mode Selection */}
-      <div className="w-40 bg-gray-50 border-r border-gray-200 flex flex-col">
+      <div className="w-48 bg-gray-50 border-r border-gray-200 flex flex-col">
         {/* Sidebar Header */}
          <div className="p-4 border-b border-gray-200">
            <h1 className="text-lg font-bold text-gray-900 mb-2">🎯 Smart View</h1>
@@ -176,7 +176,7 @@ const SmartViewPage: React.FC = () => {
              </button>
            </div>
            <div className="mt-2 text-xs text-gray-500">
-             {selectedModeIndex + 1} of {filteredModes.length} modes
+             {filteredModes.length} modes loaded
            </div>
            <div className="mt-2">
              <FamilySelector />
