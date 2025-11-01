@@ -53,16 +53,18 @@ export type FormatType = 'json' | 'yaml';
  * Represents a family of modes for organization
  */
 export type ModeFamily = {
-  /** Unique identifier for the family */
-  id: string;
-  /** Display name for the family */
-  name: string;
-  /** Brief description of the family */
-  description: string;
-  /** Color theme for the family (hex color) */
-  color?: string;
-  /** Whether this is a built-in default family */
-  isDefault?: boolean;
+   /** Unique identifier for the family */
+   id: string;
+   /** Display name for the family */
+   name: string;
+   /** Brief description of the family */
+   description: string;
+   /** Color theme for the family (hex color) */
+   color?: string;
+   /** Whether this is a built-in default family */
+   isDefault?: boolean;
+   /** Array of modes in export format (for newer family files) */
+   customModes?: ExportMode[];
 };
 
 /**

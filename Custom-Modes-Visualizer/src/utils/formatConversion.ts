@@ -75,14 +75,14 @@ export function modeToExportMode(mode: Mode): ExportMode {
 /**
  * Converts an ExportMode to Mode format
  */
-export function exportModeToMode(exportMode: ExportMode): Mode {
+export function exportModeToMode(exportMode: ExportMode, family: string = "standalone"): Mode {
   return {
     slug: exportMode.slug,
     name: exportMode.name,
     description: exportMode.description,
     usage: exportMode.whenToUse,     // whenToUse → usage
     prompt: exportMode.roleDefinition, // roleDefinition → prompt
-    family: "standalone"             // Default family for imports
+    family: family                   // Use provided family or default to standalone
   };
 }
 
@@ -155,6 +155,20 @@ export function validateExportFormat(data: any): data is ExportFormat {
   }
 
   return true;
+}
+
+/**
+ * Loads modes from a family file by converting export modes to internal modes
+ */
+export function loadModesFromFamily(family: any): Mode[] {
+  // Handle backward compatibility - if family doesn't have customModes, return empty array
+  if (!family.customModes || !Array.isArray(family.customModes)) {
+    return [];
+  }
+
+  return family.customModes.map((exportMode: ExportMode) =>
+    exportModeToMode(exportMode, family.id)
+  );
 }
 
 /**

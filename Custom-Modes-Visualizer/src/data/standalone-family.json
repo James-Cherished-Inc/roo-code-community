@@ -3,5 +3,6 @@
   "name": "Standalone",
   "description": "Individual modes not belonging to any specific family",
   "color": "#6B7280",
-  "isDefault": false
+  "isDefault": false,
+  "customModes": []
 }

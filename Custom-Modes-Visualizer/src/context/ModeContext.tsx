@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, type ReactNode }
 import type { Mode, ModeContextType, ModeFamily, FormatType, GlobalConfig } from '../types';
 
 // Load initial data from JSON file
-import modesData from '../data/modes.json';
 import defaultFamilyData from '../data/default-family.json';
 import standaloneFamilyData from '../data/standalone-family.json';
 import cherishedFamilyData from '../data/cherished-family.json';
@@ -11,6 +10,7 @@ import cherishedFamilyData from '../data/cherished-family.json';
 import {
   modeToExportMode,
   exportModeToMode,
+  loadModesFromFamily,
   detectFileFormat,
   parseFileContent,
   validateExportFormat,
@@ -33,11 +33,24 @@ const ModeContext = createContext<ModeContextType | undefined>(undefined);
  * Provider component that manages the mode state
  */
 export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-   // Initialize state with data from JSON file
-    const [modes, setModes] = useState<Mode[]>(modesData);
-    const [families, setFamilies] = useState<ModeFamily[]>([defaultFamilyData, standaloneFamilyData, cherishedFamilyData]);
-    const [selectedFamilies, setSelectedFamilies] = useState<string[]>(['default', 'standalone']);
-    const [globalConfig, setGlobalConfig] = useState<GlobalConfig>({ forAllModes: '' });
+    // Load modes from family files
+    const loadModesFromFamilies = () => {
+      const allModes: Mode[] = [];
+      const familyObjects = [defaultFamilyData, standaloneFamilyData, cherishedFamilyData];
+
+      familyObjects.forEach(family => {
+        const familyModes = loadModesFromFamily(family);
+        allModes.push(...familyModes);
+      });
+
+      return allModes;
+    };
+
+    // Initialize state with data from family files
+     const [modes, setModes] = useState<Mode[]>(loadModesFromFamilies);
+     const [families, setFamilies] = useState<ModeFamily[]>([defaultFamilyData, standaloneFamilyData, cherishedFamilyData]);
+     const [selectedFamilies, setSelectedFamilies] = useState<string[]>(['default', 'standalone']);
+     const [globalConfig, setGlobalConfig] = useState<GlobalConfig>({ forAllModes: '' });
 
   /**
    * Update a specific mode by slug
@@ -278,7 +291,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
        }
 
        // Convert to internal format
-       const modes = parsedData.customModes.map(exportModeToMode);
+       const modes = parsedData.customModes.map(mode => exportModeToMode(mode));
 
        // Import using existing logic with strategy
        return importModesFromJson(modes, strategy, familyName);
@@ -368,8 +381,8 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    */
   const resetModes = () => {
     try {
-      // Reset modes to initial data from JSON file
-      setModes(modesData);
+      // Reset modes to initial data from family files
+      setModes(loadModesFromFamilies());
 
       // Reset families to default + standalone + cherished
       setFamilies([defaultFamilyData, standaloneFamilyData, cherishedFamilyData]);

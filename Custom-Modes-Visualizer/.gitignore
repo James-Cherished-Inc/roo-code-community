@@ -1,3 +1,7 @@
+private/
+.roo/
+.roomodes
+
 # Logs
 logs
 *.log
