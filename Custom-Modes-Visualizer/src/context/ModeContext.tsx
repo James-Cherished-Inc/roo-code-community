@@ -255,7 +255,11 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
        // Download file
        const mimeType = format === 'json' ? 'application/json' : 'application/x-yaml';
        const extension = format === 'json' ? '.json' : '.yaml';
-       const filename = `roo-modes-export${extension}`;
+
+       // Get unique families from selected modes and create filename with them
+       const uniqueFamilies = [...new Set(selectedModes.map(mode => mode.family))].sort();
+       const familySuffix = uniqueFamilies.length > 0 ? `-${uniqueFamilies.join('-')}` : '';
+       const filename = `roo-modes${familySuffix}${extension}`;
 
        downloadFile(content, filename, mimeType);
        return true;
