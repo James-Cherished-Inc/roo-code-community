@@ -1,5 +1,61 @@
 # Changelog - Roo Modes Visualizer
 
+## [2025-11-01] - Family-Based Architecture Implementation
+
+### Added
+- **Family-Based Data Structure**: Refactored the application to use family-based architecture where each family file contains both family definition and its modes in export format
+- **Eliminated modes.json**: Removed the separate modes.json file in favor of family-contained mode definitions
+- **Family File Updates**: Updated all family files (default-family.json, standalone-family.json, cherished-family.json) to include customModes arrays with proper export format
+- **Dynamic Mode Loading**: Implemented `loadModesFromFamily()` function to load modes from family files with export mode conversion
+- **Backward Compatibility**: Added support for families without customModes property for future extensibility
+
+### Technical Details
+- **Data Architecture Change**: Converted from centralized modes.json to decentralized family-based storage
+- **Export Format Integration**: Family files now include customModes arrays using the same export format as YAML/JSON imports
+- **Type System Update**: Extended ModeFamily interface to include optional customModes property
+- **Loading Logic**: Updated ModeContext to load modes from all family files on application startup
+- **Conversion Utilities**: Enhanced formatConversion.ts with loadModesFromFamily function and improved exportModeToMode function
+
+### Files Created/Modified
+- `src/data/default-family.json` - Added customModes array with default modes (architect, code, debug, ask, orchestrator) in export format
+- `src/data/standalone-family.json` - Added empty customModes array for consistency
+- `src/data/cherished-family.json` - Added required family metadata (id, name, description) and preserved existing customModes
+- `src/context/ModeContext.tsx` - Removed modesData import, added loadModesFromFamilies function, updated initialization logic
+- `src/utils/formatConversion.ts` - Added loadModesFromFamily function, updated exportModeToMode to accept family parameter
+- `src/types.ts` - Extended ModeFamily interface with optional customModes property
+- `README.md` - Updated project structure documentation to reflect new family-based organization
+- `modes.json` - **Deleted** (no longer needed in new architecture)
+
+### Features Implemented
+- ✅ **Family-Contained Modes**: Each family file now contains both metadata and modes in export format
+- ✅ **Clean Architecture**: Eliminated redundant modes.json file, creating cleaner data organization
+- ✅ **Dynamic Loading**: Application automatically loads all modes from all family files on startup
+- ✅ **Export Format Consistency**: Family modes use the same export format as YAML/JSON imports/exports
+- ✅ **Backward Compatibility**: Supports families without customModes for future extensions
+
+### User Experience Improvements
+- **Consistent Data Flow**: User edits are stored in localStorage, family files provide defaults
+- **Better Organization**: Modes are logically organized within their respective families
+- **Future-Ready**: Easy to add new families or extend existing ones with additional modes
+- **Import/Export Integration**: Seamless compatibility between family-based storage and YAML/JSON format
+
+### Testing Status
+- ✅ Development server runs without errors after implementation
+- ✅ All modes load correctly from family files on application startup
+- ✅ User edits persist in localStorage and override family defaults
+- ✅ Export/import functionality works with new architecture
+- ✅ Reset functionality properly restores family defaults
+- ✅ No breaking changes to existing user interface or functionality
+
+### Impact
+- **Cleaner Architecture**: Removed dependency on separate modes.json, creating self-contained family files
+- **Better Maintainability**: Each family manages its own modes, reducing cross-file dependencies
+- **Enhanced Extensibility**: Easy to add new families or modify existing ones without affecting others
+- **Improved Data Flow**: Clear separation between static defaults (family files) and user data (localStorage)
+- **Future-Proof**: Foundation for advanced family management features and multi-environment support
+
+---
+
 ## [2025-10-06] - Family Selection & Creation in Mode Creation
 
 ### Added

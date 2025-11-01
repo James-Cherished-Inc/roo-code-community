@@ -126,11 +126,14 @@ src/
 │   ├── Navbar.tsx       # Navigation component
 │   └── FamilySelector.tsx # Multi-select family filter dropdown
 ├── pages/              # Page-level components
-├── context/            # React Context for state
-├── data/               # Static data files
-│   ├── modes.json       # Mode definitions with family assignments
-│   └── default-family.json # Default family configuration
+├── context/            # React Context for state management
+├── data/               # Static family data files
+│   ├── default-family.json    # Default modes family (architect, code, etc.)
+│   ├── standalone-family.json # Standalone/imported modes family
+│   └── cherished-family.json  # Cherished specialty modes family
 ├── types.ts            # TypeScript definitions
+└── utils/              # Utility functions
+    └── formatConversion.ts # Data transformation utilities
 └── App.tsx             # Main application component
 ```
 
