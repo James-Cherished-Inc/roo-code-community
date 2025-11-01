@@ -16,6 +16,7 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
   const [selectedMode, setSelectedMode] = useState<Mode | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
   const [generatedPrompt, setGeneratedPrompt] = useState('');
+  const [copyMessage, setCopyMessage] = useState(false);
 
   /**
    * Handle mode selection
@@ -49,7 +50,9 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
     if (generatedPrompt) {
       try {
         await navigator.clipboard.writeText(generatedPrompt);
-        // Could add a toast notification here
+        // Show copy success message
+        setCopyMessage(true);
+        setTimeout(() => setCopyMessage(false), 2000);
       } catch (err) {
         console.error('Failed to copy text: ', err);
       }
@@ -159,6 +162,13 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
                 <strong>Usage:</strong> {selectedMode.usage}
               </p>
             </div>
+          </div>
+        )}
+
+        {/* Copy success message */}
+        {copyMessage && (
+          <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg animate-fade-in-up z-50">
+            Copied ✨
           </div>
         )}
       </div>

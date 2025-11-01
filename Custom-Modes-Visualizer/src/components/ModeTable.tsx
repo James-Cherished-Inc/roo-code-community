@@ -362,8 +362,8 @@ const ModeTable: React.FC<ModeTableProps> = ({ modes }) => {
 
       {/* Copy success message */}
       {copyMessage.show && (
-        <div className="absolute top-2 right-2 bg-green-100 border border-green-300 text-green-700 px-3 py-2 rounded-md text-sm shadow-lg animate-fade-in-up">
-          "{copyMessage.modeName}" prompt copied! ✅
+        <div className="absolute top-2 right-2 bg-green-500 text-white px-3 py-2 rounded-lg text-sm font-medium shadow-lg animate-fade-in-up z-50">
+          Copied ✨
         </div>
       )}
     </div>

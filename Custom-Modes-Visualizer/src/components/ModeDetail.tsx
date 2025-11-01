@@ -407,8 +407,8 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
 
       {/* Copy success message */}
       {copyMessage && (
-        <div className="mt-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded-md text-sm shadow-lg animate-fade-in-up">
-          Prompt copied to clipboard! ✅
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg animate-fade-in-up z-50">
+          Copied ✨
         </div>
       )}
 
