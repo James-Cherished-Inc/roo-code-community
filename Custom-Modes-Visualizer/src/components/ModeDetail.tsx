@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { Mode } from '../types';
 import { useModes } from '../context/ModeContext';
+import { estimateTokens, formatTokenCount } from '../utils/tokenEstimation';
 
 /**
  * Props for the ModeDetail component
@@ -392,6 +393,9 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
         <div className="w-full">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             System Prompt
+            <span className="ml-2 text-xs text-gray-500">
+              ({formatTokenCount(estimateTokens(mode.prompt))})
+            </span>
           </label>
           {renderField('prompt', 'System Prompt', true)}
         </div>
