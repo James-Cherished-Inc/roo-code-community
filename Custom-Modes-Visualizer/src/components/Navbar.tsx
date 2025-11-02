@@ -22,7 +22,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange }) => {
   ];
 
   return (
-    <nav className="backdrop-blur-lg bg-white/80 border-b border-white/20 shadow-lg">
+    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-lg border-b border-gray-200/50">
       <div className="flex items-center h-20 px-4 sm:px-6 lg:px-8">
         {/* Logo/Title */}
         <div className="flex-shrink-0">

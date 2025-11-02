@@ -86,7 +86,7 @@ const FamilySelector: React.FC = () => {
       } else {
         alert('Failed to import modes. Please check the file format.');
       }
-    } catch (error) {
+    } catch {
       alert('Failed to import modes');
     } finally {
       setIsImporting(false);

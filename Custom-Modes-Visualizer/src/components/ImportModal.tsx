@@ -77,7 +77,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose }) => {
       } else {
         setError('Failed to import modes. Please check the file format and try again.');
       }
-    } catch (err) {
+    } catch {
       const formatName = isYamlFile ? 'YAML' : 'JSON';
       setError(`Invalid ${formatName} file format or file structure`);
     } finally {

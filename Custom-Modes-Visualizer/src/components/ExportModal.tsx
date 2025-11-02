@@ -91,7 +91,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, availableMod
       } else {
         setError('Failed to export modes. Please try again.');
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred during export');
     } finally {
       setIsProcessing(false);

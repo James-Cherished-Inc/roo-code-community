@@ -335,7 +335,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           newModes = [...modes, ...resolvedModes];
           renamedModes = conflictsResolved;
           break;
-        case 'family':
+        case 'family': {
           // For family import, create new family and assign modes to it
           if (familyName) {
             // Create slug from family name (lowercase, replace spaces with hyphens)
@@ -367,6 +367,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             newModes = [...modes, ...resolvedModes];
             renamedModes = fallbackConflictsResolved;
           }
+        }
           break;
         default:
           throw new Error('Invalid import strategy');

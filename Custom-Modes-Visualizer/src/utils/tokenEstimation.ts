@@ -21,6 +21,8 @@ export function estimateTokens(text: string): number {
   const estimatedTokens = Math.ceil(normalized.length / charsPerToken);
 
   return estimatedTokens;
+
+  return estimatedTokens;
 }
 
 /**
