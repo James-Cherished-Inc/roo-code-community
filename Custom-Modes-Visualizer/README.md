@@ -18,9 +18,10 @@ A modern, intuitive web application for managing and visualizing AI assistant mo
 
 ### 🔧 Prompt Builder
 - **Custom Construction**: Build prompts from base modes
+- **Feature Toggle System**: 9 toggleable features across 4 categories (Communication Style, Process & Planning, Technical Expertise, Tool Integration)
 - **Flexible Options**: Add custom instructions and modifications
 - **Copy to Clipboard**: Export generated prompts instantly
-- **Work in Progress Indicator**: Clear notification about development status
+- **Modular Design**: Mix and match features without conflict for specialized prompts
 
 ### 🎯 Advanced Mode Management
 - **Create Custom Modes**: Comprehensive form with emoji selector, validation, and unique slug checking
@@ -140,7 +141,7 @@ Perfect for quick edits and getting an overview of all modes. Click any cell to 
 Ideal for deep editing of individual modes with a sidebar navigation layout. Use the left sidebar to select modes, double-click any field to edit, navigate with arrow buttons, and access import/export functions. Features a collapsible cross-mode redundancy analysis panel on the right for comparing prompts across all filtered modes.
 
 #### Prompt Builder
-Create custom prompts by selecting base modes and adding specific instructions. Copy the result. Currently in development with work-in-progress indicator.
+Create custom prompts by selecting base modes and adding specific instructions. Choose from 9 toggleable features across 4 categories (Communication Style, Process & Planning, Technical Expertise, Tool Integration) to build highly specialized prompts. Copy the result to clipboard instantly.
 
 #### About Panel
 Access project information, community links, and documentation through the slide-in overlay panel. Learn about Roo Modes Visualizer, view author information, and connect with the Roo Code community.
@@ -288,6 +289,12 @@ src/
 
 - [x] Mode deletion (implemented)
 - [x] Keyboard shortcuts (Ctrl+Enter, Esc implemented)
+- [x] Prompt Builder Feature Toggle System (9 features, 4 categories)
+- [ ] Custom Feature Creation: User-defined features with drag-and-drop ordering
+- [ ] Family Filtering: Only show modes from currently selected families in Prompt Builder
+- [ ] Feature Persistence: Save custom feature combinations per mode
+- [ ] Advanced Prompt Templates: More sophisticated prompt composition logic
+- [ ] Feature Analytics: Usage statistics and effectiveness tracking
 - [ ] Search and filtering capabilities
 - [ ] Drag and drop reordering
 - [ ] Advanced family management (merge, split, export families)
