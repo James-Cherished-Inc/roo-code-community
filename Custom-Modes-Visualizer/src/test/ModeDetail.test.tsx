@@ -8,7 +8,6 @@ import type { Mode } from '../types'
 
 // Mock the context
 const mockUpdateMode = vi.fn()
-const mockDeleteMode = vi.fn()
 
 const renderWithContext = (component: React.ReactElement) => {
   return render(
@@ -112,9 +111,9 @@ describe('ModeDetail', () => {
 
       // Rerender with same mode
       rerender(
-        <ModeContext.Provider value={mockModeContextValue}>
+        <ModeProvider>
           <ModeDetail mode={mockMode} />
-        </ModeContext.Provider>
+        </ModeProvider>
       )
 
       // Should still show same token count

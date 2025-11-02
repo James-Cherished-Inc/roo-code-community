@@ -11,6 +11,11 @@ interface ModeDetailProps {
   mode: Mode;
   /** Callback when mode is updated */
   onUpdate?: (updatedMode: Mode) => void;
+  /** Navigation functions for previous/next mode */
+  onPrevious?: () => void;
+  onNext?: () => void;
+  /** Whether navigation is disabled */
+  navigationDisabled?: boolean;
 }
 
 /**
@@ -66,7 +71,7 @@ const DeleteConfirmationModal: React.FC<{
 /**
  * Component for displaying and editing a single mode in detail
  */
-const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
+const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate, onPrevious, onNext, navigationDisabled }) => {
   const { updateMode, deleteMode } = useModes();
   const [editingField, setEditingField] = useState<keyof Mode | null>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -370,6 +375,32 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate }) => {
             <DeleteIcon className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Navigation Arrows */}
+        {onPrevious && onNext && (
+          <div className="flex justify-center gap-2 mt-4">
+            <button
+              onClick={onPrevious}
+              disabled={navigationDisabled}
+              className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+              title="Previous mode"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={onNext}
+              disabled={navigationDisabled}
+              className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+              title="Next mode"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="space-y-6 w-full max-w-none">

@@ -246,7 +246,12 @@ const SmartViewPage: React.FC = () => {
         {/* Main Panel - Mode Detail */}
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           <div className="flex-1 overflow-y-auto">
-            <ModeDetail mode={selectedMode} />
+            <ModeDetail
+              mode={selectedMode}
+              onPrevious={goToPrevious}
+              onNext={goToNext}
+              navigationDisabled={filteredModes.length <= 1}
+            />
           </div>
         </div>
 
