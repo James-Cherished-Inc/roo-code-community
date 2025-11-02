@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import type { Mode } from '../types';
+import type { Mode, PromptBuilderState } from '../types';
+import { featureCategories, features, getDefaultFeaturesForMode } from '../data/features';
 
 /**
  * Props for the PromptBuilder component
@@ -13,43 +14,71 @@ interface PromptBuilderProps {
  * Component for constructing custom prompts from mode options
  */
 const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
-  const [selectedMode, setSelectedMode] = useState<Mode | null>(null);
-  const [customPrompt, setCustomPrompt] = useState('');
-  const [generatedPrompt, setGeneratedPrompt] = useState('');
-  const [copyMessage, setCopyMessage] = useState(false);
+   const [state, setState] = useState<PromptBuilderState>({
+     selectedMode: null,
+     customPrompt: '',
+     generatedPrompt: '',
+     selectedFeatures: {},
+   });
+   const [copyMessage, setCopyMessage] = useState(false);
 
   /**
    * Handle mode selection
    */
   const handleModeSelect = (mode: Mode) => {
-    setSelectedMode(mode);
-    setCustomPrompt('');
-    setGeneratedPrompt('');
+    setState({
+      selectedMode: mode,
+      customPrompt: '',
+      generatedPrompt: '',
+      selectedFeatures: getDefaultFeaturesForMode(mode.slug),
+    });
   };
 
   /**
-   * Generate prompt from selected mode
+   * Handle feature toggle changes
+   */
+  const handleFeatureToggle = (featureId: string, enabled: boolean) => {
+    setState(prev => ({
+      ...prev,
+      selectedFeatures: {
+        ...prev.selectedFeatures,
+        [featureId]: enabled,
+      },
+    }));
+  };
+
+  /**
+   * Generate prompt from selected mode and enabled features
    */
   const generatePrompt = () => {
-    if (!selectedMode) return;
+    if (!state.selectedMode) return;
 
-    let prompt = selectedMode.prompt;
+    let prompt = state.selectedMode.prompt;
 
-    // If there's custom content, integrate it
-    if (customPrompt.trim()) {
-      prompt += `\n\nAdditional Instructions: ${customPrompt}`;
+    // Add enabled features as standardized instruction blocks
+    const enabledFeatures = features.filter(feature => state.selectedFeatures[feature.id]);
+    if (enabledFeatures.length > 0) {
+      prompt += '\n\n--- Feature Enhancements ---\n';
+      enabledFeatures.forEach(feature => {
+        prompt += `\n## ${feature.name}\n${feature.description}\n`;
+      });
     }
 
-    setGeneratedPrompt(prompt);
+    // If there's custom content, integrate it
+    if (state.customPrompt.trim()) {
+      prompt += `\n\nAdditional Instructions: ${state.customPrompt}`;
+    }
+
+    setState(prev => ({ ...prev, generatedPrompt: prompt }));
   };
 
   /**
    * Copy generated prompt to clipboard
    */
   const copyToClipboard = async () => {
-    if (generatedPrompt) {
+    if (state.generatedPrompt) {
       try {
-        await navigator.clipboard.writeText(generatedPrompt);
+        await navigator.clipboard.writeText(state.generatedPrompt);
         // Show copy success message
         setCopyMessage(true);
         setTimeout(() => setCopyMessage(false), 2000);
@@ -63,9 +92,12 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
    * Reset the builder
    */
   const reset = () => {
-    setSelectedMode(null);
-    setCustomPrompt('');
-    setGeneratedPrompt('');
+    setState({
+      selectedMode: null,
+      customPrompt: '',
+      generatedPrompt: '',
+      selectedFeatures: {},
+    });
   };
 
   return (
@@ -84,7 +116,7 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
                 key={mode.slug}
                 onClick={() => handleModeSelect(mode)}
                 className={`p-4 border rounded-lg text-left transition-all ${
-                  selectedMode?.slug === mode.slug
+                  state.selectedMode?.slug === mode.slug
                     ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
                     : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                 }`}
@@ -96,14 +128,51 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
           </div>
         </div>
 
+        {/* Feature Toggles */}
+        {state.selectedMode && (
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Feature Enhancements
+            </label>
+            <div className="space-y-4">
+              {featureCategories.map(category => {
+                const categoryFeatures = features.filter(f => f.category === category.id);
+                if (categoryFeatures.length === 0) return null;
+                return (
+                  <div key={category.id} className="border rounded-lg p-4 bg-gray-50">
+                    <h4 className="font-medium text-gray-900 mb-3">{category.name}</h4>
+                    <p className="text-sm text-gray-600 mb-3">{category.description}</p>
+                    <div className="space-y-2">
+                      {categoryFeatures.map(feature => (
+                        <label key={feature.id} className="flex items-start space-x-3">
+                          <input
+                            type="checkbox"
+                            checked={state.selectedFeatures[feature.id] || false}
+                            onChange={(e) => handleFeatureToggle(feature.id, e.target.checked)}
+                            className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <div className="flex-1">
+                            <span className="font-medium text-gray-900">{feature.name}</span>
+                            <p className="text-sm text-gray-600">{feature.description}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Custom Instructions */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Additional Instructions (Optional)
           </label>
           <textarea
-            value={customPrompt}
-            onChange={(e) => setCustomPrompt(e.target.value)}
+            value={state.customPrompt}
+            onChange={(e) => setState(prev => ({ ...prev, customPrompt: e.target.value }))}
             placeholder="Add specific requirements, constraints, or customizations..."
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -114,9 +183,9 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
         <div className="flex space-x-4 mb-6">
           <button
             onClick={generatePrompt}
-            disabled={!selectedMode}
+            disabled={!state.selectedMode}
             className={`px-6 py-2 rounded-md font-medium ${
-              selectedMode
+              state.selectedMode
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             } transition-colors`}
@@ -132,7 +201,7 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
         </div>
 
         {/* Generated Prompt Display */}
-        {generatedPrompt && (
+        {state.generatedPrompt && (
           <div className="border-t pt-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-gray-900">Generated Prompt</h3>
@@ -145,21 +214,21 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
             </div>
             <div className="bg-gray-50 p-4 rounded-md">
               <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
-                {generatedPrompt}
+                {state.generatedPrompt}
               </pre>
             </div>
           </div>
         )}
 
         {/* Selected Mode Info */}
-        {selectedMode && (
+        {state.selectedMode && (
           <div className="border-t pt-6 mt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Selected Mode Details</h3>
             <div className="bg-blue-50 p-4 rounded-md">
-              <h4 className="font-medium text-blue-900">{selectedMode.name}</h4>
-              <p className="text-blue-800 mt-1">{selectedMode.description}</p>
+              <h4 className="font-medium text-blue-900">{state.selectedMode.name}</h4>
+              <p className="text-blue-800 mt-1">{state.selectedMode.description}</p>
               <p className="text-blue-700 text-sm mt-2">
-                <strong>Usage:</strong> {selectedMode.usage}
+                <strong>Usage:</strong> {state.selectedMode.usage}
               </p>
             </div>
           </div>
