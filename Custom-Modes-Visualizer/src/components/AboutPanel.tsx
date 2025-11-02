@@ -44,24 +44,19 @@ const AboutPanel: React.FC<AboutPanelProps> = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Overlay */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40" data-testid="overlay" />
-      )}
-
       {/* Panel */}
       <div
         ref={panelRef}
         role="complementary"
         aria-label="About panel"
-        className={`fixed top-0 right-0 h-full bg-gradient-to-br from-purple-800 to-purple-900 text-white shadow-lg z-50 transition-transform duration-300 ease-in-out overflow-y-auto ${
+        className={`fixed top-0 right-0 h-full bg-white text-slate-900 shadow-lg z-50 transition-transform duration-300 ease-in-out overflow-y-auto border-l-4 border-purple-500 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         } w-80 sm:w-96`}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-2xl text-white hover:text-gray-300 focus:outline-none"
+          className="absolute top-2 right-2 text-2xl text-slate-600 hover:text-slate-800 focus:outline-none"
           aria-label="Close About Panel"
         >
           ×
@@ -74,32 +69,32 @@ const AboutPanel: React.FC<AboutPanelProps> = ({ isOpen, onClose }) => {
             <img
               src="James_Photo.jpg" // James Cherished photo from DistroChoser
               alt="Sir James Cherished"
-              className="w-30 h-30 rounded-full border-3 border-white object-cover mx-auto mb-4"
+              className="w-30 h-30 rounded-full border-4 border-purple-500 object-cover mx-auto mb-4"
             />
-            <h3 className="text-lg font-semibold text-white mb-1">Sir James Cherished</h3>
-            <p className="text-sm text-gray-300">Passionate developer building open-source tools</p>
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">Sir James Cherished</h3>
+            <p className="text-sm text-slate-600">Passionate developer building open-source tools</p>
           </div>
 
           {/* About Section */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">About Me</h3>
-            <div className="text-sm text-gray-200 space-y-2">
-              <p>
-                Hi, I'm James! I hope you're enjoying the tools I build.
-              </p>
-              <p>
-                I'm a solo dev and a new Linux fan. I'm driven by the idea of an equitable chance to anyone on Earth to freely pursue their dreams and fulfillment, for free. An Internet connection as the single requirement brings this truer and truer with each effort.
-              </p>
-              <p>
-                Linux contributes to this realization and I hope this can be a small gift to the community.
-              </p>
-            </div>
-          </div>
+            <h3 className="text-lg font-semibold mb-3 text-slate-900">About Me</h3>
+             <div className="text-sm text-slate-600 space-y-2">
+               <p>
+                 Hi, I'm James! I hope you're enjoying the tools I build.
+               </p>
+               <p>
+                 I'm a solo dev and a new Linux fan. I'm driven by the idea of an equitable chance to anyone on Earth to freely pursue their dreams and fulfillment, for free. An Internet connection as the single requirement brings this truer and truer with each effort.
+               </p>
+               <p>
+                 Linux contributes to this realization and I hope this can be a small gift to the community.
+               </p>
+             </div>
+           </div>
 
-          {/* Contribute Section */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">Why a Cherished-ModesVisualizer?</h3>
-            <div className="text-sm text-gray-200 space-y-2 mb-4">
+           {/* Contribute Section */}
+           <div className="mb-6">
+             <h3 className="text-lg font-semibold mb-3 text-slate-900">Why a Cherished-ModesVisualizer?</h3>
+             <div className="text-sm text-slate-600 space-y-2 mb-4">
               <p>
                 Arguably, choosing your AI mode is one of the most fun thing about AI-assisted development. It's also one of the best way for newbies to learn about technicalities, a good reason to dive the rabbit hole and uncover its history. The existing mode visualizers did not meet my needs, and I built this just for myself. A nice, filterable, exhaustive table allows me a tailored selection and quick glances to select the right choice for my different needs.
               </p>
@@ -111,7 +106,7 @@ const AboutPanel: React.FC<AboutPanelProps> = ({ isOpen, onClose }) => {
               href="https://github.com/James-Cherished-Inc/Roo-Modes-Visualizer"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-yellow-400 text-purple-900 px-6 py-2 rounded-full font-semibold text-center hover:bg-yellow-300 transition-colors duration-200"
+              className="inline-block bg-purple-500 text-white px-6 py-2 rounded-full font-semibold text-center hover:bg-purple-600 transition-colors duration-200"
             >
               Contribute
             </a>
