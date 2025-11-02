@@ -1,44 +1,15 @@
+# Roo Modes : Cherished Family
 
-# **Custom Modes**
+Get my Custom Crew to replace Roo's default modes instantly in your workspace by running this single command on macOS, Linux, or modern Windows:
 
-### **Researcher** by @JamesCherished: Integrates Perplexity for web search and Lynx for page analysis, enabling autonomous research-augmented software engineering
-https://github.com/James-Cherished-Inc/roo-research-mode
+curl -L -o .roomodes https://raw.githubusercontent.com/James-Cherished-Inc/roo-code-community/main/.roomodes.
 
-    * requires : Perplexity pro or Perplexity API
-    * cost : a few cents per search for Perplexity
-
-
-### **Task-Master** by @JamesCherished, leveraging the tool by @eyaltoledano & co: A CLI that turns your Project's Documentation into an autonomous local task management and project implementation system.
-https://github.com/James-Cherished-Inc/AI-task-master
-
-    * requires : an API key from any provider
-    * cost : free with OpenRouter free models
-
-
-# My go-to Crew
-
-#### Check *.roomodes* for the prompts. 
 Adding .roomodes at the root of your workspace will enable the custom modes described in the file.
-Please note the specific format is required for Roo to read the modes, as of April 2025.
+Please note the specific format is required for Roo to read the modes, as of October 2025.
 
-The modifications of the "classic" modes are for my personal needs and tastes. You're free to draw inspiration from them.
-You can find them at *custom-classic-modes.md*.
+# Perplexity MCP Server
 
-* Technical Writer
-* Custom Boomerang Mode
-* Research Mode
-* Custom Coder
-* Custom Ask (mentor)
-* Custom Architect
-* Custom Debugger
-
-# My Footgun prompting
-
-#### Check *.roo/* for the full system prompt
-Adding .roo/ at the root of your workspace will replace the system prompt entirely for each custom mode specified.
-Please note that as of April 2025, the custom instructions set in the settings of the Roo extension are added on top of your footgun prompts. Additionally, it is only possible to footgun the system prompt for a specific prompt.
-
-The modifications of the system prompts maintain all the tools instructions but were made for my personal needs and tastes. You're free to draw inspiration from them.
+# Custom Modes Visualizer
 
 # Important
 
@@ -49,3 +20,24 @@ Please open a PR or contact me on X (@JamesCherished) to have your project inclu
 # Get started with Roo
 
 https://docs.roocode.com/
+
+
+# Archive
+
+### **Researcher** by @JamesCherished: Integrates Perplexity for web search and Lynx for page analysis, enabling autonomous research-augmented software engineering
+https://github.com/James-Cherished-Inc/roo-research-mode
+
+    * requires : Perplexity pro or Perplexity API
+    * cost : a few cents per search for Perplexity
+
+--> deprecated, as Roo Code's new integration for MCP (2025) allows for a more efficient use of Perplexity.
+Official Perplexity MCP Server now included in Perplexity MCP Server with a custom script for a single-shot set-up!
+
+
+### **Task-Master** by @JamesCherished, leveraging the tool by @eyaltoledano & co: A CLI that turns your Project's Documentation into an autonomous local task management and project implementation system.
+https://github.com/James-Cherished-Inc/AI-task-master
+
+    * requires : an API key from any provider
+    * cost : free with OpenRouter free models
+
+--> deprecated, as Task-Master has evolved and I am not using it anymore 

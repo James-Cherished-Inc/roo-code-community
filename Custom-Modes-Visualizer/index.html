@@ -17,12 +17,13 @@
         var script = document.createElement('script');
         script.src = 'https://storage.ko-fi.com/cdn/scripts/overlay-widget.js';
         script.onload = function() {
-          // Draw the widget with customized text
+          // Draw the widget with customized text and explicit right positioning
           kofiWidgetOverlay.draw('jamescherished', {
             'type': 'floating-chat',
-            'floating-chat.donateButton.text': 'Thank me',
+            'floating-chat.donateButton.text': 'Thank me!',
             'floating-chat.donateButton.background-color': '#00b9fe',
-            'floating-chat.donateButton.text-color': '#fff'
+            'floating-chat.donateButton.text-color': '#fff',
+            'floating-chat.position': 'Right'
           });
 
           // Wait for widget to render, then add close button and auto-hide timer
@@ -33,13 +34,21 @@
                          document.querySelector('div[style*="position: fixed"]'); // Fallback for fixed position elements
 
             if (widget) {
-              // Create close button positioned over the widget (assuming right-side positioning)
+              // Force right-side positioning with high-specificity CSS override
+              widget.style.cssText += `
+                right: 20px !important;
+                left: auto !important;
+                position: fixed !important;
+                z-index: 9999 !important;
+              `;
+
+              // Create close button positioned over the widget (right-side positioning enforced)
               var closeBtn = document.createElement('div');
               closeBtn.innerHTML = '×';
               closeBtn.style.cssText = `
-                position: fixed;
-                top: 10px;
-                right: 10px;
+                position: fixed !important;
+                top: 10px !important;
+                right: 10px !important;
                 background: rgba(0, 0, 0, 0.7);
                 color: #fff;
                 width: 30px;
@@ -49,7 +58,7 @@
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
-                z-index: 10001;
+                z-index: 10001 !important;
                 font-size: 20px;
                 font-weight: bold;
                 user-select: none;
@@ -60,6 +69,18 @@
                 closeBtn.remove();
               };
               document.body.appendChild(closeBtn);
+
+              // JavaScript fallback: Check positioning after a short delay and force right-side if needed
+              setTimeout(function() {
+                var rect = widget.getBoundingClientRect();
+                if (rect.left < window.innerWidth / 2) {
+                  // Widget is on left side, force right positioning
+                  widget.style.right = '20px';
+                  widget.style.left = 'auto';
+                  closeBtn.style.right = '10px';
+                  closeBtn.style.left = 'auto';
+                }
+              }, 1500); // Check after 1.5 seconds to allow for initial layout
 
               // Auto-hide after 30 seconds of display
               setTimeout(function() {
