@@ -49,9 +49,31 @@ const AboutPanel: React.FC<AboutPanelProps> = ({ isOpen, onClose }) => {
         ref={panelRef}
         role="complementary"
         aria-label="About panel"
-        className={`fixed top-0 right-0 h-full bg-white text-slate-900 shadow-lg z-50 transition-transform duration-300 ease-in-out overflow-y-auto border-l-4 border-purple-500 ${
+        className={`fixed top-0 right-0 h-full bg-gradient-to-br from-white via-purple-50 to-purple-100 text-slate-900 shadow-lg z-50 transition-transform duration-300 ease-in-out overflow-y-auto border-l-4 border-purple-500 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         } w-80 sm:w-96`}
+        style={{
+          // Layered: soft white -> pale purple base, subtle neon glows, and lightweight star dots.
+          // Implemented with CSS gradients only (no animations, no heavy images) to avoid runtime lag.
+          backgroundImage: `
+            linear-gradient(135deg, #ffffff 0%, #fbf8ff 40%, #f6f0ff 100%),
+            radial-gradient(circle at 10% 85%, rgba(147,51,234,0.06) 0%, transparent 40%),
+            radial-gradient(circle at 85% 15%, rgba(147,51,234,0.05) 0%, transparent 35%),
+            radial-gradient(circle at 45% 40%, rgba(147,51,234,0.035) 0%, transparent 30%),
+            /* bright tiny stars (static) */
+            radial-gradient(circle at 50% 20%, rgba(255,255,255,0.95) 0 1px, transparent 1px),
+            radial-gradient(circle at 20% 35%, rgba(255,255,255,0.85) 0 1px, transparent 1px),
+            radial-gradient(circle at 75% 60%, rgba(255,255,255,0.8) 0 1px, transparent 1px),
+            radial-gradient(circle at 30% 75%, rgba(255,255,255,0.7) 0 1px, transparent 1px),
+            radial-gradient(circle at 60% 30%, rgba(255,255,255,0.6) 0 1px, transparent 1px),
+            radial-gradient(circle at 90% 90%, rgba(255,255,255,0.65) 0 1px, transparent 1px),
+            radial-gradient(circle at 12% 18%, rgba(255,255,255,0.5) 0 1px, transparent 1px)
+          `,
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: '100% 100%',
+          // a subtle inner highlight and purple glow on the left edge to tie the neon accent in
+          boxShadow: '0 12px 30px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.7), 0 0 36px rgba(147,51,234,0.035)'
+        }}
       >
         {/* Close Button */}
         <button
@@ -71,8 +93,8 @@ const AboutPanel: React.FC<AboutPanelProps> = ({ isOpen, onClose }) => {
               alt="Sir James Cherished"
               className="w-30 h-30 rounded-full border-4 border-purple-500 object-cover mx-auto mb-4"
             />
-            <h3 className="text-lg font-semibold text-slate-900 mb-1">Sir James Cherished</h3>
-            <p className="text-sm text-slate-600">Passionate developer building open-source tools</p>
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">James Cherished</h3>
+            <p className="text-sm text-slate-600">Passionate about AI, Software and Engineering</p>
           </div>
 
           {/* About Section */}
@@ -83,27 +105,35 @@ const AboutPanel: React.FC<AboutPanelProps> = ({ isOpen, onClose }) => {
                  Hi, I'm James! I hope you're enjoying the tools I build.
                </p>
                <p>
-                 I'm a solo dev and a new Linux fan. I'm driven by the idea of an equitable chance to anyone on Earth to freely pursue their dreams and fulfillment, for free. An Internet connection as the single requirement brings this truer and truer with each effort.
+                 I'm a solo dev exploring the New World. I'm driven by the idea of an equitable chance to anyone on Earth to freely pursue their dreams and fulfillment, for free. An Internet connection as the single requirement brings this truer and truer with each effort.
                </p>
                <p>
-                 Linux contributes to this realization and I hope this can be a small gift to the community.
+                 Roo Code contributes to this realization and often procures me intense joy and positive feelings. I hope this can be a small gift to the community and likeminded peers.
                </p>
              </div>
            </div>
 
            {/* Contribute Section */}
            <div className="mb-6">
-             <h3 className="text-lg font-semibold mb-3 text-slate-900">Why a Cherished-ModesVisualizer?</h3>
+             <h3 className="text-lg font-semibold mb-3 text-slate-900">Why a Custom Modes Visualizer?</h3>
              <div className="text-sm text-slate-600 space-y-2 mb-4">
               <p>
-                Arguably, choosing your AI mode is one of the most fun thing about AI-assisted development. It's also one of the best way for newbies to learn about technicalities, a good reason to dive the rabbit hole and uncover its history. The existing mode visualizers did not meet my needs, and I built this just for myself. A nice, filterable, exhaustive table allows me a tailored selection and quick glances to select the right choice for my different needs.
+                Arguably, refining your AI prompts is one of the most fun thing about AI-assisted development.
               </p>
               <p>
-                Roo Code community is welcome to contribute. You can request or add a new mode, correct mistakes or add relevant context/information for a data point, and even argue about calculation methods :) DM me on X or join the debate on Github.
+                I built this for myself because I need a visually intuitive to update and manage the different modes I use and customization experiments.
+                I find having a one-glance table super useful, and the quick navigation smart view and redundancy flag helps me writing the best prompts.
+                I have included months of battle-testing for free in my Cherished family. I may or may not update it as I refine it.
+              </p>
+              <h3 className="text-lg font-semibold mb-3 text-slate-900">Contribute!</h3>
+              <p>
+                Roo Code community is welcome to contribute. You can submit a PR to add new modes or families.
+                This repo aims to be a centralized place of treasures for the Roo Code community!
+                DMs on X are open!
               </p>
             </div>
             <a
-              href="https://github.com/James-Cherished-Inc/Roo-Modes-Visualizer"
+              href="https://github.com/James-Cherished-Inc/roo-code-community"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-purple-500 text-white px-6 py-2 rounded-full font-semibold text-center hover:bg-purple-600 transition-colors duration-200"
@@ -115,7 +145,7 @@ const AboutPanel: React.FC<AboutPanelProps> = ({ isOpen, onClose }) => {
           {/* Social Links */}
           <div className="flex justify-center space-x-4">
             <a
-              href="https://github.com/James-Cherished-Inc"
+              href="https://github.com/James-Cherished-Inc/roo-code-community"
               target="_blank"
               rel="noopener noreferrer"
               className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200 hover:scale-110"

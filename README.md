@@ -1,4 +1,6 @@
-# Roo Modes : Cherished Family
+# Roo Community, Welcome!
+
+## Roo Modes : Cherished Family
 
 Get my Custom Crew to replace Roo's default modes instantly in your workspace by running this single command on macOS, Linux, or modern Windows:
 
@@ -7,11 +9,13 @@ curl -L -o .roomodes https://raw.githubusercontent.com/James-Cherished-Inc/roo-c
 Adding .roomodes at the root of your workspace will enable the custom modes described in the file.
 Please note the specific format is required for Roo to read the modes, as of October 2025.
 
-# Perplexity MCP Server
+## Perplexity MCP Server
 
-# Custom Modes Visualizer
+Includes a custom script for one-shot setup!
 
-# Important
+## Custom Modes Visualizer
+
+# Contribute!
 
 Please give credit to the respective owners of the work you use or draw inspiration from, when possible. Thanks!
 
