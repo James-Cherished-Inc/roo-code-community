@@ -25,6 +25,7 @@ const RedundancyHighlighter: React.FC<RedundancyHighlighterProps> = ({
   className = ""
 }) => {
   const [showRedundancies, setShowRedundancies] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [minWordLength, setMinWordLength] = useState(4);
   const [minFrequency, setMinFrequency] = useState(2);
   const [excludedWords, setExcludedWords] = useState<Set<string>>(new Set());
@@ -184,7 +185,17 @@ const RedundancyHighlighter: React.FC<RedundancyHighlighterProps> = ({
    * Toggles redundancy highlighting on/off
    */
   const toggleRedundancies = () => {
-    setShowRedundancies(!showRedundancies);
+    if (showRedundancies) {
+      // If currently showing, just hide immediately
+      setShowRedundancies(false);
+    } else {
+      // If hiding, start analysis
+      setIsAnalyzing(true);
+      setTimeout(() => {
+        setShowRedundancies(true);
+        setIsAnalyzing(false);
+      }, Math.random() * 500 + 500); // Random between 500-1000ms
+    }
   };
 
   if (prompts.length === 0) {
@@ -229,15 +240,27 @@ const RedundancyHighlighter: React.FC<RedundancyHighlighterProps> = ({
         <div className="flex flex-wrap items-center gap-4">
           <button
             onClick={toggleRedundancies}
-            className={`px-4 py-2 rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+            disabled={isAnalyzing}
+            className={`px-4 py-2 rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center gap-2 ${
               showRedundancies
                 ? 'bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500 shadow-md'
+                : isAnalyzing
+                ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
                 : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-md'
             }`}
             aria-pressed={showRedundancies}
-            aria-label={showRedundancies ? 'Hide redundancy highlighting' : 'Show redundancy highlighting'}
+            aria-label={showRedundancies ? 'Hide redundancy highlighting' : isAnalyzing ? 'Analyzing redundancies' : 'Show redundancy highlighting'}
           >
-            {showRedundancies ? '🔍 Hide Redundancies' : '🔍 Show Redundancies'}
+            {isAnalyzing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-white"></div>
+                🔍 Analyzing...
+              </>
+            ) : showRedundancies ? (
+              '🔍 Hide Redundancies'
+            ) : (
+              '🔍 Show Redundancies'
+            )}
           </button>
 
           {showRedundancies && (
@@ -377,18 +400,26 @@ const RedundancyHighlighter: React.FC<RedundancyHighlighterProps> = ({
 
       {/* Prompts Display */}
       <div className="space-y-4">
-        {prompts.map((prompt) => (
-          <div key={prompt.id} className="border rounded-lg p-4 bg-white">
-            {showPromptNames && prompt.name && (
-              <div className="font-medium text-gray-900 mb-2 pb-2 border-b border-gray-200">
-                {prompt.name}
-              </div>
-            )}
-            <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-              {renderHighlightedText(prompt.content, prompt.id)}
-            </div>
+        {isAnalyzing ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent mb-4"></div>
+            <div className="text-gray-600 text-lg">Analyzing redundancies...</div>
+            <div className="text-gray-500 text-sm mt-2">This may take a few moments</div>
           </div>
-        ))}
+        ) : (
+          prompts.map((prompt) => (
+            <div key={prompt.id} className="border rounded-lg p-4 bg-white">
+              {showPromptNames && prompt.name && (
+                <div className="font-medium text-gray-900 mb-2 pb-2 border-b border-gray-200">
+                  {prompt.name}
+                </div>
+              )}
+              <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {renderHighlightedText(prompt.content, prompt.id)}
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Legend */}

@@ -35,15 +35,21 @@ src/
 
 ### Phase 2: Enhanced Features (Completed ✅)
 - [x] Mode creation functionality
-- [ ] Mode deletion functionality
+- [x] Mode deletion functionality
 - [x] Import/export modes in JSON and YAML formats with selective export
 - [x] Mode validation (creation form validation)
 - [x] Family-based organization system with multi-select dropdown
 - [x] Family filtering in Table View and Smart View
 - [x] Reset functionality to restore default modes and clear customizations with page refresh
 - [x] Keyboard shortcuts
+- [x] Prompt Builder Feature Toggle System: Modular prompt construction with 9 toggleable features across 4 categories
 
 ### Phase 3: Advanced Features (Future)
+- [ ] Custom Feature Creation: User-defined features with drag-and-drop ordering
+- [ ] Family Filtering: Only show modes from currently selected families in Prompt Builder
+- [ ] Feature Persistence: Save custom feature combinations per mode
+- [ ] Advanced Prompt Templates: More sophisticated prompt composition logic
+- [ ] Feature Analytics: Usage statistics and effectiveness tracking
 - [ ] Dark mode support
 - [ ] Drag and drop reordering
 - [ ] Search and filtering (within families)
