@@ -115,6 +115,73 @@ The application comes pre-loaded with these Roo modes, organized in the **Defaul
 ### Family Organization
 Modes are organized into families for better management. The Default family contains all built-in modes. You can create custom families and organize your modes accordingly.
 
+## 🛠️ Updating Hardcoded Families and Prompts
+
+The application loads three predefined mode families on startup from JSON files in the `src/data/` directory:
+
+- `default-family.json` - Core Roo modes (architect, code, debug, ask, orchestrator)
+- `standalone-family.json` - Empty family for imported modes
+- `cherished-family.json` - Advanced specialized modes
+
+### How to Update Families and Prompts
+
+**Location**: `Custom-Modes-Visualizer/src/data/`
+
+**File Format**: Each family file follows this JSON structure:
+
+```json
+{
+  "id": "family-slug",
+  "name": "Family Display Name",
+  "description": "Brief description of the family",
+  "color": "#HEXCOLOR",
+  "isDefault": false,
+  "customModes": [
+    {
+      "slug": "mode-slug",
+      "name": "🏷️ Display Name",
+      "description": "Short description",
+      "roleDefinition": "Full prompt text defining the mode's behavior...",
+      "whenToUse": "When to use this mode...",
+      "groups": ["read", "edit", "browser", "command", "mcp"]
+    }
+  ]
+}
+```
+
+### Steps to Update
+
+1. **Edit the JSON file** directly in `src/data/`
+2. **Modify mode properties**:
+   - `roleDefinition`: The full prompt that defines the mode's behavior
+   - `name`: Emoji + display name
+   - `description`: Brief summary
+   - `whenToUse`: Usage guidelines
+   - `groups`: Tool permissions array
+3. **Save the file**
+4. **Restart the development server** (`npm run dev`) to reload the changes
+
+### Important Notes
+
+- Changes to hardcoded families require a full app restart to take effect
+- The `default` family cannot be deleted (protected in code)
+- Use unique `slug` values across all families to avoid conflicts
+- See [`types.ts`](src/types.ts) for complete TypeScript interfaces
+- Test changes thoroughly before committing
+
+### Example: Adding a New Mode
+
+```json
+{
+  "slug": "new-mode",
+  "name": "🔧 New Mode",
+  "description": "Handles specific task type",
+  "roleDefinition": "You are a specialized assistant for [task]. Always [guidelines]...",
+  "whenToUse": "Use when you need to [specific use case]",
+  "groups": ["read", "edit", "command"]
+}
+```
+
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 19 with TypeScript

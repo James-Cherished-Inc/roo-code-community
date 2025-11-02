@@ -1,3 +1,41 @@
+## [2025-11-02] - Ko-fi Overlay Close Bug Fix
+
+### Fixed
+- **Overlay Close Functionality**: Fixed Ko-fi "Thank me!" overlay close button that only hid the blue cross instead of the entire overlay
+- **Aggressive Removal**: Updated close button onclick handler to remove all Ko-fi DOM elements using specific class selectors (.floatingchat-container-wrap, .floating-chat-kofi-popup-iframe, iframes with ko-fi src)
+- **Positioning Improvement**: Changed Ko-fi widget position from 'Right' to 'BottomRight' to fix panel opening behavior
+- **Cross Button Positioning**: Ensured close button appears at top-right corner of the floating button for intuitive dismissal
+- **Delay Reset**: Restored original 30-second delay (temporarily changed to 1-second for testing)
+
+### Technical Details
+- **Root Cause**: Previous implementation only hid iframe and widget elements without removing them from DOM, causing persistent overlay
+- **Solution**: Implemented DOM element removal using `document.querySelectorAll()` and `.remove()` for complete cleanup
+- **Positioning Fix**: Changed Ko-fi API position parameter from 'Right' to 'BottomRight' to ensure panel opens below/above button instead of right-side
+- **Event Cleanup**: Properly removes event listeners when close button is clicked to prevent memory leaks
+- **Selector Targeting**: Uses specific Ko-fi class names for precise element removal without affecting other page elements
+
+### Files Modified
+- `Custom-Modes-Visualizer/index.html` - Updated Ko-fi loading script with proper close functionality and positioning
+
+### User Experience Improvements
+- **Complete Closure**: Clicking blue cross now fully removes the overlay instead of leaving it visible
+- **Intuitive Positioning**: Panel opens in expected location relative to the "Thank me" button
+- **Clean Interface**: No persistent overlay elements after dismissal
+- **Immediate Response**: Overlay disappears instantly when close button is clicked
+
+### Testing Status
+- ✅ Manual testing confirmed overlay fully removes when close button is clicked
+- ✅ Positioning now opens panel in correct location (below/above button)
+- ✅ No breaking changes to existing functionality
+- ✅ Close button appears at top-right of floating button as intended
+
+### Impact
+- **Bug Resolution**: Fixes long-standing issue where Ko-fi overlay could not be properly dismissed
+- **User Satisfaction**: Eliminates frustration from non-functional close button
+- **Clean UI**: Prevents overlay accumulation if user clicks multiple times
+- **Future-Ready**: Proper DOM cleanup prevents memory issues and potential conflicts
+
+---
 # Changelog - Roo Modes Visualizer
 ---
 

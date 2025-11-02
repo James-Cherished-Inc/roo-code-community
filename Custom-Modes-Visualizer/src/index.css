@@ -91,3 +91,27 @@
 .focus-ring {
   @apply focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
 }
+
+/* Ko-fi close button fallback styles
+   These provide a CSS fallback for the injected .kofi-close-btn in case Tailwind utilities
+   are not applied to the runtime-injected element. Keeps appearance consistent across setups.
+*/
+.kofi-close-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #00b9fe;
+  color: #fff;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10001;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  padding: 0;
+}

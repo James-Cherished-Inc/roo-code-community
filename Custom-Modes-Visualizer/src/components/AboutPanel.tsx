@@ -53,26 +53,13 @@ const AboutPanel: React.FC<AboutPanelProps> = ({ isOpen, onClose }) => {
           isOpen ? 'translate-x-0' : 'translate-x-full'
         } w-80 sm:w-96`}
         style={{
-          // Layered: soft white -> pale purple base, subtle neon glows, and lightweight star dots.
-          // Implemented with CSS gradients only (no animations, no heavy images) to avoid runtime lag.
           backgroundImage: `
-            linear-gradient(135deg, #ffffff 0%, #fbf8ff 40%, #f6f0ff 100%),
-            radial-gradient(circle at 10% 85%, rgba(147,51,234,0.06) 0%, transparent 40%),
-            radial-gradient(circle at 85% 15%, rgba(147,51,234,0.05) 0%, transparent 35%),
-            radial-gradient(circle at 45% 40%, rgba(147,51,234,0.035) 0%, transparent 30%),
-            /* bright tiny stars (static) */
-            radial-gradient(circle at 50% 20%, rgba(255,255,255,0.95) 0 1px, transparent 1px),
-            radial-gradient(circle at 20% 35%, rgba(255,255,255,0.85) 0 1px, transparent 1px),
-            radial-gradient(circle at 75% 60%, rgba(255,255,255,0.8) 0 1px, transparent 1px),
-            radial-gradient(circle at 30% 75%, rgba(255,255,255,0.7) 0 1px, transparent 1px),
-            radial-gradient(circle at 60% 30%, rgba(255,255,255,0.6) 0 1px, transparent 1px),
-            radial-gradient(circle at 90% 90%, rgba(255,255,255,0.65) 0 1px, transparent 1px),
-            radial-gradient(circle at 12% 18%, rgba(255,255,255,0.5) 0 1px, transparent 1px)
+            radial-gradient(circle at 20% 80%, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(147, 51, 234, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(147, 51, 234, 0.05) 0%, transparent 50%),
+            linear-gradient(to bottom right, #ffffff, #faf5ff, #f3e8ff)
           `,
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: '100% 100%',
-          // a subtle inner highlight and purple glow on the left edge to tie the neon accent in
-          boxShadow: '0 12px 30px rgba(15,23,42,0.06), inset 0 1px 0 rgba(255,255,255,0.7), 0 0 36px rgba(147,51,234,0.035)'
+          backgroundSize: '100% 100%, 100% 100%, 100% 100%, 100% 100%'
         }}
       >
         {/* Close Button */}
@@ -125,21 +112,20 @@ const AboutPanel: React.FC<AboutPanelProps> = ({ isOpen, onClose }) => {
                 I find having a one-glance table super useful, and the quick navigation smart view and redundancy flag helps me writing the best prompts.
                 I have included months of battle-testing for free in my Cherished family. I may or may not update it as I refine it.
               </p>
-              <h3 className="text-lg font-semibold mb-3 text-slate-900">Contribute!</h3>
-              <p>
+              <a
+                href="https://github.com/James-Cherished-Inc/roo-code-community"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block mx-auto bg-purple-500 text-white px-8 py-3 rounded-full font-semibold text-center text-lg hover:bg-purple-600 transition-colors duration-200 mb-4"
+              >
+                Contribute!
+              </a>
+            <p>
                 Roo Code community is welcome to contribute. You can submit a PR to add new modes or families.
                 This repo aims to be a centralized place of treasures for the Roo Code community!
                 DMs on X are open!
               </p>
             </div>
-            <a
-              href="https://github.com/James-Cherished-Inc/roo-code-community"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-purple-500 text-white px-6 py-2 rounded-full font-semibold text-center hover:bg-purple-600 transition-colors duration-200"
-            >
-              Contribute
-            </a>
           </div>
 
           {/* Social Links */}
