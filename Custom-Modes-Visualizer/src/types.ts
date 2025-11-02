@@ -73,11 +73,58 @@ export type ModeFamily = {
 export type ViewType = 'table' | 'smart' | 'prompt-builder';
 
 /**
+ * Represents a category for organizing features
+ */
+export type FeatureCategory = {
+  /** Unique identifier for the category */
+  id: string;
+  /** Display name for the category */
+  name: string;
+  /** Brief description of what features in this category control */
+  description: string;
+};
+
+/**
+ * Represents a toggleable feature definition
+ */
+export type FeatureDefinition = {
+  /** Unique identifier for the feature */
+  id: string;
+  /** Display name for the feature */
+  name: string;
+  /** Brief description of what this feature does */
+  description: string;
+  /** Category this feature belongs to */
+  category: string;
+  /** Default enabled state per mode (mode slug -> boolean) */
+  defaultEnabled: Record<string, boolean>;
+};
+
+/**
+ * State representing which features are enabled (feature id -> boolean)
+ */
+export type FeatureState = Record<string, boolean>;
+
+/**
  * Global configuration for all modes
  */
 export interface GlobalConfig {
   /** Common instructions applied to all modes */
   forAllModes: string;
+}
+
+/**
+ * State for the Prompt Builder component
+ */
+export interface PromptBuilderState {
+  /** Currently selected base mode */
+  selectedMode: Mode | null;
+  /** Additional custom instructions */
+  customPrompt: string;
+  /** Generated prompt text */
+  generatedPrompt: string;
+  /** Selected features for this prompt */
+  selectedFeatures: FeatureState;
 }
 
 /**
