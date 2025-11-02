@@ -28,6 +28,7 @@ A modern, intuitive web application for managing and visualizing AI assistant mo
 - **Family Filtering**: Multi-select dropdown to filter modes by family in all views
 - **Global Configuration**: Set common instructions that apply to all modes
 - **Selective Export**: Export only custom modes (excluding Default family)
+- **About Panel**: Access project information, community links, and documentation via slide-in overlay
 - **Responsive Design**: Works perfectly on desktop and mobile
 - **Type Safety**: Full TypeScript support for reliability
 - **Fast Performance**: Built with Vite for lightning-fast development
@@ -82,6 +83,11 @@ The built files will be in the `dist/` directory, ready for deployment.
 - **Smart View**: Use the detailed form for comprehensive editing, use family selector to filter modes
 - **Prompt Builder**: Select a base mode and customize as needed
 
+### Using the About Panel
+- Click the **About** button (ℹ️ icon) in the navbar to open the information panel
+- The panel slides in from the right with project details, community links, and support options
+- Close by clicking the × button, clicking outside the panel, or pressing the ESC key
+
 ### Views Overview
 
 #### Table View
@@ -92,6 +98,9 @@ Ideal for deep editing of individual modes. Navigate through modes with tabs or 
 
 #### Prompt Builder
 Create custom prompts by selecting base modes and adding specific instructions. Copy the result.
+
+#### About Panel
+Access project information, community links, and documentation through the slide-in overlay panel. Learn about Roo Modes Visualizer and connect with the Roo Code community.
 
 ## 🎯 Current Modes
 
@@ -124,7 +133,8 @@ src/
 │   ├── ModeDetail.tsx   # Detailed mode editing
 │   ├── PromptBuilder.tsx # Prompt construction UI
 │   ├── Navbar.tsx       # Navigation component
-│   └── FamilySelector.tsx # Multi-select family filter dropdown
+│   ├── FamilySelector.tsx # Multi-select family filter dropdown
+│   └── AboutPanel.tsx   # Slide-in information panel component
 ├── pages/              # Page-level components
 ├── context/            # React Context for state management
 ├── data/               # Static family data files

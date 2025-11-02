@@ -9,12 +9,14 @@ interface NavbarProps {
   activeView: ViewType;
   /** Callback to change the active view */
   onViewChange: (view: ViewType) => void;
+  /** Callback to open the About panel */
+  onAboutClick: () => void;
 }
 
 /**
  * Navigation bar component for switching between different views
  */
-const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange }) => {
+const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange, onAboutClick }) => {
   const views = [
     { id: 'table' as ViewType, label: '📋 Table View', description: 'Edit all modes in a table' },
     { id: 'smart' as ViewType, label: '🎯 Smart View', description: 'View and edit one mode at a time' },
@@ -54,8 +56,17 @@ const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange }) => {
           </div>
         </div>
 
-        {/* Version indicator */}
-        <div className="flex-shrink-0">
+        {/* About button and Version indicator */}
+        <div className="flex-shrink-0 flex items-center space-x-3">
+          <button
+            onClick={onAboutClick}
+            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-white/50 backdrop-blur-sm rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
+            title="About this application"
+            aria-label="About"
+          >
+            <span className="text-lg">ℹ️</span>
+            <span>About</span>
+          </button>
           <span className="px-3 py-1 text-xs bg-slate-100 text-slate-600 rounded-full font-medium">
             v2.4.0
           </span>

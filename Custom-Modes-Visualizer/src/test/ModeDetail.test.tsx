@@ -43,8 +43,8 @@ describe('ModeDetail', () => {
 
       // The token count should be displayed alongside "System Prompt"
       // Based on the prompt "This is a test prompt that should be counted for tokens"
-      // Length: 65 characters -> 65/4 = 16.25 -> ceil to 17 tokens
-      expect(screen.getByText('(17 tokens)')).toBeInTheDocument()
+      // Length: 55 characters -> 55/4 = 13.75 -> ceil to 14 tokens
+      expect(screen.getByText('(14 tokens)')).toBeInTheDocument()
     })
 
     it('should display 0 tokens for empty prompt', () => {
@@ -74,8 +74,8 @@ describe('ModeDetail', () => {
       const user = userEvent.setup()
       renderWithContext(<ModeDetail mode={mockMode} />)
 
-      // Initial count should be 17 tokens
-      expect(screen.getByText('(17 tokens)')).toBeInTheDocument()
+      // Initial count should be 14 tokens
+      expect(screen.getByText('(14 tokens)')).toBeInTheDocument()
 
       // Double-click the prompt to enter edit mode
       const promptDisplay = screen.getByText(mockMode.prompt)
@@ -107,7 +107,7 @@ describe('ModeDetail', () => {
     it('should display token count consistently across renders', () => {
       const { rerender } = renderWithContext(<ModeDetail mode={mockMode} />)
 
-      expect(screen.getByText('(17 tokens)')).toBeInTheDocument()
+      expect(screen.getByText('(14 tokens)')).toBeInTheDocument()
 
       // Rerender with same mode
       rerender(
@@ -151,7 +151,7 @@ describe('ModeDetail', () => {
       const onUpdate = vi.fn()
       const { rerender } = renderWithContext(<ModeDetail mode={mockMode} onUpdate={onUpdate} />)
 
-      expect(screen.getByText('(17 tokens)')).toBeInTheDocument()
+      expect(screen.getByText('(14 tokens)')).toBeInTheDocument()
 
       // Simulate external mode update
       const updatedMode = { ...mockMode, prompt: 'New shorter prompt' }

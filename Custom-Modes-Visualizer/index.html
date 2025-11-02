@@ -9,5 +9,68 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Custom Ko-fi Floating Donation Button with delayed loading, auto-hide, and close button -->
+    <script>
+      setTimeout(function() {
+        // Dynamically load Ko-fi script after 30 seconds to avoid immediate impact on page load
+        var script = document.createElement('script');
+        script.src = 'https://storage.ko-fi.com/cdn/scripts/overlay-widget.js';
+        script.onload = function() {
+          // Draw the widget with customized text
+          kofiWidgetOverlay.draw('jamescherished', {
+            'type': 'floating-chat',
+            'floating-chat.donateButton.text': 'Thank me',
+            'floating-chat.donateButton.background-color': '#00b9fe',
+            'floating-chat.donateButton.text-color': '#fff'
+          });
+
+          // Wait for widget to render, then add close button and auto-hide timer
+          setTimeout(function() {
+            // Find the widget container (Ko-fi typically adds a div with class containing 'kofi')
+            var widget = document.querySelector('.kofi-overlay') ||
+                         document.querySelector('[class*="kofi"]') ||
+                         document.querySelector('div[style*="position: fixed"]'); // Fallback for fixed position elements
+
+            if (widget) {
+              // Create close button positioned over the widget (assuming right-side positioning)
+              var closeBtn = document.createElement('div');
+              closeBtn.innerHTML = '×';
+              closeBtn.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                background: rgba(0, 0, 0, 0.7);
+                color: #fff;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 10001;
+                font-size: 20px;
+                font-weight: bold;
+                user-select: none;
+              `;
+              closeBtn.title = 'Close donation widget';
+              closeBtn.onclick = function() {
+                widget.style.display = 'none';
+                closeBtn.remove();
+              };
+              document.body.appendChild(closeBtn);
+
+              // Auto-hide after 30 seconds of display
+              setTimeout(function() {
+                widget.style.display = 'none';
+                closeBtn.remove();
+              }, 30000);
+            }
+          }, 1000); // Wait 1 second for widget to fully render
+        };
+        document.head.appendChild(script);
+      }, 30000); // 30-second delay before loading
+    </script>
   </body>
 </html>

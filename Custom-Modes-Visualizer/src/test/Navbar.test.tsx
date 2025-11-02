@@ -14,6 +14,7 @@ describe('Navbar Component', () => {
   const mockProps = {
     activeView: 'table' as ViewType,
     onViewChange: vi.fn(),
+    onAboutClick: vi.fn(),
   };
 
   beforeEach(() => {
