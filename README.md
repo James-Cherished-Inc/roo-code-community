@@ -13,7 +13,23 @@ Please note the specific format is required for Roo to read the modes, as of Oct
 
 Includes a custom script for one-shot setup!
 
-## Custom Modes Visualizer
+## Custom Modes Visualizer 🌟
+
+**Manage, visualize, and optimize your Roo Code AI assistant modes with an intuitive web interface!**
+
+✨ **Key Features:**
+- 📋 **Table View**: Inline editing of all modes with family filtering
+- 🎯 **Smart View**: Deep editing with cross-mode redundancy analysis
+- 🔧 **Prompt Builder**: Custom prompt construction (in development)
+- 📦 **Import/Export**: YAML/JSON support with selective mode export
+- 🎨 **Family System**: Organize modes into color-coded families
+- 🔍 **Redundancy Analysis**: Interactive highlighting of repeated words across modes
+- 🌐 **Global Config**: Set instructions that apply to all modes
+- 💾 **Auto-Save**: Instant persistence with localStorage backup
+
+Built with React 19, TypeScript, and Tailwind CSS. Perfect for prompt engineers and AI enthusiasts!
+
+🔗 **[Explore the Visualizer →](Custom-Modes-Visualizer/)**
 
 # Contribute!
 
