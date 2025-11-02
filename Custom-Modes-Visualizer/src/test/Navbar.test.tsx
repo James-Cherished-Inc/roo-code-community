@@ -120,8 +120,15 @@ describe('Navbar Component', () => {
     it('has proper titles for interactive elements', () => {
       render(<Navbar {...mockProps} />);
 
-      const githubLink = screen.getByRole('link', { name: /github/i });
-      expect(githubLink).toHaveAttribute('title', 'View source code on GitHub');
+      // Check that buttons have titles
+      const tableButton = screen.getByText('📋 Table View');
+      expect(tableButton).toHaveAttribute('title', 'Edit all modes in a table');
+
+      const smartButton = screen.getByText('🎯 Smart View');
+      expect(smartButton).toHaveAttribute('title', 'View and edit one mode at a time');
+
+      const promptBuilderButton = screen.getByText('🔧 Prompt Builder');
+      expect(promptBuilderButton).toHaveAttribute('title', 'Construct prompts from options');
     });
   });
 

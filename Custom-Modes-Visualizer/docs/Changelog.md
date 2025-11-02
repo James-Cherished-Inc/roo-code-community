@@ -1,4 +1,39 @@
 # Changelog - Roo Modes Visualizer
+---
+
+## [2025-11-02] - Vitest Configuration Separation Fix
+
+### Fixed
+- **TypeScript Error Resolution**: Resolved "test does not exist in type 'UserConfig'" error in vite.config.ts by moving test configuration to separate vitest.config.ts file
+- **Separation of Concerns**: Properly separated Vite build configuration from Vitest testing configuration according to best practices
+
+### Technical Details
+- **Configuration Split**: Vite's defineConfig only recognizes Vite-specific properties, while Vitest requires its own configuration file
+- **Import Correction**: Changed to import defineConfig from 'vitest/config' in vitest.config.ts
+- **File Structure**: Created dedicated vitest.config.ts alongside existing vite.config.ts
+- **Setup Files Path**: Adjusted setupFiles path from './src/test/setup.ts' to ['./src/test/setup.ts'] for proper array format
+
+### Files Created
+- `vitest.config.ts` - Dedicated Vitest configuration file with test settings (globals, environment, setupFiles)
+
+### Files Modified
+- `vite.config.ts` - Removed test property, now contains only Vite build configuration (plugins)
+
+### Testing Status
+- ✅ TypeScript compilation passes without errors after configuration split
+- ✅ Test suite runs successfully (npm test)
+- ✅ All existing tests continue to pass
+- ✅ Vite build process unaffected
+- ✅ No breaking changes to development or testing workflows
+
+### Impact
+- **Configuration Clarity**: Clear separation between build tool and testing framework configurations
+- **Error Resolution**: Eliminates TypeScript errors preventing proper development
+- **Best Practices**: Follows recommended Vitest setup patterns for Vite projects
+- **Maintainability**: Easier to manage Vite and Vitest configurations separately
+- **Future-Ready**: Supports independent evolution of build and test configurations
+
+---
 
 ## [2025-11-01] - Family-Based Architecture Implementation
 

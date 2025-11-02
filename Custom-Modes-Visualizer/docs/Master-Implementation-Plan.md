@@ -8,6 +8,7 @@ The Roo Modes Visualizer is a React + TypeScript application for managing and vi
 - **Styling**: Tailwind CSS v4
 - **State Management**: React Context API
 - **Build Tool**: Vite
+- **Testing**: Vitest + jsdom
 - **Language**: TypeScript
 
 ## Project Structure

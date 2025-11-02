@@ -6,6 +6,7 @@ Object.defineProperty(navigator, 'clipboard', {
     writeText: vi.fn(),
   },
   writable: true,
+  configurable: true,
 });
 
 // Mock sessionStorage for tests
