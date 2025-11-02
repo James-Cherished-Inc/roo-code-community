@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useModes } from '../context/ModeContext';
 import PromptBuilder from '../components/PromptBuilder';
+import FamilySelector from '../components/FamilySelector';
 
 /**
  * Page component for the prompt builder functionality
  */
 const PromptBuilderPage: React.FC = () => {
-  const { modes } = useModes();
+  const { modes, selectedFamilies } = useModes();
   const [showPopup, setShowPopup] = useState(false);
+
+  // Filter modes based on selected families
+  const filteredModes = useMemo(() => {
+    if (selectedFamilies.length === 0) return [];
+    return modes.filter(mode => mode.family && selectedFamilies.includes(mode.family));
+  }, [modes, selectedFamilies]);
 
   /**
    * Show work in progress popup on component mount
@@ -48,11 +55,19 @@ const PromptBuilderPage: React.FC = () => {
       )}
 
       <div className="p-6">
-        <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">🔧 Prompt Builder</h1>
-          <p className="text-gray-600">
-            Construct custom prompts by selecting base modes and adding additional instructions.
-          </p>
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">🔧 Prompt Builder</h1>
+              <p className="text-gray-600">
+                Construct custom prompts by selecting base modes and adding additional instructions.
+              </p>
+            </div>
+            <div className="text-sm text-gray-500 text-right">
+              {filteredModes.length} mode{filteredModes.length !== 1 ? 's' : ''} available
+            </div>
+          </div>
+          <FamilySelector />
         </div>
 
       <div className="mb-4">
@@ -76,7 +91,7 @@ const PromptBuilderPage: React.FC = () => {
         </div>
       </div>
 
-      <PromptBuilder modes={modes} />
+      <PromptBuilder modes={filteredModes} />
     </div>
     </>
   );

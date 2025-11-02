@@ -4,7 +4,9 @@
 
 Get my Custom Crew to replace Roo's default modes instantly in your workspace by running this single command on macOS, Linux, or modern Windows:
 
+```
 curl -L -o .roomodes https://raw.githubusercontent.com/James-Cherished-Inc/roo-code-community/main/.roomodes.
+```
 
 Adding .roomodes at the root of your workspace will enable the custom modes described in the file.
 Please note the specific format is required for Roo to read the modes, as of October 2025.
