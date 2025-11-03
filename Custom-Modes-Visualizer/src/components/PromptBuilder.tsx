@@ -263,58 +263,6 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
           </div>
         </div>
 
-        {/* Feature Toggles */}
-        {selectedMode && (
-           <div className="mb-6">
-             <label className="block text-sm font-medium text-gray-700 mb-3">
-               Feature Enhancements
-             </label>
-             <DndContext
-               sensors={sensors}
-               collisionDetection={closestCenter}
-               onDragEnd={handleDragEnd}
-             >
-               <div className="space-y-4">
-                 {featureCategories.map(category => {
-                   const categoryFeatures = features.filter(f => f.category === category.id);
-                   const categoryCustomFeatures = customFeatures.filter(f => f.category === category.id);
-
-                   if (categoryFeatures.length === 0 && categoryCustomFeatures.length === 0) return null;
-
-                   // Create sortable items for both built-in and custom features
-                   const allFeatures = [
-                     ...categoryFeatures.map(f => ({ ...f, isCustom: false })),
-                     ...categoryCustomFeatures.map(f => ({ ...f, isCustom: true }))
-                   ];
-
-                   return (
-                     <div key={category.id} className="border rounded-lg p-4 bg-gray-50">
-                       <h4 className="font-medium text-gray-900 mb-3">{category.name}</h4>
-                       <p className="text-sm text-gray-600 mb-3">{category.description}</p>
-                       <div className="space-y-2">
-                         <SortableContext
-                           items={allFeatures.map(f => f.id)}
-                           strategy={verticalListSortingStrategy}
-                         >
-                           {allFeatures.map(feature => (
-                             <SortableFeatureItem
-                               key={feature.id}
-                               featureId={feature.id}
-                               feature={feature}
-                               selectedFeatures={selectedFeatures}
-                               onFeatureToggle={handleFeatureToggle}
-                               isCustom={feature.isCustom}
-                             />
-                           ))}
-                         </SortableContext>
-                       </div>
-                     </div>
-                   );
-                 })}
-               </div>
-             </DndContext>
-           </div>
-         )}
 
         {/* Custom Instructions */}
         <div className="mb-6">
@@ -352,6 +300,59 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
             </div>
           )}
         </div>
+
+        {/* Feature Toggles */}
+        {selectedMode && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Feature Enhancements
+              </label>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <div className="space-y-4">
+                  {featureCategories.map(category => {
+                    const categoryFeatures = features.filter(f => f.category === category.id);
+                    const categoryCustomFeatures = customFeatures.filter(f => f.category === category.id);
+
+                    if (categoryFeatures.length === 0 && categoryCustomFeatures.length === 0) return null;
+
+                    // Create sortable items for both built-in and custom features
+                    const allFeatures = [
+                      ...categoryFeatures.map(f => ({ ...f, isCustom: false })),
+                      ...categoryCustomFeatures.map(f => ({ ...f, isCustom: true }))
+                    ];
+
+                    return (
+                      <div key={category.id} className="border rounded-lg p-4 bg-gray-50">
+                        <h4 className="font-medium text-gray-900 mb-3">{category.name}</h4>
+                        <p className="text-sm text-gray-600 mb-3">{category.description}</p>
+                        <div className="space-y-2">
+                          <SortableContext
+                            items={allFeatures.map(f => f.id)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            {allFeatures.map(feature => (
+                              <SortableFeatureItem
+                                key={feature.id}
+                                featureId={feature.id}
+                                feature={feature}
+                                selectedFeatures={selectedFeatures}
+                                onFeatureToggle={handleFeatureToggle}
+                                isCustom={feature.isCustom}
+                              />
+                            ))}
+                          </SortableContext>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </DndContext>
+            </div>
+          )}
 
         {/* Action Buttons */}
         <div className="flex space-x-4 mb-6">
