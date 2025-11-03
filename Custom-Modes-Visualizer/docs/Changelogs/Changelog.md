@@ -1,3 +1,34 @@
+## [2025-11-03] - CustomFeatureManager Integration in Prompt Builder
+
+### Added
+- **Custom Feature Management Section**: Added collapsible "Manage Custom Features" section to Prompt Builder interface
+- **Integrated CustomFeatureManager Component**: Users can now access custom feature management directly from Prompt Builder
+- **Toggle State Management**: Added state handling for showing/hiding the custom feature manager section
+- **UI Integration**: Seamlessly integrated custom feature management without disrupting existing Prompt Builder workflow
+
+### Changed
+- **PromptBuilder Component**: Added import for CustomFeatureManager and integrated it into the UI layout
+- **Component Structure**: Added collapsible section below custom instructions textarea
+- **Test Suite**: Updated PromptBuilder.test.tsx to mock CustomFeatureManager component for proper testing
+
+### Technical Details
+- **State Management**: Added `showCustomFeatureManager` boolean state to control section visibility
+- **UI Design**: Used collapsible button with rotating arrow icon for intuitive expand/collapse interaction
+- **Component Placement**: Positioned after custom instructions to maintain logical workflow (mode selection → features → instructions → management)
+- **Backward Compatibility**: All existing functionality remains unchanged
+
+### Files Modified
+- `src/components/PromptBuilder.tsx` - Added CustomFeatureManager integration with collapsible UI
+- `src/test/PromptBuilder.test.tsx` - Added mock for CustomFeatureManager component
+
+### Impact
+- **Enhanced User Experience**: Users can manage custom features without leaving the Prompt Builder context
+- **Streamlined Workflow**: Feature management is now part of the prompt building process
+- **UI Consistency**: Maintains design patterns with other collapsible sections in the application
+- **Accessibility**: Proper focus management and keyboard navigation for the toggle button
+
+---
+
 ## [2025-11-03] - Custom Features Integration in Prompt Generation
 
 ### Added
