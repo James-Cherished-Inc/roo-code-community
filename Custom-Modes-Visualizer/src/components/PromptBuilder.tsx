@@ -84,20 +84,24 @@ const SortableFeatureItem: React.FC<{
       {/* Checkbox */}
       <input
         type="checkbox"
+        id={`${featureId}-checkbox`}
         checked={selectedFeatures[featureId] || false}
         onChange={handleToggle}
         className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        aria-label={feature.name}
       />
 
       {/* Feature content */}
       <div className="flex-1">
-        <span className="font-medium text-gray-900">{feature.name}</span>
-        <p className="text-sm text-gray-600">{feature.description}</p>
-        {isCustom && (
-          <span className="inline-flex items-center px-2 py-0.5 mt-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
-            Custom
-          </span>
-        )}
+        <label htmlFor={`${featureId}-checkbox`} className="cursor-pointer">
+          <span className="font-medium text-gray-900">{feature.name}</span>
+          <p className="text-sm text-gray-600">{feature.description}</p>
+          {isCustom && (
+            <span className="inline-flex items-center px-2 py-0.5 mt-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
+              Custom
+            </span>
+          )}
+        </label>
       </div>
     </div>
   );
