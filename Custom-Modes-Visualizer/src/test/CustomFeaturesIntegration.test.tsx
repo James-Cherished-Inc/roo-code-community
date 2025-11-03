@@ -38,6 +38,50 @@ Object.defineProperty(navigator, 'clipboard', {
   configurable: true,
 })
 
+// Mock URL constructor and related methods
+Object.defineProperty(window, 'URL', {
+  value: {
+    createObjectURL: vi.fn(() => 'mock-url'),
+    revokeObjectURL: vi.fn(),
+  },
+  writable: true,
+  configurable: true,
+})
+
+// Mock document methods for DOM manipulation
+Object.defineProperty(document, 'createElement', {
+  writable: true,
+  value: vi.fn().mockImplementation((tagName: string) => {
+    if (tagName === 'a') {
+      return {
+        href: '',
+        download: '',
+        click: vi.fn(),
+      };
+    }
+    return {};
+  }),
+});
+
+Object.defineProperty(document.body, 'appendChild', {
+  writable: true,
+  value: vi.fn(),
+});
+
+Object.defineProperty(document.body, 'removeChild', {
+  writable: true,
+  value: vi.fn(),
+});
+
+// Mock crypto for Node.js compatibility
+Object.defineProperty(window, 'crypto', {
+  value: {
+    getRandomValues: vi.fn(),
+    subtle: {},
+  },
+  writable: true,
+});
+
 // Mock data
 const mockModes: Mode[] = [
   {
