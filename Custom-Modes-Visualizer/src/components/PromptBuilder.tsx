@@ -301,6 +301,20 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
           )}
         </div>
 
+        {/* Selected Mode Info */}
+        {selectedMode && (
+          <div className="mb-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Selected Mode Details</h3>
+            <div className="bg-blue-50 p-4 rounded-md">
+              <h4 className="font-medium text-blue-900">{selectedMode.name}</h4>
+               <p className="text-blue-800 mt-1">{selectedMode.description}</p>
+               <p className="text-blue-700 text-sm mt-2">
+                 <strong>Usage:</strong> {selectedMode.usage}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Feature Toggles */}
         {selectedMode && (
             <div className="mb-6">
@@ -395,19 +409,6 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
           </div>
         )}
 
-        {/* Selected Mode Info */}
-        {selectedMode && (
-          <div className="border-t pt-6 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Selected Mode Details</h3>
-            <div className="bg-blue-50 p-4 rounded-md">
-              <h4 className="font-medium text-blue-900">{selectedMode.name}</h4>
-               <p className="text-blue-800 mt-1">{selectedMode.description}</p>
-               <p className="text-blue-700 text-sm mt-2">
-                 <strong>Usage:</strong> {selectedMode.usage}
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Copy success message */}
         {copyMessage && (
