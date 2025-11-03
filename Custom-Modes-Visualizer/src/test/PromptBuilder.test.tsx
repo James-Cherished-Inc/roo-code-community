@@ -5,6 +5,11 @@ import '@testing-library/jest-dom'
 import PromptBuilder from '../components/PromptBuilder'
 import type { Mode } from '../types'
 
+// Mock CustomFeatureManager component
+vi.mock('../components/CustomFeatureManager', () => ({
+  CustomFeatureManager: () => <div data-testid="custom-feature-manager">Custom Feature Manager</div>
+}))
+
 // Mock the entire ModeContext
 vi.mock('../context/ModeContext', () => ({
   useModes: vi.fn(() => ({

@@ -1,3 +1,31 @@
+## [2025-11-03] - Custom Features Integration in Prompt Generation
+
+### Added
+- **Custom Features in Prompts**: Custom features now appear in generated prompts with the same formatting as built-in features
+- **Drag-and-Drop Order Preservation**: Features are included in prompts respecting their drag-and-drop reordering within each category
+- **Category-Based Organization**: Features are collected per category, combining built-in and custom features in logical order
+
+### Changed
+- **Prompt Generation Logic**: Updated `generatePrompt()` function to iterate through feature categories and collect enabled features in display order
+- **Feature Collection Strategy**: Modified from simple feature filtering to category-based collection with built-in + custom feature merging
+
+### Technical Details
+- **Order Preservation**: Custom features maintain their reordered positions within categories during prompt generation
+- **Unified Formatting**: Both built-in and custom features use identical `## Feature Name\nDescription` format in output
+- **Category Iteration**: Logic now processes features by category to maintain organizational structure in prompts
+
+### Files Modified
+- `src/components/PromptBuilder.tsx` - Updated generatePrompt function to include custom features with drag-and-drop order
+
+### Impact
+- **Complete Feature Integration**: Custom features are fully integrated into prompt generation process
+- **User Experience Enhancement**: Drag-and-drop ordering is respected in final prompt output
+- **Consistent Output Format**: All features (built-in and custom) use standardized formatting in generated prompts
+- **Backward Compatibility**: Existing prompt generation for built-in features remains unchanged
+
+---
+
+## [2025-11-02] - Extended Types for User-Created Custom Features
 ## [2025-11-02] - Extended Types for User-Created Custom Features
 
 ### Added

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useModes } from '../context/ModeContext';
 import type { Mode, FeatureState } from '../types';
 import { featureCategories, features, getDefaultFeaturesForMode } from '../data/features';
+import { CustomFeatureManager } from './CustomFeatureManager';
 import {
   DndContext,
   closestCenter,
@@ -109,6 +110,7 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
     const [generatedPrompt, setGeneratedPrompt] = useState('');
     const [selectedFeatures, setSelectedFeatures] = useState<FeatureState>({});
     const [copyMessage, setCopyMessage] = useState(false);
+    const [showCustomFeatureManager, setShowCustomFeatureManager] = useState(false);
 
     // Sensors for drag and drop
     const sensors = useSensors(
@@ -322,6 +324,29 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+        </div>
+
+        {/* Custom Feature Manager Section */}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowCustomFeatureManager(!showCustomFeatureManager)}
+            className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md px-3 py-2 bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <svg
+              className={`w-5 h-5 transform transition-transform ${showCustomFeatureManager ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            <span>Manage Custom Features</span>
+          </button>
+          {showCustomFeatureManager && (
+            <div className="mt-4 border-t pt-4">
+              <CustomFeatureManager />
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
