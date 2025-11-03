@@ -60,7 +60,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange, onAboutClick 
         <div className="flex-shrink-0 flex items-center space-x-3">
 
           <span className="px-3 py-1 text-xs bg-slate-100 text-slate-600 rounded-full font-medium">
-            v4.2.0
+            v4.2.4
           </span>
 
           <button

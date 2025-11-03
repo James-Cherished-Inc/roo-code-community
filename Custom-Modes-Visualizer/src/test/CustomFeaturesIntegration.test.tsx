@@ -65,19 +65,6 @@ describe('Custom Features Integration', () => {
 
   describe('Custom Feature Creation', () => {
     it('should allow creating a custom feature and using it in prompt generation', async () => {
-      // Mock the context to return custom features dynamically
-      let dynamicFeatures = mockCustomFeatures
-      vi.mocked(vi.importMock('../context/ModeContext')).useModes.mockImplementation(() => ({
-        customFeatures: dynamicFeatures,
-        addCustomFeature: (feature: CustomFeature) => {
-          dynamicFeatures = [...dynamicFeatures, feature]
-          mockAddCustomFeature(feature)
-        },
-        updateCustomFeature: mockUpdateCustomFeature,
-        deleteCustomFeature: mockDeleteCustomFeature,
-        reorderCustomFeatures: mockReorderCustomFeatures,
-      }))
-
       render(<PromptBuilder modes={mockModes} />)
 
       // Select mode
