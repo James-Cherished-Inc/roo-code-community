@@ -354,7 +354,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate, onPrevious, onN
   };
 
   return (
-    <div className="bg-white shadow rounded-lg px-8 py-6 h-full w-full max-w-none">
+    <div className="bg-white shadow rounded-lg px-8 py-6 h-full w-full max-w-none relative">
       {/* Header with editable name and slug */}
       <div className="mb-6 pb-4 border-b border-gray-200 relative">
         <div className="flex justify-between items-start">
@@ -442,7 +442,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate, onPrevious, onN
 
       {/* Copy success message */}
       {copyMessage && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg animate-fade-in-up z-50">
+        <div className="absolute top-2 right-2 bg-green-500 text-white px-3 py-2 rounded-lg text-sm font-medium shadow-lg animate-fade-in-up z-50">
           Copied ✨
         </div>
       )}
