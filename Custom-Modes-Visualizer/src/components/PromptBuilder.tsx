@@ -175,8 +175,19 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
 
      let prompt = selectedMode.prompt;
 
+     // Collect enabled features in drag-and-drop order (per category)
+     const enabledFeatures: (typeof features[0] | typeof customFeatures[0])[] = [];
+     featureCategories.forEach(category => {
+       // Add enabled built-in features for this category
+       const catBuiltIn = features.filter(f => f.category === category.id && selectedFeatures[f.id]);
+       enabledFeatures.push(...catBuiltIn);
+
+       // Add enabled custom features for this category (in their reordered order)
+       const catCustom = customFeatures.filter(f => f.category === category.id && selectedFeatures[f.id]);
+       enabledFeatures.push(...catCustom);
+     });
+
      // Add enabled features as standardized instruction blocks
-     const enabledFeatures = features.filter(feature => selectedFeatures[feature.id]);
      if (enabledFeatures.length > 0) {
        prompt += '\n\n--- Feature Enhancements ---\n';
        enabledFeatures.forEach(feature => {
