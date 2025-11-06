@@ -5,6 +5,20 @@ import '@testing-library/jest-dom'
 import PromptBuilder from '../components/PromptBuilder'
 import type { Mode } from '../types'
 
+// Mock CustomFeatureManager component
+vi.mock('../components/CustomFeatureManager', () => ({
+  CustomFeatureManager: () => <div data-testid="custom-feature-manager">Custom Feature Manager</div>
+}))
+
+// Mock the entire ModeContext
+vi.mock('../context/ModeContext', () => ({
+  useModes: vi.fn(() => ({
+    customFeatures: [],
+    reorderCustomFeatures: vi.fn(),
+  })),
+  ModeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
+
 // Mock clipboard API
 const mockWriteText = vi.fn()
 Object.defineProperty(navigator, 'clipboard', {
@@ -13,6 +27,38 @@ Object.defineProperty(navigator, 'clipboard', {
   },
   writable: true,
   configurable: true,
+})
+
+// Mock URL constructor and related globals
+Object.defineProperty(window, 'URL', {
+  value: class URL {
+    constructor() {}
+    createObjectURL() { return 'mock-url'; }
+    revokeObjectURL() {}
+  },
+  writable: true,
+  configurable: true,
+})
+
+// Mock document methods for DOM manipulation
+Object.defineProperty(document, 'createElement', {
+  writable: true,
+  value: vi.fn().mockImplementation(() => ({
+    href: '',
+    download: '',
+    click: vi.fn(),
+  })),
+})
+Object.defineProperty(document.body, 'appendChild', { writable: true, value: vi.fn() })
+Object.defineProperty(document.body, 'removeChild', { writable: true, value: vi.fn() })
+
+// Mock crypto for Node.js compatibility
+Object.defineProperty(window, 'crypto', {
+  value: {
+    getRandomValues: vi.fn(),
+    subtle: {},
+  },
+  writable: true,
 })
 
 // Mock data
@@ -50,6 +96,9 @@ describe('PromptBuilder', () => {
     user = userEvent.setup()
     vi.clearAllMocks()
     mockWriteText.mockResolvedValue(undefined)
+
+    // Clear all mocks
+    vi.resetAllMocks()
   })
 
   describe('UI Rendering Tests', () => {

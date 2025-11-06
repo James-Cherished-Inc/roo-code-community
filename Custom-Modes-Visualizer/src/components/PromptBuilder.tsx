@@ -1,6 +1,27 @@
 import React, { useState } from 'react';
+import { useModes } from '../context/ModeContext';
 import type { Mode, FeatureState } from '../types';
 import { featureCategories, features, getDefaultFeaturesForMode } from '../data/features';
+import { CustomFeatureManager } from './CustomFeatureManager';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 /**
  * Props for the PromptBuilder component
@@ -13,12 +34,95 @@ interface PromptBuilderProps {
 /**
  * Component for constructing custom prompts from mode options
  */
+/**
+ * Sortable feature item component
+ */
+const SortableFeatureItem: React.FC<{
+  featureId: string;
+  feature: any;
+  selectedFeatures: FeatureState;
+  onFeatureToggle: (featureId: string, enabled: boolean) => void;
+  isCustom?: boolean;
+}> = ({ featureId, feature, selectedFeatures, onFeatureToggle, isCustom = false }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: featureId });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFeatureToggle(featureId, e.target.checked);
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-start space-x-3"
+    >
+      {/* Drag handle */}
+      <button
+        className="mt-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+        {...attributes}
+        {...listeners}
+        title="Drag to reorder"
+      >
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M3 15h18v2H3v-2zm0-4h18v2H3v-2zm0-4h18v2H3V7z"/>
+        </svg>
+      </button>
+
+      {/* Checkbox */}
+      <input
+        type="checkbox"
+        id={`${featureId}-checkbox`}
+        checked={selectedFeatures[featureId] || false}
+        onChange={handleToggle}
+        className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        aria-label={feature.name}
+      />
+
+      {/* Feature content */}
+      <div className="flex-1">
+        <label htmlFor={`${featureId}-checkbox`} className="cursor-pointer">
+          <span className="font-medium text-gray-900">{feature.name}</span>
+          <p className="text-sm text-gray-600">{feature.description}</p>
+          {isCustom && (
+            <span className="inline-flex items-center px-2 py-0.5 mt-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
+              Custom
+            </span>
+          )}
+        </label>
+      </div>
+    </div>
+  );
+};
+
 const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
-   const [selectedMode, setSelectedMode] = useState<Mode | null>(null);
-   const [customPrompt, setCustomPrompt] = useState('');
-   const [generatedPrompt, setGeneratedPrompt] = useState('');
-   const [selectedFeatures, setSelectedFeatures] = useState<FeatureState>({});
-   const [copyMessage, setCopyMessage] = useState(false);
+    const { customFeatures, reorderCustomFeatures } = useModes();
+    const [selectedMode, setSelectedMode] = useState<Mode | null>(null);
+    const [customPrompt, setCustomPrompt] = useState('');
+    const [generatedPrompt, setGeneratedPrompt] = useState('');
+    const [selectedFeatures, setSelectedFeatures] = useState<FeatureState>({});
+    const [copyMessage, setCopyMessage] = useState(false);
+    const [showCustomFeatureManager, setShowCustomFeatureManager] = useState(false);
+
+    // Sensors for drag and drop
+    const sensors = useSensors(
+      useSensor(PointerSensor),
+      useSensor(KeyboardSensor, {
+        coordinateGetter: sortableKeyboardCoordinates,
+      })
+    );
 
    /**
     * Handle mode selection
@@ -28,6 +132,35 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
      setCustomPrompt('');
      setGeneratedPrompt('');
      setSelectedFeatures(getDefaultFeaturesForMode(mode.slug));
+   };
+
+   /**
+    * Handle drag end for feature reordering
+    */
+   const handleDragEnd = (event: DragEndEvent) => {
+     const { active, over } = event;
+
+     if (over && active.id !== over.id) {
+       const activeId = active.id as string;
+       const overId = over.id as string;
+
+       // Check if both are custom features
+       const isActiveCustom = activeId.startsWith('custom-');
+       const isOverCustom = overId.startsWith('custom-');
+
+       if (isActiveCustom && isOverCustom) {
+         // Reorder custom features
+         const oldIndex = customFeatures.findIndex(f => f.id === activeId);
+         const newIndex = customFeatures.findIndex(f => f.id === overId);
+
+         if (oldIndex !== -1 && newIndex !== -1) {
+           const newOrder = arrayMove(customFeatures, oldIndex, newIndex);
+           reorderCustomFeatures(newOrder);
+         }
+       }
+       // For built-in features, we could add reordering if needed in the future
+       // But the task specifically mentions custom features
+     }
    };
 
    /**
@@ -48,8 +181,19 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
 
      let prompt = selectedMode.prompt;
 
+     // Collect enabled features in drag-and-drop order (per category)
+     const enabledFeatures: (typeof features[0] | typeof customFeatures[0])[] = [];
+     featureCategories.forEach(category => {
+       // Add enabled built-in features for this category
+       const catBuiltIn = features.filter(f => f.category === category.id && selectedFeatures[f.id]);
+       enabledFeatures.push(...catBuiltIn);
+
+       // Add enabled custom features for this category (in their reordered order)
+       const catCustom = customFeatures.filter(f => f.category === category.id && selectedFeatures[f.id]);
+       enabledFeatures.push(...catCustom);
+     });
+
      // Add enabled features as standardized instruction blocks
-     const enabledFeatures = features.filter(feature => selectedFeatures[feature.id]);
      if (enabledFeatures.length > 0) {
        prompt += '\n\n--- Feature Enhancements ---\n';
        enabledFeatures.forEach(feature => {
@@ -119,42 +263,6 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
           </div>
         </div>
 
-        {/* Feature Toggles */}
-        {selectedMode && (
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Feature Enhancements
-            </label>
-            <div className="space-y-4">
-              {featureCategories.map(category => {
-                const categoryFeatures = features.filter(f => f.category === category.id);
-                if (categoryFeatures.length === 0) return null;
-                return (
-                  <div key={category.id} className="border rounded-lg p-4 bg-gray-50">
-                    <h4 className="font-medium text-gray-900 mb-3">{category.name}</h4>
-                    <p className="text-sm text-gray-600 mb-3">{category.description}</p>
-                    <div className="space-y-2">
-                      {categoryFeatures.map(feature => (
-                        <label key={feature.id} className="flex items-start space-x-3">
-                          <input
-                            type="checkbox"
-                            checked={selectedFeatures[feature.id] || false}
-                            onChange={(e) => handleFeatureToggle(feature.id, e.target.checked)}
-                            className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
-                          <div className="flex-1">
-                            <span className="font-medium text-gray-900">{feature.name}</span>
-                            <p className="text-sm text-gray-600">{feature.description}</p>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Custom Instructions */}
         <div className="mb-6">
@@ -169,6 +277,82 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+
+        {/* Custom Feature Manager Section */}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowCustomFeatureManager(!showCustomFeatureManager)}
+            className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md px-3 py-2 bg-gray-50 hover:bg-gray-100 transition-colors"
+          >
+            <svg
+              className={`w-5 h-5 transform transition-transform ${showCustomFeatureManager ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            <span>Manage Custom Features</span>
+          </button>
+          {showCustomFeatureManager && (
+            <div className="mt-4 border-t pt-4">
+              <CustomFeatureManager />
+            </div>
+          )}
+        </div>
+
+        {/* Feature Toggles */}
+        {selectedMode && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Feature Enhancements
+              </label>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <div className="space-y-4">
+                  {featureCategories.map(category => {
+                    const categoryFeatures = features.filter(f => f.category === category.id);
+                    const categoryCustomFeatures = customFeatures.filter(f => f.category === category.id);
+
+                    if (categoryFeatures.length === 0 && categoryCustomFeatures.length === 0) return null;
+
+                    // Create sortable items for both built-in and custom features
+                    const allFeatures = [
+                      ...categoryFeatures.map(f => ({ ...f, isCustom: false })),
+                      ...categoryCustomFeatures.map(f => ({ ...f, isCustom: true }))
+                    ];
+
+                    return (
+                      <div key={category.id} className="border rounded-lg p-4 bg-gray-50">
+                        <h4 className="font-medium text-gray-900 mb-3">{category.name}</h4>
+                        <p className="text-sm text-gray-600 mb-3">{category.description}</p>
+                        <div className="space-y-2">
+                          <SortableContext
+                            items={allFeatures.map(f => f.id)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            {allFeatures.map(feature => (
+                              <SortableFeatureItem
+                                key={feature.id}
+                                featureId={feature.id}
+                                feature={feature}
+                                selectedFeatures={selectedFeatures}
+                                onFeatureToggle={handleFeatureToggle}
+                                isCustom={feature.isCustom}
+                              />
+                            ))}
+                          </SortableContext>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </DndContext>
+            </div>
+          )}
 
         {/* Action Buttons */}
         <div className="flex space-x-4 mb-6">

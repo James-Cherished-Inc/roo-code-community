@@ -106,12 +106,53 @@ export type FeatureDefinition = {
 export type FeatureState = Record<string, boolean>;
 
 /**
+ * Represents a user-created custom feature
+ */
+export type CustomFeature = {
+  /** Unique identifier for the custom feature */
+  id: string;
+  /** Display name for the feature */
+  name: string;
+  /** Brief description of what this feature does */
+  description: string;
+  /** Category this feature belongs to */
+  category: string;
+};
+
+/**
+ * Ordering of features for drag-and-drop functionality (array of feature ids)
+ */
+export type FeatureOrder = string[];
+
+/**
+ * Extended feature state including built-in features, custom features, and ordering
+ */
+export type ExtendedFeatureState = {
+  /** Built-in features state */
+  builtin: FeatureState;
+  /** Custom features state (feature id -> boolean) */
+  custom: Record<string, boolean>;
+  /** Order of features for drag-and-drop */
+  order: FeatureOrder;
+};
+
+/**
  * Global configuration for all modes
  */
 export interface GlobalConfig {
   /** Common instructions applied to all modes */
   forAllModes: string;
 }
+
+/**
+ * Persistence format for custom features in localStorage
+ */
+export type PersistedCustomFeatures = {
+  /** Array of custom features */
+  features: CustomFeature[];
+  /** Last modified timestamp */
+  lastModified: string;
+};
 
 /**
  * State for the Prompt Builder component
@@ -124,7 +165,9 @@ export interface PromptBuilderState {
   /** Generated prompt text */
   generatedPrompt: string;
   /** Selected features for this prompt */
-  selectedFeatures: FeatureState;
+  selectedFeatures: ExtendedFeatureState;
+  /** Available custom features for selection */
+  availableCustomFeatures: CustomFeature[];
 }
 
 /**
@@ -134,6 +177,7 @@ export interface ModeContextType {
   modes: Mode[];
   families: ModeFamily[];
   selectedFamilies: string[];
+  customFeatures: CustomFeature[];
   updateMode: (slug: string, updates: Partial<Mode>) => void;
   addMode: (mode: Mode) => void;
   deleteMode: (slug: string) => void;
@@ -141,6 +185,10 @@ export interface ModeContextType {
   updateFamily: (id: string, updates: Partial<ModeFamily>) => void;
   deleteFamily: (id: string) => void;
   setSelectedFamilies: (familyIds: string[]) => void;
+  addCustomFeature: (feature: CustomFeature) => void;
+  updateCustomFeature: (id: string, updates: Partial<CustomFeature>) => void;
+  deleteCustomFeature: (id: string) => void;
+  reorderCustomFeatures: (newOrder: CustomFeature[]) => void;
   saveToLocalStorage: () => void;
   loadFromLocalStorage: () => void;
   exportModesToJson: () => boolean;

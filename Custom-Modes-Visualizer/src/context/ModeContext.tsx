@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { Mode, ModeContextType, ModeFamily, FormatType, GlobalConfig } from '../types';
+import type { Mode, ModeContextType, ModeFamily, FormatType, GlobalConfig, CustomFeature, PersistedCustomFeatures } from '../types';
 
 // Load initial data from JSON file
 import defaultFamilyData from '../data/default-family.json';
@@ -23,6 +23,7 @@ const MODES_STORAGE_KEY = 'roo-modes-visualizer-modes';
 const FAMILIES_STORAGE_KEY = 'roo-modes-visualizer-families';
 const SELECTED_FAMILIES_STORAGE_KEY = 'roo-modes-visualizer-selected-families';
 const GLOBAL_MODES_CONFIG_KEY = 'roo-modes-visualizer-global-config';
+const CUSTOM_FEATURES_STORAGE_KEY = 'roo-modes-visualizer-custom-features';
 
 /**
  * Context for managing mode and family data throughout the application
@@ -51,6 +52,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
      const [families, setFamilies] = useState<ModeFamily[]>([defaultFamilyData, standaloneFamilyData, cherishedFamilyData]);
      const [selectedFamilies, setSelectedFamilies] = useState<string[]>(['default', 'standalone']);
      const [globalConfig, setGlobalConfig] = useState<GlobalConfig>({ forAllModes: '' });
+     const [customFeatures, setCustomFeatures] = useState<CustomFeature[]>([]);
 
   /**
    * Update a specific mode by slug
@@ -114,17 +116,23 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   /**
    * Save current modes and families to localStorage
-    */
-   const saveToLocalStorage = () => {
-     try {
-       localStorage.setItem(MODES_STORAGE_KEY, JSON.stringify(modes));
-       localStorage.setItem(FAMILIES_STORAGE_KEY, JSON.stringify(families));
-       localStorage.setItem(SELECTED_FAMILIES_STORAGE_KEY, JSON.stringify(selectedFamilies));
-       localStorage.setItem(GLOBAL_MODES_CONFIG_KEY, JSON.stringify(globalConfig));
-     } catch (error) {
-       console.error('Failed to save data to localStorage:', error);
-     }
-   };
+     */
+    const saveToLocalStorage = () => {
+      try {
+        localStorage.setItem(MODES_STORAGE_KEY, JSON.stringify(modes));
+        localStorage.setItem(FAMILIES_STORAGE_KEY, JSON.stringify(families));
+        localStorage.setItem(SELECTED_FAMILIES_STORAGE_KEY, JSON.stringify(selectedFamilies));
+        localStorage.setItem(GLOBAL_MODES_CONFIG_KEY, JSON.stringify(globalConfig));
+
+        const customFeaturesData: PersistedCustomFeatures = {
+          features: customFeatures,
+          lastModified: new Date().toISOString(),
+        };
+        localStorage.setItem(CUSTOM_FEATURES_STORAGE_KEY, JSON.stringify(customFeaturesData));
+      } catch (error) {
+        console.error('Failed to save data to localStorage:', error);
+      }
+    };
 
   /**
    * Export modes to JSON file (merge all families except Default)
@@ -383,7 +391,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   /**
    * Reset modes to initial default state
-   */
+    */
   const resetModes = () => {
     try {
       // Reset modes to initial data from family files
@@ -398,11 +406,15 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Reset global config to empty
       setGlobalConfig({ forAllModes: '' });
 
+      // Reset custom features to empty
+      setCustomFeatures([]);
+
       // Clear localStorage
       localStorage.removeItem(MODES_STORAGE_KEY);
       localStorage.removeItem(FAMILIES_STORAGE_KEY);
       localStorage.removeItem(SELECTED_FAMILIES_STORAGE_KEY);
       localStorage.removeItem(GLOBAL_MODES_CONFIG_KEY);
+      localStorage.removeItem(CUSTOM_FEATURES_STORAGE_KEY);
 
       return true;
     } catch (error) {
@@ -413,7 +425,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   /**
    * Load modes and families from localStorage
-   */
+    */
   const loadFromLocalStorage = () => {
     try {
       const savedModes = localStorage.getItem(MODES_STORAGE_KEY);
@@ -449,6 +461,12 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const parsedGlobalConfig = JSON.parse(savedGlobalConfig);
         setGlobalConfig(parsedGlobalConfig);
       }
+
+      const savedCustomFeatures = localStorage.getItem(CUSTOM_FEATURES_STORAGE_KEY);
+      if (savedCustomFeatures) {
+        const parsedCustomFeatures: PersistedCustomFeatures = JSON.parse(savedCustomFeatures);
+        setCustomFeatures(parsedCustomFeatures.features);
+      }
     } catch (error) {
       console.error('Failed to load data from localStorage:', error);
     }
@@ -459,15 +477,50 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadFromLocalStorage();
   }, []);
 
-  // Auto-save to localStorage whenever modes, families, or selected families change
+  // Auto-save to localStorage whenever modes, families, selected families, or custom features change
   useEffect(() => {
     saveToLocalStorage();
-  }, [modes, families, selectedFamilies]);
+  }, [modes, families, selectedFamilies, customFeatures]);
+
+  // Custom feature CRUD operations
+
+  /**
+   * Add a new custom feature
+   */
+  const addCustomFeature = (feature: CustomFeature) => {
+    setCustomFeatures(prevFeatures => [...prevFeatures, feature]);
+  };
+
+  /**
+   * Update a custom feature by id
+   */
+  const updateCustomFeature = (id: string, updates: Partial<CustomFeature>) => {
+    setCustomFeatures(prevFeatures =>
+      prevFeatures.map(feature =>
+        feature.id === id ? { ...feature, ...updates } : feature
+      )
+    );
+  };
+
+  /**
+   * Delete a custom feature by id
+   */
+  const deleteCustomFeature = (id: string) => {
+    setCustomFeatures(prevFeatures => prevFeatures.filter(feature => feature.id !== id));
+  };
+
+  /**
+   * Reorder custom features
+   */
+  const reorderCustomFeatures = (newOrder: CustomFeature[]) => {
+    setCustomFeatures(newOrder);
+  };
 
   const contextValue: ModeContextType = {
     modes,
     families,
     selectedFamilies,
+    customFeatures,
     updateMode,
     addMode,
     deleteMode,
@@ -475,6 +528,10 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     updateFamily,
     deleteFamily,
     setSelectedFamilies,
+    addCustomFeature,
+    updateCustomFeature,
+    deleteCustomFeature,
+    reorderCustomFeatures,
     saveToLocalStorage,
     loadFromLocalStorage,
     exportModesToJson,
