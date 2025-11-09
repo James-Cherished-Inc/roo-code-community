@@ -23,27 +23,41 @@ describe('AboutPanel Component', () => {
     it('renders panel when isOpen is true', () => {
       render(<AboutPanel isOpen={true} onClose={mockOnClose} />);
 
-      expect(screen.getByText('About Roo Modes Visualizer')).toBeInTheDocument();
-      expect(screen.getByText('Roo Code Community')).toBeInTheDocument();
+      // Basic sanity check: about panel root should render
+      const panel = screen.getByRole('complementary');
+      expect(panel).toBeInTheDocument();
+      expect(screen.getByText('About Me')).toBeInTheDocument();
+      expect(screen.getByText('Why a Custom Modes Visualizer?')).toBeInTheDocument();
     });
 
-    it('renders overlay when panel is open', () => {
-      render(<AboutPanel isOpen={true} onClose={mockOnClose} />);
-
-      const overlay = screen.getByTestId('overlay');
-      expect(overlay).toBeInTheDocument();
-      expect(overlay).toHaveClass('bg-black', 'bg-opacity-50', 'z-40');
-    });
+    // The overlay behavior is no longer implemented as a separate element with data-testid="overlay"
+    // in the current AboutPanel. This expectation has been removed to align with the component UI.
 
     it('renders panel with correct styling', () => {
       render(<AboutPanel isOpen={true} onClose={mockOnClose} />);
 
       const panel = screen.getByRole('complementary');
+      // Updated to match current AboutPanel design
       expect(panel).toHaveClass(
-        'fixed', 'top-0', 'right-0', 'h-full',
-        'bg-gradient-to-br', 'from-purple-800', 'to-purple-900',
-        'text-white', 'shadow-lg', 'z-50', 'transition-transform',
-        'duration-300', 'ease-in-out', 'overflow-y-auto'
+        'fixed',
+        'top-0',
+        'right-0',
+        'h-full',
+        'bg-gradient-to-br',
+        'from-white',
+        'via-purple-50',
+        'to-purple-100',
+        'text-slate-900',
+        'shadow-lg',
+        'z-50',
+        'transition-transform',
+        'duration-300',
+        'ease-in-out',
+        'overflow-y-auto',
+        'border-l-4',
+        'border-purple-500',
+        'w-80',
+        'sm:w-96'
       );
     });
 
@@ -69,9 +83,15 @@ describe('AboutPanel Component', () => {
 
       const closeButton = screen.getByLabelText('Close About Panel');
       expect(closeButton).toBeInTheDocument();
+      // Updated to match current AboutPanel close button styling
       expect(closeButton).toHaveClass(
-        'absolute', 'top-2', 'right-2', 'text-2xl', 'text-white',
-        'hover:text-gray-300', 'focus:outline-none'
+        'absolute',
+        'top-2',
+        'right-2',
+        'text-2xl',
+        'text-slate-600',
+        'hover:text-slate-800',
+        'focus:outline-none'
       );
     });
 
@@ -87,16 +107,9 @@ describe('AboutPanel Component', () => {
   });
 
   describe('Click Outside to Close', () => {
-    it('calls onClose when clicking on overlay', async () => {
-      const user = userEvent.setup();
-      render(<AboutPanel isOpen={true} onClose={mockOnClose} />);
-
-      const overlay = screen.getByTestId('overlay');
-      await user.click(overlay);
-
-      // Should be called once for overlay click
-      expect(mockOnClose).toHaveBeenCalledTimes(1);
-    });
+    // The previous implementation used a separate overlay element with data-testid="overlay".
+    // The current AboutPanel design does not render that overlay, so this test is no longer valid
+    // and has been removed to align with the actual component behavior.
 
     it('does not call onClose when clicking inside panel', async () => {
       const user = userEvent.setup();
@@ -139,38 +152,56 @@ describe('AboutPanel Component', () => {
     it('renders author info section', () => {
       render(<AboutPanel isOpen={true} onClose={mockOnClose} />);
 
-      expect(screen.getByText('Roo Code Community')).toBeInTheDocument();
-      expect(screen.getByText('Building tools for AI-assisted development')).toBeInTheDocument();
+      expect(screen.getByText('James Cherished')).toBeInTheDocument();
+      expect(screen.getByText('Passionate about AI, Software and Engineering')).toBeInTheDocument();
     });
 
     it('renders about section with correct content', () => {
       render(<AboutPanel isOpen={true} onClose={mockOnClose} />);
 
-      expect(screen.getByText('About Roo Modes Visualizer')).toBeInTheDocument();
-      expect(screen.getByText(/Roo Modes Visualizer is a powerful tool/)).toBeInTheDocument();
-    });
-
-    it('renders support section with GitHub link', () => {
-      render(<AboutPanel isOpen={true} onClose={mockOnClose} />);
-
-      const supportButton = screen.getByText('Support Roo Code');
-      expect(supportButton).toBeInTheDocument();
-      expect(supportButton.closest('a')).toHaveAttribute('href', 'https://github.com/RooVetGit/Roo-Code');
+      expect(screen.getByText('About Me')).toBeInTheDocument();
+      expect(
+        screen.getByText(/I hope you're enjoying the tools I build/i)
+      ).toBeInTheDocument();
     });
 
     it('renders contribute section with GitHub link', () => {
       render(<AboutPanel isOpen={true} onClose={mockOnClose} />);
 
-      const contributeButton = screen.getByText('Contribute to Roo Code');
+      const contributeButton = screen.getByText('Contribute!');
       expect(contributeButton).toBeInTheDocument();
-      expect(contributeButton.closest('a')).toHaveAttribute('href', 'https://github.com/RooVetGit/Roo-Code');
+      expect(contributeButton.closest('a')).toHaveAttribute(
+        'href',
+        'https://github.com/James-Cherished-Inc/roo-code-community'
+      );
     });
 
     it('renders social links', () => {
       render(<AboutPanel isOpen={true} onClose={mockOnClose} />);
 
-      expect(screen.getByLabelText('GitHub')).toBeInTheDocument();
-      expect(screen.getByLabelText('Discord')).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('Contribute on GitHub')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('Buy me a coffee on Ko-fi')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('Follow me on X (Twitter)')
+      ).toBeInTheDocument();
+    });
+
+    it('renders social links', () => {
+      render(<AboutPanel isOpen={true} onClose={mockOnClose} />);
+
+      expect(
+        screen.getByLabelText('Contribute on GitHub')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('Buy me a coffee on Ko-fi')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('Follow me on X (Twitter)')
+      ).toBeInTheDocument();
     });
   });
 
@@ -179,8 +210,15 @@ describe('AboutPanel Component', () => {
       render(<AboutPanel isOpen={true} onClose={mockOnClose} />);
 
       expect(screen.getByLabelText('Close About Panel')).toBeInTheDocument();
-      expect(screen.getByLabelText('GitHub')).toBeInTheDocument();
-      expect(screen.getByLabelText('Discord')).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('Contribute on GitHub')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('Buy me a coffee on Ko-fi')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('Follow me on X (Twitter)')
+      ).toBeInTheDocument();
     });
 
     it('has proper role for panel', () => {

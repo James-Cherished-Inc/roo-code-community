@@ -210,8 +210,18 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, availableMod
                     disabled={isProcessing}
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-900 truncate">
-                      {mode.name}
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900 truncate">
+                        {mode.name}
+                      </span>
+                      {mode.family && (
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-100"
+                          title={`Family: ${mode.family}`}
+                        >
+                          {mode.family}
+                        </span>
+                      )}
                     </div>
                     <div className="text-sm text-gray-500 truncate">
                       {mode.description}
