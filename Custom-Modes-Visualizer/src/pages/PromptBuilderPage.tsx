@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { useModes } from '../context/ModeContext';
 import PromptBuilder from '../components/PromptBuilder';
-import FamilySelector from '../components/FamilySelector';
 
 /**
  * Page component for the prompt builder functionality
@@ -29,7 +28,6 @@ const PromptBuilderPage: React.FC = () => {
             {filteredModes.length} mode{filteredModes.length !== 1 ? 's' : ''} available
           </div>
         </div>
-        <FamilySelector />
       </div>
 
     <div className="mb-4">
