@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { getFeatureColor } from '../utils/colorSystem';
 import type { FeatureDefinition } from '../types';
+import PromptDisplayBlock, { type DisplayPromptBlock } from './PromptDisplayBlock';
 
 /**
  * Props for the ColoredPromptDisplay component
@@ -17,18 +18,8 @@ interface ColoredPromptDisplayProps {
 }
 
 /**
- * Represents a parsed segment of the prompt text
- */
-interface PromptSegment {
-  text: string;
-  type: 'base' | 'feature' | 'custom' | 'unmatched';
-  featureId?: string;
-  featureName?: string;
-}
-
-/**
- * Colored prompt display component with inline text highlighting
- * Parses generated prompt to identify feature contributions and applies colored highlighting
+ * Colored prompt display component with discrete block rendering
+ * Uses structured blocks to represent prompt components (base mode, features, custom instructions)
  */
 const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
   enabledFeatures,
@@ -38,146 +29,205 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
 }) => {
   const [showRawText, setShowRawText] = useState(false);
 
-  // Extract meaningful keywords from feature description
-  const extractKeywords = (feature: FeatureDefinition): string[] => {
-    const text = `${feature.name} ${feature.description}`.toLowerCase();
-    // Remove common words and extract meaningful terms
-    const words = text.split(/\s+/).filter(word =>
-      word.length > 3 &&
-      !['with', 'that', 'this', 'from', 'have', 'will', 'should', 'could', 'would'].includes(word)
-    );
-    return words.slice(0, 10); // Limit to top 10 keywords
+  /**
+   * Extract base mode content from prompt text
+   * Returns a short summary instead of full prompt text
+   */
+  const extractBaseModeContent = (text: string, baseModeName: string): string => {
+    const featureSectionIndex = text.indexOf('--- Feature Enhancements ---');
+    let baseContent = '';
+    
+    if (featureSectionIndex !== -1) {
+      baseContent = text.substring(0, featureSectionIndex).trim();
+    } else {
+      // If no feature enhancements section, treat entire text as base mode
+      baseContent = text.trim();
+    }
+    
+    // If content is short enough, return as is
+    if (baseContent.length <= 150) {
+      return baseContent;
+    }
+    
+    // Create a short summary based on the base mode name
+    const modeSummary = getBaseModeSummary(baseModeName);
+    return modeSummary || baseContent.substring(0, 147) + '...';
   };
 
-  // Find best matching text segment for feature keywords
-  const findBestMatch = (text: string, keywords: string[]): { found: boolean; index: number; length: number } => {
-    if (!text || !keywords.length) return { found: false, index: -1, length: 0 };
-
-    let bestMatch = { found: false, index: -1, length: 0 };
+  /**
+   * Get a short summary for base modes
+   */
+  const getBaseModeSummary = (baseModeName: string): string => {
+    const summaries: { [key: string]: string } = {
+      'Code Specialist': 'Expert software engineer with modern programming knowledge, providing smart, clean, and efficient code solutions.',
+      'Data Scientist': 'Advanced analytics expert specializing in machine learning, statistical analysis, and data-driven insights.',
+      'Product Manager': 'Strategic product leader focused on user needs, market analysis, and product development best practices.',
+      'UI/UX Designer': 'Creative design professional specializing in user experience, interface design, and user research.',
+      'Business Analyst': 'Strategic business expert focused on process optimization, requirements analysis, and data-driven decisions.'
+    };
     
-    for (const keyword of keywords) {
-      const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-      const match = regex.exec(text);
+    return summaries[baseModeName] || `${baseModeName} mode focused on specialized expertise and best practices.`;
+  };
+
+  /**
+   * Shorten text to specified character limit while preserving sentence boundaries
+   */
+  const shortenText = (text: string, maxLength: number): string => {
+    if (text.length <= maxLength) {
+      return text;
+    }
+    
+    // Find the last complete sentence within the limit
+    const sentences = text.split(/[.!?]+/);
+    let result = '';
+    
+    for (const sentence of sentences) {
+      const trimmedSentence = sentence.trim();
+      if (!trimmedSentence) continue;
       
-      if (match) {
-        const keywordLength = match[0].length;
-        if (keywordLength > bestMatch.length) {
-          bestMatch = { found: true, index: match.index, length: keywordLength };
-        }
+      const sentenceWithPunctuation = trimmedSentence + '.';
+      if (result.length + sentenceWithPunctuation.length <= maxLength) {
+        result += (result ? ' ' : '') + sentenceWithPunctuation;
+      } else {
+        break;
+      }
+    }
+    
+    // If we couldn't fit any complete sentences, truncate at word boundary
+    if (!result) {
+      const truncated = text.substring(0, maxLength - 3);
+      const lastSpaceIndex = truncated.lastIndexOf(' ');
+      return lastSpaceIndex > maxLength * 0.8
+        ? truncated.substring(0, lastSpaceIndex) + '...'
+        : truncated + '...';
+    }
+    
+    return result;
+  };
+
+  /**
+   * Extract feature content from prompt text
+   * Returns shortened feature descriptions (2-3 sentences max)
+   */
+  const extractFeatureContent = (text: string, _featureId: string, featureName: string): string => {
+    const featureSectionIndex = text.indexOf('--- Feature Enhancements ---');
+    if (featureSectionIndex === -1) {
+      return '';
+    }
+
+    const featureSection = text.substring(featureSectionIndex);
+    // Look for feature section between ## headers
+    const featureHeaderRegex = new RegExp(`##\\s*${featureName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\n([\\s\\S]*?)(?=##|---|$)`, 'i');
+    const match = featureSection.match(featureHeaderRegex);
+    
+    if (match && match[1]) {
+      const fullContent = match[1].trim();
+      return shortenText(fullContent, 200); // Limit to ~200 characters
+    }
+
+    // Fallback: try to find content after the feature name in any section
+    const lines = featureSection.split('\n');
+    let foundFeature = false;
+    const contentLines: string[] = [];
+    
+    for (const line of lines) {
+      if (line.trim().startsWith(`## ${featureName}`)) {
+        foundFeature = true;
+        continue;
+      }
+      if (foundFeature && line.trim().startsWith('##')) {
+        // Found next feature, stop collecting
+        break;
+      }
+      if (foundFeature && line.trim()) {
+        contentLines.push(line);
+      }
+    }
+    
+    const fallbackContent = contentLines.join('\n').trim();
+    return shortenText(fallbackContent, 200);
+  };
+
+  /**
+   * Extract custom instructions content from prompt text
+   * Looks for "Additional Instructions:" section
+   */
+  const extractCustomContent = (text: string): string => {
+    const customSectionIndex = text.indexOf('Additional Instructions:');
+    if (customSectionIndex !== -1) {
+      return text.substring(customSectionIndex + 'Additional Instructions:'.length).trim();
+    }
+    return '';
+  };
+
+  /**
+   * Create structured blocks from prompt data
+   * Follows proper data flow: Base mode → Features (in drag-drop order) → Custom instructions
+   */
+  const promptBlocks = useMemo((): DisplayPromptBlock[] => {
+    if (!promptText) {
+      return [];
+    }
+
+    const blocks: DisplayPromptBlock[] = [];
+
+    // 1. Add base mode block
+    if (baseModeName) {
+      const baseContent = extractBaseModeContent(promptText, baseModeName);
+      if (baseContent) {
+        const baseBlock: DisplayPromptBlock = {
+          id: `base-${Date.now()}`,
+          type: 'base',
+          title: 'Base Mode',
+          content: baseContent,
+          colorConfig: getFeatureColor('base', baseModeName),
+          featureId: 'base',
+          featureName: baseModeName
+        };
+        blocks.push(baseBlock);
       }
     }
 
-    // If no keyword match, try to match feature name
-    if (!bestMatch.found) {
-      for (const feature of enabledFeatures) {
-        const featureNameRegex = new RegExp(`\\b${feature.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-        const match = featureNameRegex.exec(text);
-        if (match) {
-          bestMatch = { found: true, index: match.index, length: match[0].length };
-          break;
-        }
-      }
-    }
-
-    return bestMatch;
-  };
-
-  // Parse prompt text into segments based on feature keywords and patterns
-  const parsedSegments = useMemo((): PromptSegment[] => {
-    if (!enabledFeatures.length) {
-      return [{ text: promptText || 'No prompt generated yet.', type: 'unmatched' }];
-    }
-
-    const segments: PromptSegment[] = [];
-    let remainingText = promptText || '';
-    
-    // Sort features by priority (more specific descriptions first)
-    const sortedFeatures = [...enabledFeatures].sort((a, b) =>
-      b.description.length - a.description.length
-    );
-
-    for (const feature of sortedFeatures) {
-      const featureKeywords = extractKeywords(feature);
-      const match = findBestMatch(remainingText, featureKeywords);
-      
-      if (match.found && match.index >= 0 && match.length > 0) {
-        // Add text before the match
-        if (match.index > 0) {
-          segments.push({
-            text: remainingText.substring(0, match.index),
-            type: 'unmatched'
-          });
-        }
-        
-        // Add the matched feature text
-        segments.push({
-          text: remainingText.substring(match.index, match.index + match.length),
+    // 2. Add feature blocks in order
+    enabledFeatures.forEach((feature, index) => {
+      const featureContent = extractFeatureContent(promptText, feature.id, feature.name);
+      if (featureContent) {
+        const featureBlock: DisplayPromptBlock = {
+          id: `feature-${feature.id}-${Date.now()}-${index}`,
           type: 'feature',
+          title: feature.name,
+          content: featureContent,
+          colorConfig: getFeatureColor(feature.id, feature.name),
           featureId: feature.id,
           featureName: feature.name
-        });
-        
-        // Update remaining text
-        remainingText = remainingText.substring(match.index + match.length);
+        };
+        blocks.push(featureBlock);
+      }
+    });
+
+    // 3. Add custom instructions block
+    if (customInstructions) {
+      const customContent = extractCustomContent(promptText) || customInstructions;
+      if (customContent) {
+        const customBlock: DisplayPromptBlock = {
+          id: `custom-${Date.now()}`,
+          type: 'custom',
+          title: 'Custom Instructions',
+          content: customContent,
+          colorConfig: getFeatureColor('custom', 'Custom Instructions'),
+          featureId: 'custom',
+          featureName: 'Custom Instructions'
+        };
+        blocks.push(customBlock);
       }
     }
-    
-    // Add any remaining text
-    if (remainingText) {
-      segments.push({
-        text: remainingText,
-        type: remainingText.trim() ? 'unmatched' : 'base'
-      });
-    }
 
-    // If no segments were found, treat entire text as base
-    if (segments.length === 0) {
-      return [{ text: promptText || '', type: 'base' }];
-    }
+    return blocks;
+  }, [promptText, enabledFeatures, baseModeName, customInstructions]);
 
-    return segments;
-  }, [promptText, enabledFeatures]);
-
-  // Render a colored text segment
-  const renderColoredSegment = (segment: PromptSegment, index: number) => {
-    if (segment.type === 'unmatched') {
-      return (
-        <span key={index} className="text-gray-800">
-          {segment.text}
-        </span>
-      );
-    }
-
-    if (segment.type === 'base') {
-      return (
-        <span key={index} className="font-semibold text-blue-800 bg-blue-50 px-1 rounded">
-          {segment.text}
-        </span>
-      );
-    }
-
-    if (segment.type === 'feature' && segment.featureId && segment.featureName) {
-      const colorConfig = getFeatureColor(segment.featureId, segment.featureName);
-      
-      return (
-        <span
-          key={index}
-          className={`${colorConfig.background} ${colorConfig.text} px-1 py-0.5 rounded border-l-2 ${colorConfig.border} inline-block`}
-          title={`${segment.featureName} feature contribution`}
-        >
-          {segment.text}
-        </span>
-      );
-    }
-
-    return (
-      <span key={index} className="text-gray-800">
-        {segment.text}
-      </span>
-    );
-  };
-
-  // Build summary text
+  /**
+   * Build summary text for the display
+   */
   const buildSummary = () => {
     const features = enabledFeatures.map(f => f.name);
     const baseMode = baseModeName ? `base mode + ${baseModeName}` : 'base mode';
@@ -185,7 +235,9 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
     return `Built with: ${allFeatures}`;
   };
 
-  // Render raw prompt text
+  /**
+   * Render raw prompt text
+   */
   const renderRawText = () => (
     <div className="bg-gray-50 border rounded-lg p-4">
       <div className="flex justify-between items-center mb-2">
@@ -207,13 +259,13 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
     <div className="space-y-6">
       {/* Header with stats */}
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-900">Generated Prompt Structure</h3>
+        <h3 className="text-lg font-medium text-gray-900">Lego-Style Prompt Structure</h3>
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setShowRawText(!showRawText)}
             className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded"
           >
-            {showRawText ? 'Show Colored' : 'Show Raw'}
+            {showRawText ? 'Show Blocks' : 'Show Raw'}
           </button>
           <div className="text-sm text-gray-600">
             <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
@@ -236,46 +288,30 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
         {showRawText ? (
           renderRawText()
         ) : (
-          <div className="prose prose-sm max-w-none">
-            <div className="text-sm leading-relaxed text-gray-800">
-              {parsedSegments.map((segment, index) => renderColoredSegment(segment, index))}
-            </div>
+          <div className="space-y-4">
+            {promptBlocks.length > 0 ? (
+              promptBlocks.map((block, index) => (
+                <div key={block.id} className="relative">
+                  {/* Connection line to next block (except last) */}
+                  {index < promptBlocks.length - 1 && (
+                    <div className="absolute -bottom-2 left-8 w-0.5 h-4 bg-gradient-to-b from-gray-300 to-transparent z-10" />
+                  )}
+                  <PromptDisplayBlock
+                    block={block}
+                    isCompact={false}
+                    showStuds={true}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500 py-8">
+                <div className="text-4xl mb-4">🧱</div>
+                <p>No prompt blocks to display. Generate a prompt to see the Lego-style structure.</p>
+              </div>
+            )}
           </div>
         )}
       </div>
-
-      {/* Base mode section */}
-      {baseModeName && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">🎯</span>
-            </div>
-            <div>
-              <h4 className="font-semibold text-blue-900">Base Mode: {baseModeName}</h4>
-              <p className="text-blue-700 text-sm">Foundation prompt template</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Custom instructions section */}
-      {customInstructions && (
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg p-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">✨</span>
-            </div>
-            <div>
-              <h4 className="font-semibold text-purple-900">Custom Instructions</h4>
-              <p className="text-purple-700 text-sm">Additional custom requirements</p>
-            </div>
-          </div>
-          <div className="mt-3 p-3 bg-white bg-opacity-70 rounded border border-purple-200">
-            <p className="text-gray-800 text-sm">{customInstructions}</p>
-          </div>
-        </div>
-      )}
 
       {/* Feature legend */}
       {enabledFeatures.length > 0 && !showRawText && (
@@ -299,8 +335,9 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
 
       {/* Analysis info */}
       <div className="text-xs text-gray-500 text-center border-t pt-4">
-        <p>✨ Intelligent text parsing identifies feature contributions automatically</p>
-        <p>💡 Toggle between colored and raw text for different views</p>
+        <p>🧱 Discrete blocks represent prompt components for clear visualization</p>
+        <p>⚡ Features are displayed in drag-drop order for easy understanding</p>
+        <p>💡 Toggle between block view and raw text for different perspectives</p>
       </div>
     </div>
   );
