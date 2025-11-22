@@ -266,20 +266,44 @@ export const BUILTIN_FEATURE_COLORS: Record<string, ColorConfig> = {
 };
 
 /**
- * Category base hues for consistent color families
+ * Predefined color palettes for each category family using standard Tailwind classes
  */
-const CATEGORY_BASE_HUES: Record<string, number> = {
-  'communication-style': 240,    // Blue family
-  'process-planning': 120,       // Green family
-  'technical-expertise': 280,    // Purple family
-  'tool-integration': 30,        // Orange family
+export const CATEGORY_COLOR_PALETTES: Record<string, { background: string; border: string; hover: string; shadow: string; text: string; textLight: string }[]> = {
+  'communication-style': [
+    { background: 'bg-blue-50', border: 'border-blue-200', hover: 'hover:bg-blue-100', shadow: 'shadow-blue-100', text: 'text-blue-900', textLight: 'text-blue-700' },
+    { background: 'bg-blue-100', border: 'border-blue-300', hover: 'hover:bg-blue-200', shadow: 'shadow-blue-200', text: 'text-blue-900', textLight: 'text-blue-700' },
+    { background: 'bg-blue-200', border: 'border-blue-400', hover: 'hover:bg-blue-300', shadow: 'shadow-blue-300', text: 'text-blue-900', textLight: 'text-blue-800' },
+    { background: 'bg-cyan-50', border: 'border-cyan-200', hover: 'hover:bg-cyan-100', shadow: 'shadow-cyan-100', text: 'text-cyan-900', textLight: 'text-cyan-700' },
+    { background: 'bg-sky-50', border: 'border-sky-200', hover: 'hover:bg-sky-100', shadow: 'shadow-sky-100', text: 'text-sky-900', textLight: 'text-sky-700' }
+  ],
+  'process-planning': [
+    { background: 'bg-green-50', border: 'border-green-200', hover: 'hover:bg-green-100', shadow: 'shadow-green-100', text: 'text-green-900', textLight: 'text-green-700' },
+    { background: 'bg-green-100', border: 'border-green-300', hover: 'hover:bg-green-200', shadow: 'shadow-green-200', text: 'text-green-900', textLight: 'text-green-700' },
+    { background: 'bg-green-200', border: 'border-green-400', hover: 'hover:bg-green-300', shadow: 'shadow-green-300', text: 'text-green-900', textLight: 'text-green-800' },
+    { background: 'bg-emerald-50', border: 'border-emerald-200', hover: 'hover:bg-emerald-100', shadow: 'shadow-emerald-100', text: 'text-emerald-900', textLight: 'text-emerald-700' },
+    { background: 'bg-teal-50', border: 'border-teal-200', hover: 'hover:bg-teal-100', shadow: 'shadow-teal-100', text: 'text-teal-900', textLight: 'text-teal-700' }
+  ],
+  'technical-expertise': [
+    { background: 'bg-purple-50', border: 'border-purple-200', hover: 'hover:bg-purple-100', shadow: 'shadow-purple-100', text: 'text-purple-900', textLight: 'text-purple-700' },
+    { background: 'bg-purple-100', border: 'border-purple-300', hover: 'hover:bg-purple-200', shadow: 'shadow-purple-200', text: 'text-purple-900', textLight: 'text-purple-700' },
+    { background: 'bg-purple-200', border: 'border-purple-400', hover: 'hover:bg-purple-300', shadow: 'shadow-purple-300', text: 'text-purple-900', textLight: 'text-purple-800' },
+    { background: 'bg-violet-50', border: 'border-violet-200', hover: 'hover:bg-violet-100', shadow: 'shadow-violet-100', text: 'text-violet-900', textLight: 'text-violet-700' },
+    { background: 'bg-indigo-50', border: 'border-indigo-200', hover: 'hover:bg-indigo-100', shadow: 'shadow-indigo-100', text: 'text-indigo-900', textLight: 'text-indigo-700' }
+  ],
+  'tool-integration': [
+    { background: 'bg-orange-50', border: 'border-orange-200', hover: 'hover:bg-orange-100', shadow: 'shadow-orange-100', text: 'text-orange-900', textLight: 'text-orange-700' },
+    { background: 'bg-orange-100', border: 'border-orange-300', hover: 'hover:bg-orange-200', shadow: 'shadow-orange-200', text: 'text-orange-900', textLight: 'text-orange-700' },
+    { background: 'bg-orange-200', border: 'border-orange-400', hover: 'hover:bg-orange-300', shadow: 'shadow-orange-300', text: 'text-orange-900', textLight: 'text-orange-800' },
+    { background: 'bg-amber-50', border: 'border-amber-200', hover: 'hover:bg-amber-100', shadow: 'shadow-amber-100', text: 'text-amber-900', textLight: 'text-amber-700' },
+    { background: 'bg-yellow-50', border: 'border-yellow-200', hover: 'hover:bg-yellow-100', shadow: 'shadow-yellow-100', text: 'text-yellow-900', textLight: 'text-yellow-700' }
+  ]
 };
 
 /**
- * Generate category-based color variations
+ * Generate category-based color using predefined palettes
  */
 const generateCategoryColor = (featureId: string, featureName: string, categoryId: string): FeatureColor => {
-  // Use hash from feature ID to ensure consistency
+  // Use hash from feature ID to ensure consistent color selection
   let hash = 0;
   for (let i = 0; i < featureId.length; i++) {
     const char = featureId.charCodeAt(i);
@@ -287,43 +311,22 @@ const generateCategoryColor = (featureId: string, featureName: string, categoryI
     hash = hash & hash; // Convert to 32-bit integer
   }
 
-  // Get base hue for the category
-  const baseHue = CATEGORY_BASE_HUES[categoryId] || 200; // Default blue-ish
-  const hueVariation = ((hash * 13) % 40) - 20; // ±20° variation
-  const hue = (baseHue + hueVariation + 360) % 360;
-  
-  // Varied saturation and lightness for visual distinction within category
-  const saturation = 65 + ((hash * 17) % 25); // 65-90%
-  const lightness = 70 + ((hash * 19) % 20);  // 70-90%
-
-  // Convert HSL to RGB and then to hex for Tailwind compatibility
-  const rgb = hslToRgb(hue, saturation, lightness);
-  const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
-
-  // Calculate text color (black or white) based on background brightness
-  const textColor = getContrastColor(rgb);
-
-  // Generate hover and shadow variants
-  const hoverRgb = adjustBrightness(rgb, 1.1);
-  const hoverHex = rgbToHex(hoverRgb.r, hoverRgb.g, hoverRgb.b);
-  
-  const borderHex = rgbToHex(
-    Math.max(0, rgb.r - 35),
-    Math.max(0, rgb.g - 35),
-    Math.max(0, rgb.b - 35)
-  );
+  // Get color palette for category
+  const palette = CATEGORY_COLOR_PALETTES[categoryId] || CATEGORY_COLOR_PALETTES['communication-style'];
+  const colorIndex = Math.abs(hash) % palette.length;
+  const selectedColor = palette[colorIndex];
 
   return {
     id: featureId,
     name: featureName,
-    hue,
-    saturation,
-    lightness,
-    background: `bg-[${hex}]`,
-    border: `border-[${borderHex}]`,
-    text: textColor === 'dark' ? 'text-gray-900' : 'text-white',
-    hover: `hover:bg-[${hoverHex}]`,
-    shadow: `shadow-[${hex}]30`
+    hue: 0, // Not used for predefined colors
+    saturation: 0,
+    lightness: 0,
+    background: selectedColor.background,
+    border: selectedColor.border,
+    text: selectedColor.text,
+    hover: selectedColor.hover,
+    shadow: selectedColor.shadow
   };
 };
 
