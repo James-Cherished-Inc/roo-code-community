@@ -7,11 +7,6 @@ let's add a toggle on top right of the system prompt display in the Smart View p
 
 # Prompt Builder:
 
-- so no. what happens here is that the description of the feature gets added instead of the prompt content. in addition it gets added next to the previous block instead of as a separate block...
-
-- each section of the possible features should be more or less the same "color family" while each block inside the sections should be of a different nuance/tint of this family.
-- 
-
 - Move the family selector into the prompt builder, on the right and on the same line than "Select base model"
 - When we can select which base model to use, the first card should Start from Scratch with body text "Create a new mode", and with the same graphical identity and functions that what we see in the Smart View left menu.
 

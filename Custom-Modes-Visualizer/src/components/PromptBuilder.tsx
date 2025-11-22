@@ -55,8 +55,8 @@ const SortableFeatureItem: React.FC<{
     isDragging,
   } = useSortable({ id: featureId });
 
-  // Get color configuration for this feature
-  const featureColor = getFeatureColor(featureId, feature.name);
+  // Get color configuration for this feature with category support
+  const featureColor = getFeatureColor(featureId, feature.name, feature.category);
 
   const style = {
     transform: CSS.Transform.toString(transform),

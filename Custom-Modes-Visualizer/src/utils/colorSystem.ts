@@ -266,15 +266,89 @@ export const BUILTIN_FEATURE_COLORS: Record<string, ColorConfig> = {
 };
 
 /**
+ * Category base hues for consistent color families
+ */
+const CATEGORY_BASE_HUES: Record<string, number> = {
+  'communication-style': 240,    // Blue family
+  'process-planning': 120,       // Green family
+  'technical-expertise': 280,    // Purple family
+  'tool-integration': 30,        // Orange family
+};
+
+/**
+ * Generate category-based color variations
+ */
+const generateCategoryColor = (featureId: string, featureName: string, categoryId: string): FeatureColor => {
+  // Use hash from feature ID to ensure consistency
+  let hash = 0;
+  for (let i = 0; i < featureId.length; i++) {
+    const char = featureId.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+
+  // Get base hue for the category
+  const baseHue = CATEGORY_BASE_HUES[categoryId] || 200; // Default blue-ish
+  const hueVariation = ((hash * 13) % 40) - 20; // ±20° variation
+  const hue = (baseHue + hueVariation + 360) % 360;
+  
+  // Varied saturation and lightness for visual distinction within category
+  const saturation = 65 + ((hash * 17) % 25); // 65-90%
+  const lightness = 70 + ((hash * 19) % 20);  // 70-90%
+
+  // Convert HSL to RGB and then to hex for Tailwind compatibility
+  const rgb = hslToRgb(hue, saturation, lightness);
+  const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+
+  // Calculate text color (black or white) based on background brightness
+  const textColor = getContrastColor(rgb);
+
+  // Generate hover and shadow variants
+  const hoverRgb = adjustBrightness(rgb, 1.1);
+  const hoverHex = rgbToHex(hoverRgb.r, hoverRgb.g, hoverRgb.b);
+  
+  const borderHex = rgbToHex(
+    Math.max(0, rgb.r - 35),
+    Math.max(0, rgb.g - 35),
+    Math.max(0, rgb.b - 35)
+  );
+
+  return {
+    id: featureId,
+    name: featureName,
+    hue,
+    saturation,
+    lightness,
+    background: `bg-[${hex}]`,
+    border: `border-[${borderHex}]`,
+    text: textColor === 'dark' ? 'text-gray-900' : 'text-white',
+    hover: `hover:bg-[${hoverHex}]`,
+    shadow: `shadow-[${hex}]30`
+  };
+};
+
+/**
  * Get color for a feature (built-in or custom)
  */
-export const getFeatureColor = (featureId: string, featureName: string): ColorConfig => {
-  // Check if it's a built-in feature with predefined color
-  if (BUILTIN_FEATURE_COLORS[featureId]) {
+export const getFeatureColor = (featureId: string, featureName: string, categoryId?: string): ColorConfig => {
+  // Check if it's a built-in feature with predefined color (for backward compatibility)
+  if (BUILTIN_FEATURE_COLORS[featureId] && !categoryId) {
     return BUILTIN_FEATURE_COLORS[featureId];
   }
   
-  // Generate dynamic color for custom features
+  // Generate category-based color if category is provided
+  if (categoryId) {
+    const color = generateCategoryColor(featureId, featureName, categoryId);
+    return {
+      background: color.background,
+      border: color.border,
+      text: color.text,
+      hover: color.hover,
+      shadow: color.shadow
+    };
+  }
+  
+  // Fallback to dynamic color for custom features without category
   const color = generateFeatureColor(featureId, featureName);
   return {
     background: color.background,
