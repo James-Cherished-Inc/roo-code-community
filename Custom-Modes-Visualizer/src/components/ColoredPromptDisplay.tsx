@@ -38,6 +38,50 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
 }) => {
   const [showRawText, setShowRawText] = useState(false);
 
+  // Extract meaningful keywords from feature description
+  const extractKeywords = (feature: FeatureDefinition): string[] => {
+    const text = `${feature.name} ${feature.description}`.toLowerCase();
+    // Remove common words and extract meaningful terms
+    const words = text.split(/\s+/).filter(word =>
+      word.length > 3 &&
+      !['with', 'that', 'this', 'from', 'have', 'will', 'should', 'could', 'would'].includes(word)
+    );
+    return words.slice(0, 10); // Limit to top 10 keywords
+  };
+
+  // Find best matching text segment for feature keywords
+  const findBestMatch = (text: string, keywords: string[]): { found: boolean; index: number; length: number } => {
+    if (!text || !keywords.length) return { found: false, index: -1, length: 0 };
+
+    let bestMatch = { found: false, index: -1, length: 0 };
+    
+    for (const keyword of keywords) {
+      const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+      const match = regex.exec(text);
+      
+      if (match) {
+        const keywordLength = match[0].length;
+        if (keywordLength > bestMatch.length) {
+          bestMatch = { found: true, index: match.index, length: keywordLength };
+        }
+      }
+    }
+
+    // If no keyword match, try to match feature name
+    if (!bestMatch.found) {
+      for (const feature of enabledFeatures) {
+        const featureNameRegex = new RegExp(`\\b${feature.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+        const match = featureNameRegex.exec(text);
+        if (match) {
+          bestMatch = { found: true, index: match.index, length: match[0].length };
+          break;
+        }
+      }
+    }
+
+    return bestMatch;
+  };
+
   // Parse prompt text into segments based on feature keywords and patterns
   const parsedSegments = useMemo((): PromptSegment[] => {
     if (!enabledFeatures.length) {
@@ -93,50 +137,6 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
 
     return segments;
   }, [promptText, enabledFeatures]);
-
-  // Extract meaningful keywords from feature description
-  const extractKeywords = (feature: FeatureDefinition): string[] => {
-    const text = `${feature.name} ${feature.description}`.toLowerCase();
-    // Remove common words and extract meaningful terms
-    const words = text.split(/\s+/).filter(word => 
-      word.length > 3 && 
-      !['with', 'that', 'this', 'from', 'have', 'will', 'should', 'could', 'would'].includes(word)
-    );
-    return words.slice(0, 10); // Limit to top 10 keywords
-  };
-
-  // Find best matching text segment for feature keywords
-  const findBestMatch = (text: string, keywords: string[]): { found: boolean; index: number; length: number } => {
-    if (!text || !keywords.length) return { found: false, index: -1, length: 0 };
-
-    let bestMatch = { found: false, index: -1, length: 0 };
-    
-    for (const keyword of keywords) {
-      const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-      const match = regex.exec(text);
-      
-      if (match) {
-        const keywordLength = match[0].length;
-        if (keywordLength > bestMatch.length) {
-          bestMatch = { found: true, index: match.index, length: keywordLength };
-        }
-      }
-    }
-
-    // If no keyword match, try to match feature name
-    if (!bestMatch.found) {
-      for (const feature of enabledFeatures) {
-        const featureNameRegex = new RegExp(`\\b${feature.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-        const match = featureNameRegex.exec(text);
-        if (match) {
-          bestMatch = { found: true, index: match.index, length: match[0].length };
-          break;
-        }
-      }
-    }
-
-    return bestMatch;
-  };
 
   // Render a colored text segment
   const renderColoredSegment = (segment: PromptSegment, index: number) => {
