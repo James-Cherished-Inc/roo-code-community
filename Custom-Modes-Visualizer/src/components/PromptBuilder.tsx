@@ -3,7 +3,7 @@ import { useModes } from '../context/ModeContext';
 import type { Mode, FeatureState, FeatureDefinition } from '../types';
 import { featureCategories, features, getDefaultFeaturesForMode } from '../data/features';
 import { CustomFeatureManager } from './CustomFeatureManager';
-import PromptDisplay from './PromptDisplay';
+import ColoredPromptDisplay from './ColoredPromptDisplay';
 import { getFeatureColor } from '../utils/colorSystem';
 import {
   DndContext,
@@ -426,8 +426,8 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
               </button>
             </div>
             
-            {/* New Lego-style prompt display */}
-            <PromptDisplay
+            {/* New colored prompt display */}
+            <ColoredPromptDisplay
               enabledFeatures={enabledFeatures}
               promptText={generatedPrompt}
               baseModeName={selectedMode?.name || ''}
