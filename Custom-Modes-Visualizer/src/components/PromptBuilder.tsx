@@ -32,6 +32,8 @@ import { CSS } from '@dnd-kit/utilities';
 interface PromptBuilderProps {
   /** Available modes to build prompts from */
   modes: Mode[];
+  /** Total number of available modes */
+  availableModesCount: number;
 }
 
 /**
@@ -113,7 +115,7 @@ const SortableFeatureItem: React.FC<{
   );
 };
 
-const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
+const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes, availableModesCount }) => {
     const { customFeatures, reorderCustomFeatures } = useModes();
     const [selectedMode, setSelectedMode] = useState<Mode | null>(null);
     const [customPrompt, setCustomPrompt] = useState('');
@@ -265,7 +267,7 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <label className="text-sm font-medium text-gray-700">
-              Select Base Mode
+              Select Base Mode - {availableModesCount} mode{availableModesCount !== 1 ? 's' : ''} available
             </label>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-500">Filter by family:</span>

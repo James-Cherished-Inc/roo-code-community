@@ -24,9 +24,6 @@ const PromptBuilderPage: React.FC = () => {
               Construct custom prompts by selecting base modes and adding additional instructions.
             </p>
           </div>
-          <div className="text-sm text-gray-500 text-right">
-            {filteredModes.length} mode{filteredModes.length !== 1 ? 's' : ''} available
-          </div>
         </div>
       </div>
 
@@ -51,7 +48,7 @@ const PromptBuilderPage: React.FC = () => {
       </div>
     </div>
 
-    <PromptBuilder modes={filteredModes} />
+    <PromptBuilder modes={filteredModes} availableModesCount={filteredModes.length} />
   </div>
   );
 };
