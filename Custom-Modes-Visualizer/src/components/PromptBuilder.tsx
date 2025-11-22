@@ -5,6 +5,7 @@ import { featureCategories, features, getDefaultFeaturesForMode } from '../data/
 import { CustomFeatureManager } from './CustomFeatureManager';
 import ColoredPromptDisplay from './ColoredPromptDisplay';
 import { getFeatureColor } from '../utils/colorSystem';
+import FamilySelector from './FamilySelector';
 import {
   DndContext,
   closestCenter,
@@ -262,9 +263,15 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
 
         {/* Mode Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Select Base Mode
-          </label>
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-sm font-medium text-gray-700">
+              Select Base Mode
+            </label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">Filter by family:</span>
+              <FamilySelector />
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {modes.map((mode) => (
               <button
