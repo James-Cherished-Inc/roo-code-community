@@ -109,7 +109,7 @@ describe('Custom Features Integration', () => {
 
   describe('Custom Feature Creation', () => {
     it('should allow creating a custom feature and using it in prompt generation', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -141,7 +141,7 @@ describe('Custom Features Integration', () => {
     })
 
     it('should include custom features in prompt generation when enabled', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -170,7 +170,7 @@ describe('Custom Features Integration', () => {
     })
 
     it('should not include disabled custom features in generated prompt', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -202,7 +202,7 @@ describe('Custom Features Integration', () => {
         category: 'process-planning',
       })
 
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -252,7 +252,7 @@ describe('Custom Features Integration', () => {
     })
 
     it('should include both built-in and custom features when enabled', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -283,7 +283,7 @@ describe('Custom Features Integration', () => {
 
   describe('Custom Feature Persistence', () => {
     it('should persist custom features state across prompt generations', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')

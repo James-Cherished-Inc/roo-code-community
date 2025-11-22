@@ -6,6 +6,7 @@ import { CustomFeatureManager } from './CustomFeatureManager';
 import ColoredPromptDisplay from './ColoredPromptDisplay';
 import { getFeatureColor } from '../utils/colorSystem';
 import FamilySelector from './FamilySelector';
+import CreateModeModal from './CreateModeModal';
 import {
   DndContext,
   closestCenter,
@@ -124,6 +125,7 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes, availableModesCoun
     const [selectedFeatures, setSelectedFeatures] = useState<FeatureState>({});
     const [copyMessage, setCopyMessage] = useState(false);
     const [showCustomFeatureManager, setShowCustomFeatureManager] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     // Sensors for drag and drop
     const sensors = useSensors(
@@ -248,6 +250,13 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes, availableModesCoun
    };
 
    /**
+    * Handle create mode button click
+    */
+   const handleCreate = () => {
+     setIsCreateModalOpen(true);
+   };
+
+   /**
     * Reset the builder
     */
    const reset = () => {
@@ -275,6 +284,18 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes, availableModesCoun
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Start from Scratch Card */}
+            <button
+              onClick={handleCreate}
+              className="w-full text-left p-2 rounded-lg transition-all duration-200 text-sm bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 font-medium"
+            >
+              <div className="font-semibold truncate">➕ Create Mode</div>
+              <div className="text-xs mt-1 truncate text-green-600">
+                Add new mode
+              </div>
+            </button>
+            
+            {/* Existing Mode Cards */}
             {modes.map((mode) => (
               <button
                 key={mode.slug}
@@ -454,6 +475,12 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes, availableModesCoun
           </div>
         )}
       </div>
+      
+      {/* Create Mode Modal */}
+      <CreateModeModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   );
 };
