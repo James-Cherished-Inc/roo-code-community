@@ -112,7 +112,7 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
       description: formData.description!.trim(),
       usage: formData.usage!.trim(),
       prompt: formData.prompt!.trim(),
-      family: selectedFamily?.id || undefined // Use selected family or undefined for no family
+      family: selectedFamily?.id || 'standalone' // Use selected family or standalone for no family
     };
 
     addMode(newMode);

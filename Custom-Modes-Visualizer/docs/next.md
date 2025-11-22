@@ -1,4 +1,6 @@
--O NOT TOUCH
+DO NOT TOUCH
+
+- if there is an error in the slug when creating a mode, we cannot create it anymore, even after fixing the error.
 
 - what is the current format displayed in the smart view? is it markdown?
 let's add a toggle on top right of the system prompt display in the Smart View page that allows to display the prompt as markdown.
