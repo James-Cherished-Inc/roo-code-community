@@ -13,6 +13,8 @@ interface ColoredPromptDisplayProps {
   promptText: string;
   /** Base mode name */
   baseModeName: string;
+  /** Actual base mode prompt text - the real content contribution */
+  baseModePrompt?: string;
   /** Custom instructions text */
   customInstructions?: string;
 }
@@ -25,33 +27,29 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
   enabledFeatures,
   promptText,
   baseModeName,
+  baseModePrompt,
   customInstructions
 }) => {
   const [showRawText, setShowRawText] = useState(false);
 
   /**
    * Extract base mode content from prompt text
-   * Returns a short summary instead of full prompt text
+   * Returns the actual base mode prompt text contribution
    */
   const extractBaseModeContent = (text: string, baseModeName: string): string => {
+    // Priority 1: Use the actual base mode prompt if provided
+    if (baseModePrompt) {
+      return baseModePrompt;
+    }
+    
+    // Priority 2: Extract from generated prompt text
     const featureSectionIndex = text.indexOf('--- Feature Enhancements ---');
-    let baseContent = '';
-    
     if (featureSectionIndex !== -1) {
-      baseContent = text.substring(0, featureSectionIndex).trim();
-    } else {
-      // If no feature enhancements section, treat entire text as base mode
-      baseContent = text.trim();
+      return text.substring(0, featureSectionIndex).trim();
     }
     
-    // If content is short enough, return as is
-    if (baseContent.length <= 150) {
-      return baseContent;
-    }
-    
-    // Create a short summary based on the base mode name
-    const modeSummary = getBaseModeSummary(baseModeName);
-    return modeSummary || baseContent.substring(0, 147) + '...';
+    // Fallback: Use entire text if no sections found
+    return text.trim();
   };
 
   /**
@@ -107,9 +105,10 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
 
   /**
    * Extract feature content from prompt text
-   * Returns shortened feature descriptions (2-3 sentences max)
+   * Returns the actual feature description text contribution
    */
-  const extractFeatureContent = (text: string, _featureId: string, featureName: string): string => {
+  const extractFeatureContent = (text: string, featureId: string, featureName: string): string => {
+    // Try to find the feature in the generated prompt text
     const featureSectionIndex = text.indexOf('--- Feature Enhancements ---');
     if (featureSectionIndex === -1) {
       return '';
@@ -121,8 +120,7 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
     const match = featureSection.match(featureHeaderRegex);
     
     if (match && match[1]) {
-      const fullContent = match[1].trim();
-      return shortenText(fullContent, 200); // Limit to ~200 characters
+      return match[1].trim();
     }
 
     // Fallback: try to find content after the feature name in any section
@@ -144,15 +142,20 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
       }
     }
     
-    const fallbackContent = contentLines.join('\n').trim();
-    return shortenText(fallbackContent, 200);
+    return contentLines.join('\n').trim();
   };
 
   /**
    * Extract custom instructions content from prompt text
-   * Looks for "Additional Instructions:" section
+   * Returns the actual custom instructions text contribution
    */
   const extractCustomContent = (text: string): string => {
+    // Priority 1: Use the actual custom instructions if provided
+    if (customInstructions) {
+      return customInstructions;
+    }
+    
+    // Priority 2: Extract from generated prompt text
     const customSectionIndex = text.indexOf('Additional Instructions:');
     if (customSectionIndex !== -1) {
       return text.substring(customSectionIndex + 'Additional Instructions:'.length).trim();
@@ -188,10 +191,11 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
       }
     }
 
-    // 2. Add feature blocks in order
+    // 2. Add feature blocks in order - show actual prompt content added
     enabledFeatures.forEach((feature, index) => {
-      const featureContent = extractFeatureContent(promptText, feature.id, feature.name);
-      if (featureContent) {
+      // Show the complete prompt format: "## Feature Name\nDescription"
+      const featureContent = `## ${feature.name}\n${feature.description}`;
+      if (featureContent && featureContent.trim()) {
         const featureBlock: DisplayPromptBlock = {
           id: `feature-${feature.id}-${Date.now()}-${index}`,
           type: 'feature',
@@ -223,7 +227,7 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
     }
 
     return blocks;
-  }, [promptText, enabledFeatures, baseModeName, customInstructions]);
+  }, [promptText, enabledFeatures, baseModeName, customInstructions, baseModePrompt]);
 
   /**
    * Build summary text for the display

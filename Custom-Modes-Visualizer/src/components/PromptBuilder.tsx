@@ -431,6 +431,7 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
               enabledFeatures={enabledFeatures}
               promptText={generatedPrompt}
               baseModeName={selectedMode?.name || ''}
+              baseModePrompt={selectedMode?.prompt || ''}
               customInstructions={customPrompt.trim() || undefined}
             />
           </div>

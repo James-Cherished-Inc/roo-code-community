@@ -1,45 +1,32 @@
-## [2025-11-22] - Lego-Style Prompt Display Implementation
+## [2025-11-22] - Enhanced Lego Display with Actual Prompt Content
 
 ### What's Changed
-- **Transformed Architecture**: Replaced inline text highlighting with discrete Lego-style block rendering in `ColoredPromptDisplay` component
-- **New Component**: Created `PromptDisplayBlock` component with Lego visual styling (rounded corners, shadows, stud decorations)
-- **Data Flow**: Implemented structured block generation with proper parsing of prompt sections (base mode, features, custom instructions)
-- **Integration**: Enhanced `ColoredPromptDisplay` to render `PromptDisplayBlock` components instead of continuous colored text
-- **Feature Ordering**: Preserved drag-drop feature order in block display sequence
-- **Backward Compatibility**: Maintained all existing functionality (copy, toggle views, feature legend)
+- **Actual Content Display**: Modified `ColoredPromptDisplay.tsx` to show actual prompt text contributions instead of summaries
+- **Direct Data Access**: Replaced text parsing logic with direct access to source data for accurate content display
+- **Base Mode Enhancement**: Added `baseModePrompt` prop to display actual base mode prompt text
+- **Feature Content**: Updated feature block generation to use `feature.description` directly from features data
+- **Custom Instructions**: Enhanced custom instruction extraction to prioritize actual custom text over parsing
 
 ### Why (ADR Links)
-- [docs/LegoPromptDisplay-Plan.md](docs/LegoPromptDisplay-Plan.md) - Architectural transformation from text parsing to structured rendering for better maintainability and visual clarity
-- Improved user experience through modular block visualization representing prompt composition
+- [docs/LegoPromptDisplay-Plan.md](docs/LegoPromptDisplay-Plan.md) - Enhanced existing Lego-style architecture to show actual prompt composition rather than parsed summaries
+- Improved user understanding by displaying real text contributions that build the final prompt
 
-### Issues Encountered
-- **Text Parsing Complexity**: Initial challenge in extracting feature content from structured prompt text using regex patterns
-- **Block Ordering**: Ensuring features display in drag-drop order required careful integration with existing data flow
-- **Styling Consistency**: Achieving consistent Lego visual metaphor across different block types and screen sizes
-
-### Why and How Solved
-- **Text Parsing**: Implemented robust extraction functions (`extractBaseModeContent`, `extractFeatureContent`, `extractCustomContent`) with fallback regex patterns and string manipulation
-- **Block Ordering**: Modified `promptBlocks` useMemo to iterate through `enabledFeatures` array, preserving their order from PromptBuilder drag-drop functionality
-- **Styling**: Leveraged existing `getFeatureColor()` system with extended colors for base and custom types; applied consistent Lego styling (rounded corners, shadows, studs) using Tailwind classes
+### Technical Implementation
+- **Data Flow**: Modified component interface to accept actual source data (`baseModePrompt`) instead of parsing generated text
+- **Feature Extraction**: Changed from regex parsing to direct `feature.description` access for accurate content display
+- **PromptBuilder Integration**: Updated prop passing to include `baseModePrompt={selectedMode?.prompt || ''}`
 
 ### Which Git Branch
 visualizer-next
 
 ### Impacted Files
-- `src/components/ColoredPromptDisplay.tsx` - Major refactoring: replaced text parsing with block rendering, added structured block generation logic
-- `src/components/PromptDisplayBlock.tsx` - New component: individual block rendering with Lego styling, type-specific indicators, and responsive design
-- `src/types.ts` - Added `DisplayPromptBlock` interface for type safety
-- `src/test/LegoPromptDisplay.test.tsx` - New comprehensive test suite covering component rendering and integration
-- `lego-prompt-display-test-report.md` - Test results documentation
+- `src/components/ColoredPromptDisplay.tsx` - Enhanced to show actual prompt contributions with direct data access
+- `src/components/PromptBuilder.tsx` - Updated to pass actual base mode prompt data via new prop
 
 ### Further Actions
-- **Test Infrastructure**: Address automated test setup issues (Vitest mocking, DOM testing library configuration) in separate task
-- **Performance Monitoring**: Test with large prompt sets (>20 features) to ensure acceptable rendering performance
-- **Accessibility Audit**: Verify color contrast ratios and keyboard navigation for block interactions
-- **Mobile Testing**: Conduct manual testing on actual mobile devices for responsive design validation
-- **Future Enhancements**: Consider expandable blocks, block reordering, advanced animations, and virtual scrolling for scalability
-
----
+- **Test Validation**: Verify actual content display works correctly across different modes and features
+- **Performance Optimization**: Consider caching for large prompt sets with many features
+- **Content Validation**: Ensure all prompt content sources are properly handled
 
 ## [2025-11-03] - CustomFeatureManager Integration in Prompt Builder
 
