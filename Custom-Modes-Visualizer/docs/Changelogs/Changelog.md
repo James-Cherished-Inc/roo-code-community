@@ -1,3 +1,39 @@
+## [2025-11-22] - Lego Blocks Show Actual Prompt Contributions
+
+### What's Changed
+- **Real Content Display**: Modified feature blocks to show actual prompt text format: `## Feature Name\nDescription`
+- **Data Source Accuracy**: Eliminated text parsing in favor of direct access to `enabledFeatures` array data
+- **Prompt Assembly Visualization**: Each block now displays the exact text contribution that gets concatenated into the final prompt
+- **Test Updates**: Updated test suite to validate new content display behavior and fixed vitest imports
+
+### Why (ADR Links)
+- [docs/LegoPromptDisplay-Plan.md](docs/LegoPromptDisplay-Plan.md) - Enhanced visual breakdown showing how prompts are actually built, like Lego pieces assembling a structure
+- Improved user understanding by displaying the real text components that form the complete prompt
+
+### Issues Encountered
+- **Test Compatibility**: Initial tests expected generic "Base Mode" labels but implementation shows actual content
+- **Text Parsing Removal**: Removing regex parsing logic required careful validation that data flow remained intact
+- **Vitest Imports**: Fixed test imports to use correct vitest function imports instead of jest globals
+
+### Why and How Solved
+- **Test Updates**: Modified test expectations to match actual content display (checking for `## Empathy & Friendly Tone Guidelines` instead of feature names)
+- **Data Flow**: Replaced `extractFeatureContent()` parsing with direct `feature.name` and `feature.description` access
+- **Import Fixes**: Corrected vitest imports using `import { describe, test, expect, vi } from 'vitest'` pattern
+
+### Which Git Branch
+visualizer-next
+
+### Impacted Files
+- `src/components/ColoredPromptDisplay.tsx` - Updated feature content generation to show actual prompt format
+- `src/test/LegoPromptDisplay.test.tsx` - Fixed vitest imports and updated test expectations for actual content display
+
+### Further Actions
+- **Copy Functionality**: Consider implementing clipboard functionality for individual blocks or the complete assembled prompt
+- **Content Truncation**: Add intelligent truncation for very long feature descriptions while maintaining readability
+- **Performance Monitoring**: Monitor rendering performance with large feature sets
+
+---
+
 ## [2025-11-22] - Enhanced Lego Display with Actual Prompt Content
 
 ### What's Changed
