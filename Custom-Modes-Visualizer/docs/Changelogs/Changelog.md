@@ -1,3 +1,49 @@
+## [2025-11-23] - Family Mode Import Duplicate Handling Enhancement
+
+### What's Changed
+- **Flexible Duplicate Resolution**: Enhanced family mode imports with user-configurable duplicate handling options
+- **Three Strategy Options**: Implemented three distinct strategies for managing duplicate mode slugs during batch imports:
+  - Option 1: "Append -2 at the end" (automatic numbering like previous behavior)
+  - Option 2: "Append the name of the file" (filename-based suffix generation)
+  - Option 3: "Input custom suffix" (user-defined suffix applied to entire family)
+- **Enhanced UI**: Added comprehensive duplicate handling UI section with visual examples
+- **Type Safety**: Fixed TypeScript compilation errors and added missing interface definitions
+- **Build Resolution**: Resolved all unused variable warnings and ensured clean compilation
+
+### Why (ADR Links)
+- [docs/Changelog/Decisions/Family-Mode-Import-Duplicate-Handling-ADR.md](docs/Changelog/Decisions/Family-Mode-Import-Duplicate-Handling-ADR.md) - Architecture decision for flexible suffix-based duplicate resolution
+- User requested greater control over duplicate slug handling in family mode imports
+- Enhanced user experience through intuitive radio button interface with visual examples
+- Maintained full backward compatibility while adding requested functionality
+
+### Issues Encountered
+- **TypeScript Compilation Errors**: Function signature mismatches in ModeContextType interface
+- **Build Warnings**: Functions and variables in ColoredPromptDisplay.tsx causing build failures
+- **UI State Management**: Complex state coordination between import strategy and suffix options
+
+### Why and How Solved
+- **Interface Updates**: Added missing `importFromFile` signature and removed duplicate declarations in `src/types.ts`
+- **Code Cleanup**: Removed unused code with proper underscore prefixing for intentional unused variables
+- **Conditional Rendering**: Implemented conditional rendering based on import strategy selection
+
+### Which Git Branch
+master
+
+### Impacted Files
+- `src/utils/formatConversion.ts` - Enhanced `generateUniqueSlug` and `resolveSlugConflicts` functions
+- `src/components/ImportModal.tsx` - Added comprehensive duplicate handling UI for family imports
+- `src/context/ModeContext.tsx` - Modified import functions to accept optional custom suffix parameter
+- `src/types.ts` - Added missing interface definitions and resolved TypeScript compilation errors
+- `src/components/ColoredPromptDisplay.tsx` - Removed unused functions to fix compilation
+
+### Further Actions
+- Test coverage for new duplicate handling scenarios
+- User preference persistence for default duplicate handling choice
+- Batch import validation enhancements
+- Import history tracking with rollback capabilities
+
+---
+
 ## [2025-11-22] - Lego Blocks Show Actual Prompt Contributions
 
 ### What's Changed

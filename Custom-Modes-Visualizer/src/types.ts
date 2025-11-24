@@ -70,7 +70,7 @@ export type ModeFamily = {
 /**
  * Available view types for the application
  */
-export type ViewType = 'table' | 'smart' | 'prompt-builder';
+export type ViewType = 'table' | 'smart' | 'prompt-builder' | 'context-manager';
 
 /**
  * Represents a category for organizing features
@@ -188,13 +188,13 @@ export interface ModeContextType {
   addCustomFeature: (feature: CustomFeature) => void;
   updateCustomFeature: (id: string, updates: Partial<CustomFeature>) => void;
   deleteCustomFeature: (id: string) => void;
+  importFromFile: (file: File, strategy?: 'replace' | 'add' | 'family', familyName?: string, customSuffix?: string) => Promise<{ success: boolean, renamedModes: { original: string, new: string }[] }>;
   reorderCustomFeatures: (newOrder: CustomFeature[]) => void;
   saveToLocalStorage: () => void;
   loadFromLocalStorage: () => void;
   exportModesToJson: () => boolean;
   exportSelectedModes: (format: FormatType, selectedSlugs: string[]) => boolean;
   importModesFromJson: (jsonData: Mode[], strategy: 'replace' | 'add' | 'family', familyName?: string) => { success: boolean, renamedModes: { original: string, new: string }[] };
-  importFromFile: (file: File, strategy?: 'replace' | 'add' | 'family', familyName?: string) => Promise<{ success: boolean, renamedModes: { original: string, new: string }[] }>;
   exportFamilyToJson: (familyId: string) => boolean;
   importFamilyFromJson: (jsonData: ModeFamily, modes: Mode[], newFamilyName?: string) => boolean;
   resetModes: () => boolean;

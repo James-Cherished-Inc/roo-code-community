@@ -15,16 +15,29 @@ export function detectSlugConflicts(existingModes: Mode[], importedModes: Mode[]
 /**
  * Generates a unique slug by adding an incremental suffix
  */
-export function generateUniqueSlug(baseSlug: string, existingSlugs: Set<string>): string {
-  let counter = 2;
-  let newSlug = `${baseSlug}-${counter}`;
+export function generateUniqueSlug(baseSlug: string, existingSlugs: Set<string>, suffix?: string): string {
+  if (suffix) {
+    let newSlug = `${baseSlug}-${suffix}`;
+    let counter = 1;
+    
+    while (existingSlugs.has(newSlug)) {
+      counter++;
+      newSlug = `${baseSlug}-${suffix}-${counter}`;
+    }
+    
+    return newSlug;
+  } else {
+    // Default behavior: incremental numbering
+    let counter = 2;
+    let newSlug = `${baseSlug}-${counter}`;
 
-  while (existingSlugs.has(newSlug)) {
-    counter++;
-    newSlug = `${baseSlug}-${counter}`;
+    while (existingSlugs.has(newSlug)) {
+      counter++;
+      newSlug = `${baseSlug}-${counter}`;
+    }
+
+    return newSlug;
   }
-
-  return newSlug;
 }
 
 /**
@@ -33,7 +46,8 @@ export function generateUniqueSlug(baseSlug: string, existingSlugs: Set<string>)
  */
 export function resolveSlugConflicts(
   importedModes: Mode[],
-  existingModes: Mode[]
+  existingModes: Mode[],
+  customSuffix?: string
 ): { resolvedModes: Mode[], renamedModes: { original: string, new: string }[] } {
   const existingSlugs = new Set(existingModes.map(mode => mode.slug));
   const resolvedModes = [...importedModes];
@@ -42,7 +56,7 @@ export function resolveSlugConflicts(
   resolvedModes.forEach((mode, index) => {
     if (existingSlugs.has(mode.slug)) {
       const originalSlug = mode.slug;
-      const newSlug = generateUniqueSlug(originalSlug, existingSlugs);
+      const newSlug = generateUniqueSlug(originalSlug, existingSlugs, customSuffix);
 
       // Update the mode with the new slug
       resolvedModes[index] = { ...mode, slug: newSlug };

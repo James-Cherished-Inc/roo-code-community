@@ -36,7 +36,7 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
    * Extract base mode content from prompt text
    * Returns the actual base mode prompt text contribution
    */
-  const extractBaseModeContent = (text: string, baseModeName: string): string => {
+  const extractBaseModeContent = (text: string, _baseModeName: string): string => {
     // Priority 1: Use the actual base mode prompt if provided
     if (baseModePrompt) {
       return baseModePrompt;
@@ -50,99 +50,6 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
     
     // Fallback: Use entire text if no sections found
     return text.trim();
-  };
-
-  /**
-   * Get a short summary for base modes
-   */
-  const getBaseModeSummary = (baseModeName: string): string => {
-    const summaries: { [key: string]: string } = {
-      'Code Specialist': 'Expert software engineer with modern programming knowledge, providing smart, clean, and efficient code solutions.',
-      'Data Scientist': 'Advanced analytics expert specializing in machine learning, statistical analysis, and data-driven insights.',
-      'Product Manager': 'Strategic product leader focused on user needs, market analysis, and product development best practices.',
-      'UI/UX Designer': 'Creative design professional specializing in user experience, interface design, and user research.',
-      'Business Analyst': 'Strategic business expert focused on process optimization, requirements analysis, and data-driven decisions.'
-    };
-    
-    return summaries[baseModeName] || `${baseModeName} mode focused on specialized expertise and best practices.`;
-  };
-
-  /**
-   * Shorten text to specified character limit while preserving sentence boundaries
-   */
-  const shortenText = (text: string, maxLength: number): string => {
-    if (text.length <= maxLength) {
-      return text;
-    }
-    
-    // Find the last complete sentence within the limit
-    const sentences = text.split(/[.!?]+/);
-    let result = '';
-    
-    for (const sentence of sentences) {
-      const trimmedSentence = sentence.trim();
-      if (!trimmedSentence) continue;
-      
-      const sentenceWithPunctuation = trimmedSentence + '.';
-      if (result.length + sentenceWithPunctuation.length <= maxLength) {
-        result += (result ? ' ' : '') + sentenceWithPunctuation;
-      } else {
-        break;
-      }
-    }
-    
-    // If we couldn't fit any complete sentences, truncate at word boundary
-    if (!result) {
-      const truncated = text.substring(0, maxLength - 3);
-      const lastSpaceIndex = truncated.lastIndexOf(' ');
-      return lastSpaceIndex > maxLength * 0.8
-        ? truncated.substring(0, lastSpaceIndex) + '...'
-        : truncated + '...';
-    }
-    
-    return result;
-  };
-
-  /**
-   * Extract feature content from prompt text
-   * Returns the actual feature description text contribution
-   */
-  const extractFeatureContent = (text: string, featureId: string, featureName: string): string => {
-    // Try to find the feature in the generated prompt text
-    const featureSectionIndex = text.indexOf('--- Feature Enhancements ---');
-    if (featureSectionIndex === -1) {
-      return '';
-    }
-
-    const featureSection = text.substring(featureSectionIndex);
-    // Look for feature section between ## headers
-    const featureHeaderRegex = new RegExp(`##\\s*${featureName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\n([\\s\\S]*?)(?=##|---|$)`, 'i');
-    const match = featureSection.match(featureHeaderRegex);
-    
-    if (match && match[1]) {
-      return match[1].trim();
-    }
-
-    // Fallback: try to find content after the feature name in any section
-    const lines = featureSection.split('\n');
-    let foundFeature = false;
-    const contentLines: string[] = [];
-    
-    for (const line of lines) {
-      if (line.trim().startsWith(`## ${featureName}`)) {
-        foundFeature = true;
-        continue;
-      }
-      if (foundFeature && line.trim().startsWith('##')) {
-        // Found next feature, stop collecting
-        break;
-      }
-      if (foundFeature && line.trim()) {
-        contentLines.push(line);
-      }
-    }
-    
-    return contentLines.join('\n').trim();
   };
 
   /**

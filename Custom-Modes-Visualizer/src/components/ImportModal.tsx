@@ -17,6 +17,9 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose }) => {
   const { importFromFile } = useModes();
   const [importStrategy, setImportStrategy] = useState<'replace' | 'add' | 'family'>('add');
   const [familyName, setFamilyName] = useState('');
+  const [duplicateStrategy, setDuplicateStrategy] = useState<'automatic' | 'filename' | 'custom'>('automatic');
+  const [customSuffix, setCustomSuffix] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -29,6 +32,9 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose }) => {
   const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Store selected file for filename-based suffix
+    setSelectedFile(file);
 
     // Validate family name if using family strategy
     if (importStrategy === 'family' && (!familyName || familyName.trim() === '')) {
@@ -44,23 +50,49 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
+    // For family imports, validate duplicate strategy
+    if (importStrategy === 'family' && duplicateStrategy === 'custom' && (!customSuffix || customSuffix.trim() === '')) {
+      setError('Please enter a custom suffix for duplicate handling');
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
     setSuccess(null);
     setRenamedModes([]);
 
     try {
-      const result = await importFromFile(file, importStrategy, importStrategy === 'family' ? familyName : undefined);
+      // Determine the suffix to use
+      let suffix: string | undefined;
+      if (importStrategy === 'family') {
+        switch (duplicateStrategy) {
+          case 'filename':
+            // Extract filename without extension
+            const filename = file.name.replace(/\.[^/.]+$/, "");
+            suffix = filename.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+            break;
+          case 'custom':
+            suffix = customSuffix.trim();
+            break;
+          case 'automatic':
+          default:
+            suffix = undefined; // Use default behavior
+            break;
+        }
+      }
+
+      const result = await importFromFile(file, importStrategy, importStrategy === 'family' ? familyName : undefined, suffix);
 
       if (result.success) {
         const formatName = isYamlFile ? 'YAML' : 'JSON';
         const strategyText = importStrategy === 'family' && familyName ? `${importStrategy} (${familyName})` : importStrategy;
+        const duplicateText = importStrategy === 'family' ? ` with ${duplicateStrategy} duplicate handling` : '';
 
         if (result.renamedModes.length > 0) {
           setRenamedModes(result.renamedModes);
-          setSuccess(`Successfully imported modes from ${formatName} file using ${strategyText} strategy. Some modes were renamed to avoid conflicts.`);
+          setSuccess(`Successfully imported modes from ${formatName} file using ${strategyText} strategy${duplicateText}. Some modes were renamed to avoid conflicts.`);
         } else {
-          setSuccess(`Successfully imported modes from ${formatName} file using ${strategyText} strategy`);
+          setSuccess(`Successfully imported modes from ${formatName} file using ${strategyText} strategy${duplicateText}`);
         }
 
         setTimeout(() => {
@@ -70,6 +102,9 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose }) => {
           setRenamedModes([]);
           setImportStrategy('add');
           setFamilyName('');
+          setDuplicateStrategy('automatic');
+          setCustomSuffix('');
+          setSelectedFile(null);
           if (fileInputRef.current) {
             fileInputRef.current.value = '';
           }
@@ -180,9 +215,90 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose }) => {
               disabled={isProcessing}
               required
             />
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-sm text-gray-500">
               All imported modes will be grouped under this family name
             </p>
+          </div>
+        )}
+
+        {/* Duplicate Handling Options (only for family strategy) */}
+        {importStrategy === 'family' && (
+          <div className="mb-6">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Duplicate Handling</h3>
+            <p className="text-xs text-gray-500 mb-3">
+              Choose how to handle mode slugs that already exist
+            </p>
+            <div className="space-y-3">
+              <label className="flex items-start">
+                <input
+                  type="radio"
+                  name="duplicateStrategy"
+                  value="automatic"
+                  checked={duplicateStrategy === 'automatic'}
+                  onChange={(e) => setDuplicateStrategy(e.target.value as 'automatic' | 'filename' | 'custom')}
+                  className="mr-3 mt-0.5"
+                  disabled={isProcessing}
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900">Automatic numbering</div>
+                  <div className="text-sm text-gray-500">Append -2, -3, etc. to conflicting slugs</div>
+                </div>
+              </label>
+
+              <label className="flex items-start">
+                <input
+                  type="radio"
+                  name="duplicateStrategy"
+                  value="filename"
+                  checked={duplicateStrategy === 'filename'}
+                  onChange={(e) => setDuplicateStrategy(e.target.value as 'automatic' | 'filename' | 'custom')}
+                  className="mr-3 mt-0.5"
+                  disabled={isProcessing}
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900">Use filename</div>
+                  <div className="text-sm text-gray-500">
+                    Append the imported file name to conflicting slugs
+                    {selectedFile && (
+                      <span className="block text-xs text-blue-600 mt-1">
+                        Example: <span className="font-mono">{`mode-name-${selectedFile.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`}</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </label>
+
+              <label className="flex items-start">
+                <input
+                  type="radio"
+                  name="duplicateStrategy"
+                  value="custom"
+                  checked={duplicateStrategy === 'custom'}
+                  onChange={(e) => setDuplicateStrategy(e.target.value as 'automatic' | 'filename' | 'custom')}
+                  className="mr-3 mt-0.5"
+                  disabled={isProcessing}
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900">Custom suffix</div>
+                  <div className="text-sm text-gray-500 mb-2">
+                    Specify a custom suffix to append to all conflicting slugs
+                  </div>
+                  <input
+                    type="text"
+                    value={customSuffix}
+                    onChange={(e) => setCustomSuffix(e.target.value)}
+                    placeholder="Enter custom suffix (e.g., 'imported', 'backup')"
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    disabled={isProcessing || duplicateStrategy !== 'custom'}
+                  />
+                  {customSuffix && duplicateStrategy === 'custom' && (
+                    <div className="mt-1 text-xs text-blue-600">
+                      Example: <span className="font-mono">{`mode-name-${customSuffix}`}</span>
+                    </div>
+                  )}
+                </div>
+              </label>
+            </div>
           </div>
         )}
 

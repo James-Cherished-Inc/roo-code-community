@@ -281,7 +281,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     * Import modes from file (auto-detects format)
     * Returns success status and information about any renamed modes
     */
-   const importFromFile = async (file: File, strategy: 'replace' | 'add' | 'family' = 'add', familyName?: string): Promise<{ success: boolean, renamedModes: { original: string, new: string }[] }> => {
+   const importFromFile = async (file: File, strategy: 'replace' | 'add' | 'family' = 'add', familyName?: string, customSuffix?: string): Promise<{ success: boolean, renamedModes: { original: string, new: string }[] }> => {
      try {
        // Detect format from filename
        const format = detectFileFormat(file.name);
@@ -305,8 +305,8 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
        // Convert to internal format
        const modes = parsedData.customModes.map(mode => exportModeToMode(mode));
 
-       // Import using existing logic with strategy
-       return importModesFromJson(modes, strategy, familyName);
+       // Import using existing logic with strategy and custom suffix
+       return importModesFromJson(modes, strategy, familyName, customSuffix);
      } catch (error) {
        console.error('Failed to import from file:', error);
        return { success: false, renamedModes: [] };
@@ -317,7 +317,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    * Import modes from JSON file with different merge strategies
    * Returns success status and information about any renamed modes
    */
-  const importModesFromJson = (jsonData: Mode[], strategy: 'replace' | 'add' | 'family', familyName?: string) => {
+  const importModesFromJson = (jsonData: Mode[], strategy: 'replace' | 'add' | 'family', familyName?: string, customSuffix?: string) => {
     try {
       if (!Array.isArray(jsonData)) {
         throw new Error('Invalid JSON format: expected array of modes');
@@ -338,7 +338,7 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           newModes = jsonData;
           break;
         case 'add':
-          // Resolve slug conflicts by renaming conflicting modes
+          // Resolve slug conflicts by renaming conflicting modes (no custom suffix for add strategy)
           const { resolvedModes, renamedModes: conflictsResolved } = resolveSlugConflicts(jsonData, modes);
           newModes = [...modes, ...resolvedModes];
           renamedModes = conflictsResolved;
@@ -361,17 +361,17 @@ export const ModeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               addFamily(newFamily);
             }
 
-            // Resolve slug conflicts within family import as well
+            // Resolve slug conflicts within family import with custom suffix if provided
             const modesWithFamily = jsonData.map(mode => ({
               ...mode,
               family: familyId
             }));
-            const { resolvedModes: resolvedFamilyModes, renamedModes: familyConflictsResolved } = resolveSlugConflicts(modesWithFamily, modes);
+            const { resolvedModes: resolvedFamilyModes, renamedModes: familyConflictsResolved } = resolveSlugConflicts(modesWithFamily, modes, customSuffix);
             newModes = [...modes, ...resolvedFamilyModes];
             renamedModes = familyConflictsResolved;
           } else {
             // Fallback: just add without family assignment (with conflict resolution)
-            const { resolvedModes, renamedModes: fallbackConflictsResolved } = resolveSlugConflicts(jsonData, modes);
+            const { resolvedModes, renamedModes: fallbackConflictsResolved } = resolveSlugConflicts(jsonData, modes, customSuffix);
             newModes = [...modes, ...resolvedModes];
             renamedModes = fallbackConflictsResolved;
           }
