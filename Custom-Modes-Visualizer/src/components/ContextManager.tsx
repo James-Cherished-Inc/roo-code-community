@@ -17,6 +17,9 @@ interface ContextInputs {
   turnCount: number;
   filesRead: number;
   plannedMessages: number;
+  inputFullPrice: number;
+  inputCachedPrice: number;
+  outputPrice: number;
 }
 
 /**
@@ -55,25 +58,26 @@ const ContextManager: React.FC<ContextManagerProps> = ({ onRecommendation }) => 
   // Form state for all inputs
   const [inputs, setInputs] = useState<ContextInputs>({
     systemPromptTokens: 2000,
-    currentHistoryTokens: 5000,
-    turnCount: 5,
-    filesRead: 2,
-    plannedMessages: 5
+    currentHistoryTokens: 10000,
+    turnCount: 10,
+    filesRead: 3,
+    plannedMessages: 5,
+    inputFullPrice: 3.00,
+    inputCachedPrice: 0.30,
+    outputPrice: 15.00
   });
 
   // Calculate results state
   const [recommendation, setRecommendation] = useState<ContextRecommendation | null>(null);
 
-  // Price constants (Claude 3.5 Sonnet pricing per million tokens)
-  const FULL_PRICE = 3.00;
-  const CACHED_PRICE = 0.30;
   const CACHE_MULTIPLIER = 10;
+  const OUTPUT_TOKENS_PER_TURN = 2000; // Average output tokens per turn
 
   /**
    * Calculate context recommendation based on inputs
    */
   const calculateRecommendation = (): ContextRecommendation => {
-    const { systemPromptTokens, currentHistoryTokens, turnCount, filesRead, plannedMessages } = inputs;
+    const { systemPromptTokens, currentHistoryTokens, turnCount, filesRead, plannedMessages, inputFullPrice, inputCachedPrice, outputPrice } = inputs;
 
     // Calculate total context size
     const totalContext = systemPromptTokens + currentHistoryTokens;
@@ -81,9 +85,16 @@ const ContextManager: React.FC<ContextManagerProps> = ({ onRecommendation }) => 
     // Calculate break-even point (in turns)
     const breakEvenTurns = (CACHE_MULTIPLIER * systemPromptTokens) / currentHistoryTokens;
 
-    // Calculate costs
-    const costPerTurnStaying = (totalContext * CACHED_PRICE) / 1000000;
-    const costToSwitch = (systemPromptTokens * FULL_PRICE) / 1000000;
+    // Calculate output cost (symmetric for both stay/switch)
+    const outputCostPerTurn = (OUTPUT_TOKENS_PER_TURN * outputPrice) / 1000000;
+
+    // Calculate input costs
+    const inputCostPerTurnStaying = (totalContext * inputCachedPrice) / 1000000;
+    const inputCostToSwitch = (systemPromptTokens * inputFullPrice) / 1000000;
+
+    // Total costs per turn/path
+    const costPerTurnStaying = inputCostPerTurnStaying + outputCostPerTurn;
+    const costToSwitch = inputCostToSwitch + outputCostPerTurn;
     const costIfStay = costPerTurnStaying * plannedMessages;
     const costIfSwitch = costToSwitch + (costPerTurnStaying * (plannedMessages - 1));
 
@@ -266,6 +277,55 @@ const ContextManager: React.FC<ContextManagerProps> = ({ onRecommendation }) => 
               step="1"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />
+          </div>
+
+          {/* Pricing Inputs */}
+          <div className="md:col-span-2">
+            <h4 className="text-sm font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Pricing ($/Million Tokens)</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label htmlFor="inputFullPrice" className="block text-xs font-medium text-gray-600 mb-1">
+                  Input Full
+                </label>
+                <input
+                  type="number"
+                  id="inputFullPrice"
+                  value={inputs.inputFullPrice}
+                  onChange={(e) => handleInputChange('inputFullPrice', e.target.value)}
+                  min="0"
+                  step="0.01"
+                  className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label htmlFor="inputCachedPrice" className="block text-xs font-medium text-gray-600 mb-1">
+                  Input Cached
+                </label>
+                <input
+                  type="number"
+                  id="inputCachedPrice"
+                  value={inputs.inputCachedPrice}
+                  onChange={(e) => handleInputChange('inputCachedPrice', e.target.value)}
+                  min="0"
+                  step="0.01"
+                  className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label htmlFor="outputPrice" className="block text-xs font-medium text-gray-600 mb-1">
+                  Output
+                </label>
+                <input
+                  type="number"
+                  id="outputPrice"
+                  value={inputs.outputPrice}
+                  onChange={(e) => handleInputChange('outputPrice', e.target.value)}
+                  min="0"
+                  step="0.01"
+                  className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

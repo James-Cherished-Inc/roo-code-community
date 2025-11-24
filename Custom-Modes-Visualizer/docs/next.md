@@ -4,16 +4,31 @@ DO NOT TOUCH
 
 # Context Manager
 
+For the pricing I only want input and output, not cached price.
+
 The Context Manager is an interactive calculator that helps optimize API costs by determining the optimal time to switch tasks versus continuing in the current session. Located in `src/components/ContextManager.tsx`, it implements the "10x Rule" for cost optimization.
 
 ## Implementation Details
 
 ### Core Logic
-The calculator uses the pricing differential between cached (10% cost) and uncached (100% cost) requests to determine break-even points:
+The calculator uses the pricing differential between cached (10% cost) and uncached (100% cost) requests to determine break-even points, now enhanced with:
 
-- **Full Price**: $3.00 per million tokens (Claude 3.5 Sonnet)
-- **Cached Price**: $0.30 per million tokens
 - **Break-even Formula**: `(10 × System Prompt Size) / Current History Size`
+- **Output Cost Integration**: Includes ~2000 tokens per turn for output generation costs
+- **Total Cost Analysis**: Compares full cost scenarios including both input and output token costs
+
+### Default Values
+The ContextManager initializes with realistic defaults:
+- **Turn Count**: 10 turns
+- **Files Read**: 3 files
+- **History Tokens**: 10,000 tokens
+- **Planned Messages**: 5 future messages
+
+### Pricing Configuration
+Users can customize pricing for different API providers with three editable fields:
+- **Input Full Price**: $3.00 per million tokens (uncached requests)
+- **Input Cached Price**: $0.30 per million tokens (cached requests)
+- **Output Price**: $15.00 per million tokens (model responses)
 
 ### Input Parameters
 - System Prompt Size (tokens)
@@ -21,27 +36,33 @@ The calculator uses the pricing differential between cached (10% cost) and uncac
 - Number of Turns So Far
 - Files Read in Context
 - Planned Messages (future turns)
+- **Pricing Configuration** (customizable per provider):
+  - Input Full Price ($/Million Tokens)
+  - Input Cached Price ($/Million Tokens)
+  - Output Price ($/Million Tokens)
 
 ### Risk Assessment
 The component automatically evaluates three key risk factors:
 - **Context Pollution Risk**: Turn count > 15
 - **File Bloat Risk**: Files read > 5
 - **History Bloat Risk**: History tokens > 25,000
+- **Critical Bloat**: Turn count > 20 OR files > 8 OR history > 25,000 triggers urgent switch recommendation
 
-### Recommendations
-Provides four types of recommendations:
-- 🚨 **SWITCH NOW**: Critical context bloat detected
-- ⚠️ **RECOMMEND SWITCH**: Cost savings justify switching
-- ✅ **STAY**: Haven't hit break-even point
-- ⚖️ **MARGINAL**: Consider workflow context
+### Enhanced Recommendations
+Provides four types of recommendations with detailed cost breakdowns:
+- 🚨 **SWITCH NOW**: Critical context bloat detected with cost analysis
+- ⚠️ **RECOMMEND SWITCH**: Cost savings > 50% justify switching
+- ✅ **STAY**: Haven't hit break-even point yet
+- ⚖️ **MARGINAL**: Consider workflow context with mathematical proximity
 
 ### File Upload Integration
 **{Future Enhancement}**: File upload functionality to automatically calculate token counts from uploaded documents, enabling real-time context analysis without manual token estimation.
 
 **References**:
-- Calculator logic: [`docs/temporary-resources/calculator.md`](docs/temporary-resources/calculator.md)
+- Calculator logic: [`docs/calculator.md`](docs/calculator.md)
 - Component implementation: [`src/components/ContextManager.tsx`](src/components/ContextManager.tsx)
 - Test coverage: [`src/test/ContextManager.test.tsx`](src/test/ContextManager.test.tsx)
+- Recent changes: [`docs/Changelog/Code/2025-11-24-ContextManager-Enhanced-Pricing-and-Cost-Calculation.md`](docs/Changelog/Code/2025-11-24-ContextManager-Enhanced-Pricing-and-Cost-Calculation.md)
 
 # Improvements
 
@@ -236,6 +257,14 @@ describe('ImportModal Component', () => {
 3. **Long-term Benefits**: Advanced automation, pattern libraries, comprehensive quality gates
 
 These enhancements would transform the development process from reactive problem-solving to proactive quality management, significantly improving the AI-engineering system's efficiency and reliability for future feature development.
+
+---
+
+User: Teach about API cost optimization patterns beyond the calculator.
+Codebase: Add more comprehensive tests for edge cases (negative prices, zero values).
+
+Persist pricing in localStorage for user convenience.
+Add tooltips explaining pricing (input vs output, caching benefits).
 
 ---
 

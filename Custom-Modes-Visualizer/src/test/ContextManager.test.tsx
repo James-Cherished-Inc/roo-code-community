@@ -9,36 +9,39 @@ const user = userEvent.setup();
 describe('ContextManager', () => {
   test('renders with default values and shows correct recommendation', async () => {
     render(<ContextManager />);
-    
+
     // Check inputs have default values
-    expect(screen.getByLabelText(/System Prompt Size/i)).toHaveValue('2000');
-    expect(screen.getByLabelText(/Current Chat History/i)).toHaveValue('5000');
-    expect(screen.getByLabelText(/Number of Turns/i)).toHaveValue('5');
-    expect(screen.getByLabelText(/Files Read/i)).toHaveValue('2');
-    expect(screen.getByLabelText(/How many more messages/i)).toHaveValue('5');
-    
-    // Default: MARGINAL (breakEven ~4 < planned 5)
+    expect(screen.getByLabelText(/System Prompt Size/i)).toHaveValue(2000);
+    expect(screen.getByLabelText(/Current Chat History/i)).toHaveValue(10000);
+    expect(screen.getByLabelText(/Number of Turns/i)).toHaveValue(10);
+    expect(screen.getByLabelText(/Files Read/i)).toHaveValue(3);
+    expect(screen.getByLabelText(/How many more messages/i)).toHaveValue(5);
+    expect(screen.getByLabelText(/Input Full/i)).toHaveValue(3.00);
+    expect(screen.getByLabelText(/Input Cached/i)).toHaveValue(0.30);
+    expect(screen.getByLabelText(/Output/i)).toHaveValue(15.00);
+
+    // Default: STAY (breakEven ~10 > planned 5? Wait no: totalContext=12000, breakEven= (10*2000)/10000 = 20000/10000=2, 2 < 5, so STAY)
     await waitFor(() => {
-      expect(screen.getByText(/MARGINAL/i)).toBeInTheDocument();
+      expect(screen.getByText((content) => content.includes('✅ STAY'))).toBeInTheDocument();
     });
-    
-    // Total context 7000
-    expect(screen.getByText('7,000 tokens')).toBeInTheDocument();
+
+    // Total context 12000
+    expect(screen.getByText('12,000 tokens')).toBeInTheDocument();
   });
 
   test('input changes trigger real-time recalculation and update recommendation', async () => {
     render(<ContextManager />);
-    
+
     const historyInput = screen.getByLabelText(/Current Chat History/i);
-    
-    // Reduce history to trigger STAY
+
+    // Reduce history to trigger STAY (total=3000, breakEven=2000/1000=2, 2<5, costIfStay < costIfSwitch, so STAY)
     await user.clear(historyInput);
     await user.type(historyInput, '1000');
-    
+
     await waitFor(() => {
-      expect(screen.getByText(/STAY/i)).toBeInTheDocument();
+      expect(screen.getByText((content) => content.includes('STAY'))).toBeInTheDocument();
     });
-    
+
     // Total updates to 3000
     await waitFor(() => {
       expect(screen.getByText('3,000 tokens')).toBeInTheDocument();
@@ -74,24 +77,24 @@ describe('ContextManager', () => {
 
   test('cost calculations match Claude 3.5 Sonnet pricing', async () => {
     render(<ContextManager />);
-    
+
     // Specific: system=10000, history=1000, planned=10
     const systemInput = screen.getByLabelText(/System Prompt Size/i);
     await user.clear(systemInput);
     await user.type(systemInput, '10000');
-    
+
     const historyInput = screen.getByLabelText(/Current Chat History/i);
     await user.clear(historyInput);
     await user.type(historyInput, '1000');
-    
+
     const plannedInput = screen.getByLabelText(/How many more messages/i);
     await user.clear(plannedInput);
     await user.type(plannedInput, '10');
-    
+
     await waitFor(() => {
       expect(screen.getByText('11,000 tokens')).toBeInTheDocument();
-      expect(screen.getByText('$0.0033')).toBeInTheDocument(); // per turn cached
-      expect(screen.getByText('$0.0300')).toBeInTheDocument(); // switch full
+      expect(screen.getByText('$0.0333')).toBeInTheDocument(); // per turn cached + output
+      expect(screen.getByText('$0.0600')).toBeInTheDocument(); // switch full + output
     });
   });
 });
