@@ -4,16 +4,15 @@ DO NOT TOUCH
 
 # Context Manager
 
-For the pricing I only want input and output, not cached price.
-
 The Context Manager is an interactive calculator that helps optimize API costs by determining the optimal time to switch tasks versus continuing in the current session. Located in `src/components/ContextManager.tsx`, it implements the "10x Rule" for cost optimization.
 
 ## Implementation Details
 
 ### Core Logic
-The calculator uses the pricing differential between cached (10% cost) and uncached (100% cost) requests to determine break-even points, now enhanced with:
+The calculator implements the simplified "10x Rule" pricing model to determine break-even points, now enhanced with:
 
 - **Break-even Formula**: `(10 × System Prompt Size) / Current History Size`
+- **Input Pricing**: Single input price field with 10x multiplier for switching (built-in 10x rule)
 - **Output Cost Integration**: Includes ~2000 tokens per turn for output generation costs
 - **Total Cost Analysis**: Compares full cost scenarios including both input and output token costs
 
@@ -25,9 +24,8 @@ The ContextManager initializes with realistic defaults:
 - **Planned Messages**: 5 future messages
 
 ### Pricing Configuration
-Users can customize pricing for different API providers with three editable fields:
-- **Input Full Price**: $3.00 per million tokens (uncached requests)
-- **Input Cached Price**: $0.30 per million tokens (cached requests)
+Users can customize pricing for different API providers with two editable fields:
+- **Input Price**: $3.00 per million tokens (with 10x rule for switching built-in)
 - **Output Price**: $15.00 per million tokens (model responses)
 
 ### Input Parameters
@@ -37,8 +35,7 @@ Users can customize pricing for different API providers with three editable fiel
 - Files Read in Context
 - Planned Messages (future turns)
 - **Pricing Configuration** (customizable per provider):
-  - Input Full Price ($/Million Tokens)
-  - Input Cached Price ($/Million Tokens)
+  - Input Price ($/Million Tokens) with 10x rule for switching
   - Output Price ($/Million Tokens)
 
 ### Risk Assessment

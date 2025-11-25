@@ -201,3 +201,19 @@ export interface ModeContextType {
   globalConfig: GlobalConfig;
   updateGlobalConfig: (updates: Partial<GlobalConfig>) => void;
 }
+
+/**
+* Checklist for assessing impact of function extensions on existing interfaces
+*/
+export interface FunctionExtensionChecklist {
+ existingInterfaces: string[];
+ affectedComponents: string[];
+ breakingChanges: boolean;
+ backwardCompatibility: boolean;
+ typeSafetyCoverage: string[];
+}
+
+/**
+* Utility type for interface audit results
+*/
+export type InterfaceAuditResult = FunctionExtensionChecklist;

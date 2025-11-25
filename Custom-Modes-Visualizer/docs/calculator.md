@@ -11,15 +11,14 @@ The calculator now provides comprehensive cost analysis including both **input a
 ### Pricing Configuration
 
 The calculator supports customizable pricing for different API providers:
-- **Input Full Price**: $3.00 per million tokens (uncached requests)
-- **Input Cached Price**: $0.30 per million tokens (cached requests)
+- **Input Price**: $3.00 per million tokens (with 10x rule for switching built-in)
 - **Output Price**: $15.00 per million tokens (model responses)
 
 ### The "10x Rule" for Optimization
 
-To determine the exact break-even point, we can use a mathematical heuristic based on the pricing difference between **Cached** (10% cost) and **Uncached** (100% cost) requests.
+To determine the exact break-even point, we use a mathematical heuristic based on the built-in pricing differential between **staying** (cached cost) and **switching** (full price × 10) requests.
 
-Since the Uncached price is **10x higher** than the Cached price, the "System Prompt Penalty" determines your strategy.
+Since switching costs **10x more** than staying for the first turn, the "System Prompt Penalty" determines your strategy.
 
 #### The Golden Formula:
 You should switch when the **"Dead Weight" (History)** you are carrying is significantly larger than your **"Fixed overhead" (System Prompt)**.
@@ -36,9 +35,9 @@ $$ \text{Switch Threshold (Turns)} \approx \frac{10 \times \text{System Prompt S
 - **Output Tokens:** 2,000 per turn × 10 turns = 20,000 tokens
 
 **Cost Calculation:**
-- **Staying**: (22,000 tokens × $0.30/M) + (20,000 tokens × $15.00/M) = $0.0066 + $0.3000 = **$0.3066 per turn**
-- **Switching**: (2,000 tokens × $3.00/M) + (20,000 tokens × $15.00/M) = $0.0060 + $0.3000 = **$0.3060 first turn, then $0.3066**
-- **Total for 10 messages**: Stay = $3.066, Switch = $3.066 + $0.006 = $3.072
+- **Staying**: (22,000 tokens × $3.00/M) + (20,000 tokens × $15.00/M) = $0.0660 + $0.3000 = **$0.3660 per turn**
+- **Switching**: (2,000 tokens × $3.00/M × 10) + (20,000 tokens × $15.00/M) = $0.0600 + $0.3000 = **$0.3600 first turn, then $0.3660**
+- **Total for 10 messages**: Stay = $3.660, Switch = $0.3600 + ($0.3660 × 9) = $3.654
 
 **Enhanced Verdict:** With output costs included, the difference is minimal. Context quality and task continuity become more important factors.
 
@@ -48,7 +47,7 @@ $$ \text{Switch Threshold (Turns)} \approx \frac{10 \times \text{System Prompt S
 *   **History:** 2,000 tokens (Just started).
 *   **Calculation:** $(10 \times 5,000) / 2,000 = \textbf{25 Turns}$.
 *   **Verdict:** You would need to send **25 messages** in the new task just to "break even" on the cost of reloading those heavy rules at full price.
-*   **Enhanced Analysis:** Including output costs ($0.03 per turn), staying for 25 turns costs ~$0.75 while switching costs ~$0.78 + context loss.
+*   **Enhanced Analysis:** With simplified pricing (input $3.00/M, output $15.00/M, 10x rule), staying for 25 turns costs ~$9.15 while switching costs ~$9.75 + context loss.
 *   **Strategy:** **STAY.** It is cheaper to pay the small "rent" on the 2k history than to pay the huge "moving fee" for the 5k rules.
 
 ### 2. When is it SUB-EFFICIENT to keep the same task? (Switch Now)
@@ -57,8 +56,8 @@ $$ \text{Switch Threshold (Turns)} \approx \frac{10 \times \text{System Prompt S
 *   **History:** 20,000 tokens (Bloated with read files/chat).
 *   **Calculation:** $(10 \times 2,000) / 20,000 = \textbf{1 Turn}$.
 *   **Verdict:** If you plan to send even **one more message**, it is already cheaper to switch.
-*   **Enhanced Analysis:** Output costs are symmetric ($0.03/turn), so input cost differences dominate the decision.
-*   **Strategy:** **SWITCH IMMEDIATELY.** You are paying more "rent" per turn on the history ($0.006) than the one-time cost of starting fresh ($0.006).
+*   **Enhanced Analysis:** With simplified pricing (input $3.00/M, output $15.00/M, 10x rule), input cost differences dominate the decision.
+*   **Strategy:** **SWITCH IMMEDIATELY.** You are paying more "rent" per turn on the history than the one-time cost of starting fresh with 10x penalty.
 
 ***
 
@@ -67,9 +66,9 @@ $$ \text{Switch Threshold (Turns)} \approx \frac{10 \times \text{System Prompt S
 While the math gives exact points, "Context Quality" (the AI knowing what you are talking about) is worth money too. Here are the practical limits:
 
 #### The Token Limit: **20k - 30k Tokens**
-*   **Why?** At 30k tokens, your "rent" per message is ~$0.01.
-*   If you stay for another 30 turns, you waste $0.30.
-*   Starting a new task costs ~$0.01 - $0.03.
+*   **Why?** At 30k tokens, your "rent" per message becomes significant with the simplified pricing model.
+*   If you stay for another 30 turns, you accumulate substantial input costs.
+*   Starting a new task incurs the 10x switching penalty but eliminates ongoing history costs.
 *   **Rule:** Once you hit **30k context**, finish your current thought and reset.
 
 #### The Turn Limit: **10 - 15 Turns**
