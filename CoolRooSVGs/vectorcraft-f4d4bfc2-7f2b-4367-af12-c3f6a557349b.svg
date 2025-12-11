@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="matrixRain" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#003300" stop-opacity="0" />
+      <stop offset="50%" stop-color="#00FF41" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#003300" stop-opacity="0" />
+    </linearGradient>
+    
+    <radialGradient id="gloveGradient" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#ff4d4d" />
+      <stop offset="100%" stop-color="#990000" />
+    </radialGradient>
+    
+    <linearGradient id="furGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D2B48C" />
+      <stop offset="100%" stop-color="#8B4513" />
+    </linearGradient>
+    
+    <linearGradient id="coatGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2b2b2b" />
+      <stop offset="50%" stop-color="#000000" />
+      <stop offset="100%" stop-color="#2b2b2b" />
+    </linearGradient>
+
+    <linearGradient id="lensGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#444" />
+      <stop offset="100%" stop-color="#000" />
+    </linearGradient>
+
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background: The Matrix -->
+  <rect width="512" height="512" fill="#050505" />
+  
+  <!-- Abstract Matrix Code Rain -->
+  <g opacity="0.4">
+    <rect x="20" y="0" width="10" height="200" fill="url(#matrixRain)" rx="2" />
+    <rect x="60" y="100" width="10" height="300" fill="url(#matrixRain)" rx="2" />
+    <rect x="120" y="50" width="10" height="250" fill="url(#matrixRain)" rx="2" />
+    <rect x="400" y="20" width="10" height="150" fill="url(#matrixRain)" rx="2" />
+    <rect x="450" y="150" width="10" height="300" fill="url(#matrixRain)" rx="2" />
+    <rect x="250" y="10" width="10" height="180" fill="url(#matrixRain)" rx="2" />
+    <rect x="320" y="200" width="10" height="200" fill="url(#matrixRain)" rx="2" />
+  </g>
+
+  <!-- Text: ROO CODE -->
+  <text x="256" y="70" text-anchor="middle" font-family="Courier New, monospace" font-weight="bold" font-size="64" fill="#00FF41" filter="url(#glow)" letter-spacing="4">ROO CODE</text>
+
+  <!-- The Kangaroo (Neo) -->
+  <g transform="translate(0, 40)">
+    
+    <!-- Coat Tails (Back) -->
+    <path d="M180,350 Q150,450 100,480 L300,480 Q280,400 280,350 Z" fill="#1a1a1a" />
+
+    <!-- Body/Chest -->
+    <path d="M200,200 L312,200 L300,400 L212,400 Z" fill="#000" />
+    
+    <!-- Head & Neck -->
+    <path d="M230,200 Q230,150 256,130 Q282,150 282,200 Z" fill="url(#furGradient)" /> <!-- Neck -->
+    
+    <!-- Ears -->
+    <path d="M235,140 Q220,80 230,60 Q250,100 250,135 Z" fill="url(#furGradient)" stroke="#5c3a1e" stroke-width="2"/>
+    <path d="M277,140 Q292,80 282,60 Q262,100 262,135 Z" fill="url(#furGradient)" stroke="#5c3a1e" stroke-width="2"/>
+
+    <!-- Face Shape -->
+    <path d="M220,130 Q210,180 256,200 Q302,180 292,130 Q256,100 220,130 Z" fill="url(#furGradient)" />
+    <path d="M246,190 Q256,195 266,190" fill="none" stroke="#333" stroke-width="2" /> <!-- Mouth -->
+    <ellipse cx="256" cy="185" rx="8" ry="6" fill="#333" /> <!-- Nose -->
+
+    <!-- Neo Sunglasses -->
+    <g transform="translate(225, 145)">
+      <path d="M0,10 Q15,0 31,10 Q47,0 62,10 Q62,20 55,22 Q31,25 7,22 Q0,20 0,10 Z" fill="url(#lensGradient)" stroke="#888" stroke-width="1" />
+      <path d="M5,12 Q15,5 25,12" fill="none" stroke="white" stroke-width="2" opacity="0.4" />
+      <path d="M37,12 Q47,5 57,12" fill="none" stroke="white" stroke-width="2" opacity="0.4" />
+      <line x1="31" y1="10" x2="31" y2="14" stroke="#000" stroke-width="2" />
+    </g>
+
+    <!-- Coat Collar -->
+    <path d="M210,200 Q190,180 190,150 L220,210 Z" fill="#000" />
+    <path d="M302,200 Q322,180 322,150 L292,210 Z" fill="#000" />
+    
+    <!-- Coat Front -->
+    <path d="M200,200 Q180,300 160,450 L240,450 L240,220 Z" fill="url(#coatGradient)" />
+    <path d="M312,200 Q332,300 352,450 L272,450 L272,220 Z" fill="url(#coatGradient)" />
+
+    <!-- Arms -->
+    <path d="M210,230 Q160,250 140,280" fill="none" stroke="#1a1a1a" stroke-width="35" stroke-linecap="round" /> <!-- Left Arm (Punching) -->
+    <path d="M302,230 Q340,260 330,300" fill="none" stroke="#1a1a1a" stroke-width="35" stroke-linecap="round" /> <!-- Right Arm (Guarding) -->
+
+    <!-- Comic Impact Effect (Behind Glove) -->
+    <g transform="translate(100, 280)">
+      <polygon points="0,0 20,-40 40,-10 70,-50 80,0 120,20 80,50 60,90 30,50 -10,70 10,20 -30,-10" fill="#FFD700" stroke="#FF4500" stroke-width="3" />
+      <polygon points="10,10 25,-20 40,5 60,-25 65,10 90,25 65,45 50,70 30,40 0,55 15,20 -10,0" fill="#FFF" opacity="0.8" />
+    </g>
+
+    <!-- The Bug (Getting Punched) -->
+    <g transform="translate(60, 260) rotate(-30)">
+      <!-- Legs -->
+      <path d="M10,20 L-10,10 M10,30 L-10,30 M10,40 L-10,50 M50,20 L70,10 M50,30 L70,30 M50,40 L70,50" stroke="#00FF41" stroke-width="3" />
+      <!-- Body -->
+      <ellipse cx="30" cy="30" rx="25" ry="35" fill="#222" stroke="#00FF41" stroke-width="2" />
+      <path d="M30,5 L30,55" stroke="#00FF41" stroke-width="1" />
+      <path d="M10,20 L50,20 M10,30 L50,30 M10,40 L50,40" stroke="#00FF41" stroke-width="1" opacity="0.5" />
+      <!-- Eyes (X) -->
+      <g stroke="#FF0000" stroke-width="3">
+        <line x1="15" y1="10" x2="25" y2="20" />
+        <line x1="25" y1="10" x2="15" y2="20" />
+        <line x1="35" y1="10" x2="45" y2="20" />
+        <line x1="45" y1="10" x2="35" y2="20" />
+      </g>
+      <!-- Antennae (Broken) -->
+      <path d="M20,5 L10,-10 M40,5 L45,-5 L55,-2" fill="none" stroke="#00FF41" stroke-width="2" />
+    </g>
+
+    <!-- Boxing Gloves -->
+    <!-- Right Glove (Guarding) -->
+    <g transform="translate(310, 280)">
+      <circle cx="20" cy="20" r="35" fill="url(#gloveGradient)" stroke="#500" stroke-width="2" />
+      <path d="M10,10 Q30,10 40,30" fill="none" stroke="white" stroke-width="3" opacity="0.3" stroke-linecap="round" />
+      <rect x="-10" y="30" width="40" height="20" rx="5" fill="#cc0000" /> <!-- Wrist -->
+    </g>
+
+    <!-- Left Glove (Punching - In front of impact) -->
+    <g transform="translate(100, 260)">
+      <ellipse cx="30" cy="20" rx="45" ry="40" fill="url(#gloveGradient)" stroke="#500" stroke-width="2" />
+      <path d="M10,5 Q40,0 60,15" fill="none" stroke="white" stroke-width="4" opacity="0.4" stroke-linecap="round" />
+      <rect x="50" y="10" width="30" height="40" rx="5" fill="#cc0000" transform="rotate(-10)" /> <!-- Wrist -->
+    </g>
+    
+    <!-- Motion Lines -->
+    <path d="M180,260 L220,260" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.7" />
+    <path d="M170,280 L210,280" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.7" />
+
+  </g>
+</svg>
