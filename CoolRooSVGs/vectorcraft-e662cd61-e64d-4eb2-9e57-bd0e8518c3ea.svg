@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="matrix-fade" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00FF00" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#003300" stop-opacity="0"/>
+    </linearGradient>
+    
+    <linearGradient id="coat-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="50%" stop-color="#2d2d2d"/>
+      <stop offset="100%" stop-color="#0d0d0d"/>
+    </linearGradient>
+
+    <linearGradient id="fur-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C68E56"/>
+      <stop offset="100%" stop-color="#8B5A2B"/>
+    </linearGradient>
+
+    <linearGradient id="glasses-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#111"/>
+      <stop offset="50%" stop-color="#000"/>
+      <stop offset="100%" stop-color="#002200"/>
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    
+    <filter id="glitch-blur">
+      <feGaussianBlur stdDeviation="1" result="blur"/>
+      <feOffset dx="2" dy="0" result="offset"/>
+      <feMerge>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="offset"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background: The Matrix -->
+  <rect width="512" height="512" fill="#050505"/>
+  
+  <!-- Matrix Rain Code -->
+  <g font-family="monospace" font-weight="bold" font-size="14" fill="url(#matrix-fade)" opacity="0.6">
+    <text x="20" y="0">1 0 1 0 1 0 1<tspan x="20" dy="20">0 1 0 0 1</tspan><tspan x="20" dy="20">1 0 1 1</tspan><tspan x="20" dy="20">0 0 1</tspan></text>
+    <text x="60" y="-10">0 1 1 0<tspan x="60" dy="20">1 0 1</tspan><tspan x="60" dy="20">0 0</tspan><tspan x="60" dy="20">1</tspan></text>
+    <text x="100" y="20">1 0<tspan x="100" dy="20">0 1</tspan><tspan x="100" dy="20">1 0 1 0</tspan></text>
+    <text x="150" y="-30">0 1 0 1 1<tspan x="150" dy="20">1 0 0</tspan><tspan x="150" dy="20">0 1</tspan></text>
+    <text x="350" y="0">1 0 1<tspan x="350" dy="20">0 1 0</tspan><tspan x="350" dy="20">1 1</tspan></text>
+    <text x="400" y="-20">0 1<tspan x="400" dy="20">1 0 1 1</tspan><tspan x="400" dy="20">0 0 1</tspan></text>
+    <text x="450" y="10">1 0 0<tspan x="450" dy="20">0 1</tspan><tspan x="450" dy="20">1 0</tspan></text>
+    <text x="480" y="-40">0 1 0<tspan x="480" dy="20">1 0 1</tspan></text>
+    
+    <!-- Lower rain -->
+    <text x="40" y="300">1 0<tspan x="40" dy="20">0 1</tspan></text>
+    <text x="460" y="350">0 1<tspan x="460" dy="20">1 0</tspan></text>
+    <text x="200" y="400">1 0 1<tspan x="200" dy="20">0 0</tspan></text>
+  </g>
+
+  <!-- Title Text -->
+  <text x="256" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="64" fill="#00FF00" filter="url(#glow)" letter-spacing="4">ROO CODE</text>
+
+  <!-- The Kangaroo (Neo) -->
+  <g transform="translate(0, 40)">
+    <!-- Tail -->
+    <path d="M180,350 Q150,420 80,450 Q60,460 50,440 Q120,400 160,320" fill="url(#fur-grad)"/>
+
+    <!-- Trench Coat (Back/Flowing) -->
+    <path d="M180,200 Q120,250 100,380 L140,400 Q160,300 200,280" fill="#0a0a0a"/>
+    <path d="M220,200 Q150,350 160,480 L320,460 Q300,350 280,250" fill="url(#coat-grad)"/>
+
+    <!-- Right Leg (Back) -->
+    <path d="M200,380 Q180,450 220,480 L260,480 Q240,420 240,380" fill="url(#fur-grad)"/>
+
+    <!-- Body/Chest -->
+    <path d="M200,180 L280,180 L290,300 L210,300 Z" fill="#111"/> <!-- Shirt -->
+    
+    <!-- Head & Neck -->
+    <g transform="translate(240, 130)">
+      <!-- Ears -->
+      <path d="M-10,0 L-20,-50 L10,-10 Z" fill="url(#fur-grad)"/>
+      <path d="M30,0 L50,-45 L40,-5 Z" fill="url(#fur-grad)"/>
+      <!-- Face Base -->
+      <path d="M-10,0 Q-20,40 10,60 Q40,65 60,50 Q80,30 70,0 Q60,-20 30,-20 Q0,-20 -10,0" fill="url(#fur-grad)"/>
+      <!-- Snout -->
+      <path d="M60,50 Q80,55 90,45 Q95,35 80,30" fill="url(#fur-grad)"/>
+      <ellipse cx="90" cy="38" rx="4" ry="3" fill="#000"/> <!-- Nose tip -->
+      
+      <!-- Sunglasses -->
+      <g>
+        <path d="M10,20 L40,20 Q45,20 45,25 L45,30 Q45,35 40,35 L10,35 Q5,35 5,30 L5,25 Q5,20 10,20" fill="url(#glasses-grad)" stroke="#333" stroke-width="1"/>
+        <path d="M50,20 L80,20 Q85,20 85,25 L85,30 Q85,35 80,35 L50,35 Q45,35 45,30 L45,25 Q45,20 50,20" fill="url(#glasses-grad)" stroke="#333" stroke-width="1"/>
+        <line x1="45" y1="27" x2="50" y2="27" stroke="#111" stroke-width="2"/>
+        <!-- Reflection -->
+        <path d="M10,22 L30,22 L25,28 Z" fill="#00FF00" opacity="0.3"/>
+        <path d="M55,22 L75,22 L70,28 Z" fill="#00FF00" opacity="0.3"/>
+      </g>
+    </g>
+
+    <!-- Arms -->
+    <!-- Left Arm (Guard) -->
+    <path d="M220,200 Q180,220 190,250" fill="none" stroke="url(#coat-grad)" stroke-width="25" stroke-linecap="round"/>
+    <circle cx="190" cy="250" r="20" fill="#111"/> <!-- Glove -->
+
+    <!-- Right Arm (Punching) -->
+    <path d="M280,200 Q320,200 380,210" fill="none" stroke="url(#coat-grad)" stroke-width="25" stroke-linecap="round"/>
+    
+    <!-- Fist -->
+    <g transform="translate(390, 210)">
+      <rect x="-15" y="-15" width="35" height="30" rx="5" fill="#111"/>
+      <rect x="-5" y="-15" width="10" height="30" fill="#222"/> <!-- Knuckles highlight -->
+    </g>
+  </g>
+
+  <!-- The Digital Bug (Being Punched) -->
+  <g transform="translate(430, 250)">
+    <!-- Glitch effect group -->
+    <g filter="url(#glitch-blur)">
+      <!-- Bug Body -->
+      <path d="M0,0 Q-20,-20 -20,-40 Q-20,-60 0,-60 Q20,-60 20,-40 Q20,-20 0,0" fill="#FF0033"/>
+      <path d="M-20,-40 L-35,-30 M-20,-50 L-35,-55 M20,-40 L35,-30 M20,-50 L35,-55" stroke="#FF0033" stroke-width="3"/>
+      <!-- Bug Head -->
+      <circle cx="0" cy="-60" r="10" fill="#990000"/>
+      <!-- Pixel Debris -->
+      <rect x="-40" y="-50" width="5" height="5" fill="#00FF00"/>
+      <rect x="-30" y="-70" width="8" height="8" fill="#FF0033"/>
+      <rect x="10" y="-80" width="6" height="6" fill="#00FF00"/>
+      <rect x="30" y="-40" width="4" height="4" fill="#FFFFFF"/>
+    </g>
+    
+    <!-- Impact Flash -->
+    <path d="M-10,-30 L-30,-40 L-15,-50 L-20,-70 L0,-55 L20,-70 L15,-50 L30,-40 L10,-30 Z" fill="#FFFFFF" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;0.2;0.8" dur="0.1s" repeatCount="indefinite"/>
+    </path>
+    
+    <!-- Binary spilling out -->
+    <text x="10" y="-10" font-family="monospace" font-size="10" fill="#00FF00">1</text>
+    <text x="20" y="0" font-family="monospace" font-size="10" fill="#00FF00">0</text>
+    <text x="25" y="-20" font-family="monospace" font-size="10" fill="#00FF00">1</text>
+  </g>
+
+  <!-- Foreground Code Overlay (Depth) -->
+  <rect x="0" y="0" width="512" height="512" fill="url(#matrix-fade)" opacity="0.1" pointer-events="none"/>
+
+</svg>

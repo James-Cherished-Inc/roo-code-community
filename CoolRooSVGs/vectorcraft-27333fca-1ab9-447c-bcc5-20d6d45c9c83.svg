@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#000000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a1a0a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="coatGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#333333;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d0d0d;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="furGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d2b48c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5a2b;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="gloveGradient" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#ff4d4d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#990000;stop-opacity:1" />
+    </radialGradient>
+    <radialGradient id="bugGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#555;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#000;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Filters -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="textGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background: The Matrix -->
+  <rect width="512" height="512" fill="url(#bgGradient)" />
+  
+  <!-- Code Rain Effect -->
+  <g font-family="monospace" font-weight="bold" fill="#00ff41" opacity="0.4">
+    <text x="20" y="50" font-size="14" opacity="0.6">1 0 1 0 1 1 0</text>
+    <text x="20" y="200" font-size="14" opacity="0.3">0 1 1 0 1</text>
+    <text x="60" y="100" font-size="18" opacity="0.8">0 1 0 1 1</text>
+    <text x="60" y="300" font-size="18" opacity="0.4">1 0 0 1</text>
+    <text x="120" y="40" font-size="12" opacity="0.5">1 1 0 1 0</text>
+    <text x="400" y="80" font-size="20" opacity="0.7">0 1 0 1</text>
+    <text x="450" y="150" font-size="16" opacity="0.5">1 0 1 1</text>
+    <text x="450" y="350" font-size="16" opacity="0.3">0 1 0</text>
+    <text x="300" y="450" font-size="14" opacity="0.4">1 1 0 1</text>
+    <text x="180" y="480" font-size="12" opacity="0.3">0 0 1</text>
+    
+    <!-- Vertical Streams -->
+    <path d="M 100,0 V 512" stroke="#00ff41" stroke-width="20" stroke-dasharray="20, 10" opacity="0.05"/>
+    <path d="M 350,0 V 512" stroke="#00ff41" stroke-width="30" stroke-dasharray="30, 15" opacity="0.05"/>
+    <path d="M 200,0 V 512" stroke="#00ff41" stroke-width="15" stroke-dasharray="10, 20" opacity="0.05"/>
+  </g>
+
+  <!-- Title Text -->
+  <text x="256" y="70" text-anchor="middle" font-family="'Courier New', monospace" font-weight="900" font-size="64" fill="#00ff41" filter="url(#textGlow)" letter-spacing="4">ROO CODE</text>
+
+  <!-- The Kangaroo (Neo) -->
+  <g transform="translate(0, 40)">
+    <!-- Tail -->
+    <path d="M 180,350 Q 120,400 80,450 Q 140,460 190,420" fill="url(#furGradient)" stroke="#5a3a1a" stroke-width="2"/>
+
+    <!-- Back Coat Flap -->
+    <path d="M 200,250 Q 150,350 120,450 L 240,450 L 250,350 Z" fill="#111" />
+
+    <!-- Legs & Boots -->
+    <g transform="translate(200, 350)">
+      <!-- Left Leg (Back) -->
+      <path d="M 10,0 L -20,80 L 10,100 L 40,20 Z" fill="#222" />
+      <path d="M -20,80 L -30,110 L 20,115 L 10,100 Z" fill="#000" /> <!-- Boot -->
+      <!-- Right Leg (Front) -->
+      <path d="M 60,0 L 80,70 L 120,70 L 100,10 Z" fill="#333" />
+      <path d="M 80,70 L 80,100 L 130,100 L 120,70 Z" fill="#000" /> <!-- Boot -->
+    </g>
+
+    <!-- Body / Coat -->
+    <path d="M 200,150 Q 180,250 190,380 L 280,380 Q 290,250 270,150 Z" fill="url(#coatGradient)" />
+    <path d="M 200,150 L 220,250 L 250,250 L 270,150" fill="none" stroke="#000" stroke-width="2" opacity="0.5"/> <!-- Lapels hint -->
+    
+    <!-- Chest/Neck Fur -->
+    <path d="M 220,150 L 250,150 L 245,180 L 225,180 Z" fill="url(#furGradient)" />
+
+    <!-- Head -->
+    <g transform="translate(235, 110)">
+      <!-- Ears -->
+      <ellipse cx="-15" cy="-25" rx="10" ry="35" transform="rotate(-20)" fill="url(#furGradient)" stroke="#5a3a1a" stroke-width="1"/>
+      <ellipse cx="15" cy="-25" rx="10" ry="35" transform="rotate(20)" fill="url(#furGradient)" stroke="#5a3a1a" stroke-width="1"/>
+      <!-- Face -->
+      <path d="M -25,0 Q -30,30 0,45 Q 30,30 25,0 Q 0,-10 -25,0" fill="url(#furGradient)" />
+      <!-- Snout -->
+      <path d="M -10,25 Q 0,35 10,25 Q 5,15 -5,15 Q -15,15 -10,25" fill="#c69c6d" />
+      <ellipse cx="0" cy="22" rx="4" ry="3" fill="#331a00" />
+      <!-- Sunglasses -->
+      <g fill="#000" stroke="#333" stroke-width="1">
+        <rect x="-22" y="5" width="20" height="12" rx="3" />
+        <rect x="2" y="5" width="20" height="12" rx="3" />
+        <line x1="-2" y1="10" x2="2" y2="10" stroke-width="2" />
+      </g>
+      <!-- Reflection in glasses -->
+      <path d="M -18,7 L -10,7 L -18,15 Z" fill="#00ff41" opacity="0.6" />
+      <path d="M 6,7 L 14,7 L 6,15 Z" fill="#00ff41" opacity="0.6" />
+    </g>
+
+    <!-- Arms & Gloves -->
+    <!-- Left Arm (Guard) -->
+    <path d="M 210,180 Q 180,200 190,230" fill="none" stroke="#1a1a1a" stroke-width="18" stroke-linecap="round"/>
+    <circle cx="190" cy="230" r="25" fill="url(#gloveGradient)" stroke="#500" stroke-width="2"/>
+    <path d="M 180,220 Q 190,215 200,220" fill="none" stroke="#ff9999" stroke-width="2" opacity="0.5"/> <!-- Highlight -->
+
+    <!-- Right Arm (Punching) -->
+    <path d="M 260,180 L 340,180" fill="none" stroke="#1a1a1a" stroke-width="18" stroke-linecap="round"/>
+    <!-- Right Glove (Punching) -->
+    <g transform="translate(350, 180)">
+      <rect x="-10" y="-25" width="40" height="50" rx="15" fill="url(#gloveGradient)" stroke="#500" stroke-width="2"/>
+      <rect x="-15" y="-10" width="20" height="30" rx="10" fill="url(#gloveGradient)" stroke="#500" stroke-width="2"/> <!-- Thumb -->
+      <ellipse cx="10" cy="-10" rx="8" ry="4" fill="#fff" opacity="0.4" transform="rotate(-45)"/> <!-- Shininess -->
+    </g>
+  </g>
+
+  <!-- Impact Effect (Comic Style) -->
+  <g transform="translate(390, 220)">
+    <polygon points="0,0 20,-40 40,-10 70,-50 60,0 100,20 50,40 60,80 20,50 -20,90 -10,40 -50,20 -10,-10 -40,-40" 
+             fill="#ffeb3b" stroke="#ff9800" stroke-width="3" />
+    <path d="M 0,0 L 80,0" stroke="#fff" stroke-width="2" opacity="0.8" transform="rotate(-15) translate(10, -10)"/>
+    <path d="M 0,0 L 60,0" stroke="#fff" stroke-width="2" opacity="0.8" transform="rotate(15) translate(10, 10)"/>
+  </g>
+
+  <!-- The Bug (Being Hit) -->
+  <g transform="translate(420, 220) rotate(30)">
+    <!-- Legs -->
+    <path d="M -15,-10 L -25,-20 M -15,0 L -30,0 M -15,10 L -25,20" stroke="#00ff41" stroke-width="3" fill="none" />
+    <path d="M 15,-10 L 25,-20 M 15,0 L 30,0 M 15,10 L 25,20" stroke="#00ff41" stroke-width="3" fill="none" />
+    <!-- Body -->
+    <ellipse cx="0" cy="0" rx="20" ry="25" fill="url(#bugGradient)" stroke="#00ff41" stroke-width="1"/>
+    <!-- Head -->
+    <circle cx="0" cy="-25" r="12" fill="#222" stroke="#00ff41" stroke-width="1"/>
+    <!-- Eyes (X for dead/hit) -->
+    <path d="M -6,-28 L -2,-22 M -2,-28 L -6,-22" stroke="#f00" stroke-width="2" />
+    <path d="M 2,-28 L 6,-22 M 6,-28 L 2,-22" stroke="#f00" stroke-width="2" />
+    <!-- Glitch effect lines -->
+    <path d="M -30,0 L 30,0" stroke="#00ff41" stroke-width="1" opacity="0.5" stroke-dasharray="2,2"/>
+  </g>
+
+  <!-- Flying Code Fragments (Debris) -->
+  <g fill="#00ff41" font-family="monospace" font-size="10" font-weight="bold">
+    <text x="400" y="180" transform="rotate(-20)">null</text>
+    <text x="450" y="260" transform="rotate(45)">404</text>
+    <text x="420" y="150" transform="rotate(-10)">;</text>
+    <text x="460" y="200" transform="rotate(80)">}</text>
+  </g>
+
+</svg>
