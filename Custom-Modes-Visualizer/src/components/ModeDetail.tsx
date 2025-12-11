@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { Mode } from '../types';
 import { useModes } from '../context/ModeContext';
 import { estimateTokens, formatTokenCount } from '../utils/tokenEstimation';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import MarkdownToggle from './MarkdownToggle';
 
 /**
  * Props for the ModeDetail component
@@ -77,6 +81,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate, onPrevious, onN
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [textareaDimensions, setTextareaDimensions] = useState<{ [field: string]: { width: number; height: number } | null }>({});
   const [copyMessage, setCopyMessage] = useState(false);
+  const [isMarkdownView, setIsMarkdownView] = useState(false);
 
   // Ref for the currently editing textarea
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -247,10 +252,10 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate, onPrevious, onN
           <textarea
             ref={textareaRef}
             defaultValue={value}
-            onBlur={(e) => saveEdit(field, e.target.value)}
+            onBlur={(e) => saveEdit(field, (e.target as HTMLTextAreaElement).value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && e.ctrlKey) {
-                saveEdit(field, e.currentTarget.value);
+                saveEdit(field, (e.currentTarget as HTMLTextAreaElement).value);
               } else if (e.key === 'Escape') {
                 cancelEdit();
               }
@@ -268,10 +273,10 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate, onPrevious, onN
         <input
           type="text"
           defaultValue={value}
-          onBlur={(e) => saveEdit(field, e.target.value)}
+          onBlur={(e) => saveEdit(field, (e.target as HTMLInputElement).value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
-              saveEdit(field, e.currentTarget.value);
+              saveEdit(field, (e.target as HTMLInputElement).value);
             } else if (e.key === 'Escape') {
               cancelEdit();
             }
@@ -298,14 +303,54 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate, onPrevious, onN
                     e.stopPropagation();
                     handleCopyToClipboard(value);
                   }}
-                  className="absolute top-0 right-0 p-1 text-gray-400 hover:text-indigo-600 transition-colors duration-200 rounded-sm hover:bg-indigo-50 z-10"
+                  className="absolute top-0 right-20 p-1 text-gray-400 hover:text-indigo-600 transition-colors duration-200 rounded-sm hover:bg-indigo-50 z-10"
                   title="Copy prompt to clipboard"
                 >
                   <CopyIcon className="w-4 h-4" />
                 </button>
               )}
-              <div className="text-slate-700 whitespace-pre-line leading-relaxed pr-8 w-full break-words" title={value}>
-                {value}
+              <div className="pr-8 w-full break-words" title={value}>
+                {isMarkdownView ? (
+                  <div className="markdown-content prose prose-slate max-w-none">
+                    <ReactMarkdown
+                      components={{
+                        code(props) {
+                          const { children, className } = props;
+                          const match = /language-(\w+)/.exec(className || '');
+                          return match ? (
+                            <SyntaxHighlighter
+                              style={tomorrow}
+                              language={match[1]}
+                              PreTag="div"
+                              className="rounded-md"
+                            >
+                              {String(children).replace(/\n$/, '')}
+                            </SyntaxHighlighter>
+                          ) : (
+                            <code className="bg-gray-100 px-1 py-0.5 rounded text-sm">
+                              {children}
+                            </code>
+                          );
+                        },
+                        h1: ({children}) => <h1 className="text-2xl font-bold text-slate-900 mb-4">{children}</h1>,
+                        h2: ({children}) => <h2 className="text-xl font-semibold text-slate-800 mb-3">{children}</h2>,
+                        h3: ({children}) => <h3 className="text-lg font-medium text-slate-700 mb-2">{children}</h3>,
+                        p: ({children}) => <p className="text-slate-700 leading-relaxed mb-4">{children}</p>,
+                        ul: ({children}) => <ul className="list-disc list-inside text-slate-700 mb-4 space-y-1">{children}</ul>,
+                        ol: ({children}) => <ol className="list-decimal list-inside text-slate-700 mb-4 space-y-1">{children}</ol>,
+                        li: ({children}) => <li className="text-slate-700">{children}</li>,
+                        strong: ({children}) => <strong className="font-semibold text-slate-900">{children}</strong>,
+                        em: ({children}) => <em className="italic text-slate-800">{children}</em>,
+                      }}
+                    >
+                      {value}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  <div className="text-slate-700 whitespace-pre-line leading-relaxed">
+                    {value}
+                  </div>
+                )}
               </div>
             </>
           ) : (
@@ -328,10 +373,10 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate, onPrevious, onN
         <input
           type="text"
           defaultValue={value}
-          onBlur={(e) => saveEdit(field, e.target.value)}
+          onBlur={(e) => saveEdit(field, (e.target as HTMLInputElement).value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
-              saveEdit(field, e.currentTarget.value);
+              saveEdit(field, (e.target as HTMLInputElement).value);
             } else if (e.key === 'Escape') {
               cancelEdit();
             }
@@ -354,7 +399,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate, onPrevious, onN
   };
 
   return (
-    <div className="bg-white shadow rounded-lg px-8 py-6 h-full w-full max-w-none">
+    <div className="bg-white shadow rounded-lg px-8 py-6 h-full w-full max-w-none relative">
       {/* Header with editable name and slug */}
       <div className="mb-6 pb-4 border-b border-gray-200 relative">
         <div className="flex justify-between items-start">
@@ -422,12 +467,18 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate, onPrevious, onN
 
         {/* Prompt Field */}
         <div className="w-full">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            System Prompt
-            <span className="ml-2 text-xs text-gray-500">
-              ({formatTokenCount(estimateTokens(mode.prompt))})
-            </span>
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-gray-700">
+              System Prompt
+              <span className="ml-2 text-xs text-gray-500">
+                ({formatTokenCount(estimateTokens(mode.prompt))})
+              </span>
+            </label>
+            <MarkdownToggle
+              onToggle={setIsMarkdownView}
+              initialMarkdown={false}
+            />
+          </div>
           {renderField('prompt', 'System Prompt', true)}
         </div>
       </div>
@@ -442,7 +493,7 @@ const ModeDetail: React.FC<ModeDetailProps> = ({ mode, onUpdate, onPrevious, onN
 
       {/* Copy success message */}
       {copyMessage && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg animate-fade-in-up z-50">
+        <div className="absolute top-2 right-2 bg-green-500 text-white px-3 py-2 rounded-lg text-sm font-medium shadow-lg animate-fade-in-up z-50">
           Copied ✨
         </div>
       )}

@@ -34,7 +34,7 @@ describe('Navbar Component', () => {
     it('renders the version indicator', () => {
       render(<Navbar {...mockProps} />);
 
-      expect(screen.getByText('v2.4.0')).toBeInTheDocument();
+      expect(screen.getByText('v4.2.4')).toBeInTheDocument();
     });
   });
 

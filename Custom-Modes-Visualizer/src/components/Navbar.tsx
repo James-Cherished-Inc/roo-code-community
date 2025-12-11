@@ -21,6 +21,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange, onAboutClick 
     { id: 'table' as ViewType, label: '📋 Table View', description: 'Edit all modes in a table' },
     { id: 'smart' as ViewType, label: '🎯 Smart View', description: 'View and edit one mode at a time' },
     { id: 'prompt-builder' as ViewType, label: '🔧 Prompt Builder', description: 'Construct prompts from options' },
+    { id: 'context-manager' as ViewType, label: '🧠 Context Manager', description: 'Optimize task switching with cost calculator' },
   ];
 
   return (
@@ -60,7 +61,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeView, onViewChange, onAboutClick 
         <div className="flex-shrink-0 flex items-center space-x-3">
 
           <span className="px-3 py-1 text-xs bg-slate-100 text-slate-600 rounded-full font-medium">
-            v4.2.4
+            v5.0.0
           </span>
 
           <button

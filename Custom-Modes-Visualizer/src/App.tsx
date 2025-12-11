@@ -5,6 +5,7 @@ import AboutPanel from './components/AboutPanel';
 import TableViewPage from './pages/TableViewPage';
 import SmartViewPage from './pages/SmartViewPage';
 import PromptBuilderPage from './pages/PromptBuilderPage';
+import ContextManager from './components/ContextManager';
 import type { ViewType } from './types';
 
 /**
@@ -25,6 +26,8 @@ function App() {
         return <SmartViewPage />;
       case 'prompt-builder':
         return <PromptBuilderPage />;
+      case 'context-manager':
+        return <ContextManager />;
       default:
         return <TableViewPage />;
     }

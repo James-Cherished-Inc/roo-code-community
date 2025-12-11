@@ -38,6 +38,50 @@ Object.defineProperty(navigator, 'clipboard', {
   configurable: true,
 })
 
+// Mock URL constructor and related methods
+Object.defineProperty(window, 'URL', {
+  value: {
+    createObjectURL: vi.fn(() => 'mock-url'),
+    revokeObjectURL: vi.fn(),
+  },
+  writable: true,
+  configurable: true,
+})
+
+// Mock document methods for DOM manipulation
+Object.defineProperty(document, 'createElement', {
+  writable: true,
+  value: vi.fn().mockImplementation((tagName: string) => {
+    if (tagName === 'a') {
+      return {
+        href: '',
+        download: '',
+        click: vi.fn(),
+      };
+    }
+    return {};
+  }),
+});
+
+Object.defineProperty(document.body, 'appendChild', {
+  writable: true,
+  value: vi.fn(),
+});
+
+Object.defineProperty(document.body, 'removeChild', {
+  writable: true,
+  value: vi.fn(),
+});
+
+// Mock crypto for Node.js compatibility
+Object.defineProperty(window, 'crypto', {
+  value: {
+    getRandomValues: vi.fn(),
+    subtle: {},
+  },
+  writable: true,
+});
+
 // Mock data
 const mockModes: Mode[] = [
   {
@@ -65,7 +109,7 @@ describe('Custom Features Integration', () => {
 
   describe('Custom Feature Creation', () => {
     it('should allow creating a custom feature and using it in prompt generation', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -97,7 +141,7 @@ describe('Custom Features Integration', () => {
     })
 
     it('should include custom features in prompt generation when enabled', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -126,7 +170,7 @@ describe('Custom Features Integration', () => {
     })
 
     it('should not include disabled custom features in generated prompt', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -158,7 +202,7 @@ describe('Custom Features Integration', () => {
         category: 'process-planning',
       })
 
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -208,7 +252,7 @@ describe('Custom Features Integration', () => {
     })
 
     it('should include both built-in and custom features when enabled', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -239,7 +283,7 @@ describe('Custom Features Integration', () => {
 
   describe('Custom Feature Persistence', () => {
     it('should persist custom features state across prompt generations', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')

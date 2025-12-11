@@ -38,7 +38,7 @@ describe('Custom Features End-to-End Workflow', () => {
   it('should create custom feature, enable in prompt builder, and verify in generated prompt', async () => {
     render(
       <ModeProvider>
-        <PromptBuilder modes={testModes} />
+        <PromptBuilder modes={testModes} availableModesCount={testModes.length} />
       </ModeProvider>
     )
 

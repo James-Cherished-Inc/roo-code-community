@@ -29,38 +29,6 @@ Object.defineProperty(navigator, 'clipboard', {
   configurable: true,
 })
 
-// Mock URL constructor and related globals
-Object.defineProperty(window, 'URL', {
-  value: class URL {
-    constructor() {}
-    createObjectURL() { return 'mock-url'; }
-    revokeObjectURL() {}
-  },
-  writable: true,
-  configurable: true,
-})
-
-// Mock document methods for DOM manipulation
-Object.defineProperty(document, 'createElement', {
-  writable: true,
-  value: vi.fn().mockImplementation(() => ({
-    href: '',
-    download: '',
-    click: vi.fn(),
-  })),
-})
-Object.defineProperty(document.body, 'appendChild', { writable: true, value: vi.fn() })
-Object.defineProperty(document.body, 'removeChild', { writable: true, value: vi.fn() })
-
-// Mock crypto for Node.js compatibility
-Object.defineProperty(window, 'crypto', {
-  value: {
-    getRandomValues: vi.fn(),
-    subtle: {},
-  },
-  writable: true,
-})
-
 // Mock data
 const mockModes: Mode[] = [
   {
@@ -103,7 +71,7 @@ describe('PromptBuilder', () => {
 
   describe('UI Rendering Tests', () => {
     it('should display mode selection correctly', () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Check title
       expect(screen.getByText('🔧 Prompt Builder')).toBeInTheDocument()
@@ -121,7 +89,7 @@ describe('PromptBuilder', () => {
     })
 
     it('should render feature checkboxes grouped by category when mode selected', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select a mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -139,7 +107,7 @@ describe('PromptBuilder', () => {
     })
 
     it('should render UI elements properly', () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Check labels
       expect(screen.getByText('Additional Instructions (Optional)')).toBeInTheDocument()
@@ -158,7 +126,7 @@ describe('PromptBuilder', () => {
     })
 
     it('should show feature toggles only after mode selection', () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Initially no feature toggles
       expect(screen.queryByText('Feature Enhancements')).not.toBeInTheDocument()
@@ -170,7 +138,7 @@ describe('PromptBuilder', () => {
 
   describe('State Management Tests', () => {
     it('should update state correctly when mode is selected', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       const allArchitectElements = screen.getAllByText('🏗️ Architect')
       const architectButton = allArchitectElements[0].closest('button')!
@@ -186,7 +154,7 @@ describe('PromptBuilder', () => {
     })
 
     it('should update custom prompt state when typing', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       const textarea = screen.getByPlaceholderText('Add specific requirements, constraints, or customizations...')
       await user.type(textarea, 'Test custom instructions')
@@ -195,7 +163,7 @@ describe('PromptBuilder', () => {
     })
 
     it('should toggle feature checkboxes correctly', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode to show features
       const allArchitectElements = screen.getAllByText('🏗️ Architect')
@@ -215,7 +183,7 @@ describe('PromptBuilder', () => {
     })
 
     it('should reset all state when reset button clicked', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode and add custom prompt
       const architectButton = screen.getByText('🏗️ Architect')
@@ -244,7 +212,7 @@ describe('PromptBuilder', () => {
 
   describe('Prompt Generation Tests', () => {
     it('should include base mode prompt when no features enabled', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -266,7 +234,7 @@ describe('PromptBuilder', () => {
     })
 
     it('should add feature enhancements section when features are enabled', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -295,7 +263,7 @@ describe('PromptBuilder', () => {
 
 
     it('should append custom instructions correctly', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -324,7 +292,7 @@ describe('PromptBuilder', () => {
 
   describe('Integration Tests', () => {
     it('should complete workflow: select mode → toggle features → generate prompt', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // 1. Select mode
       const allArchitectElements = screen.getAllByText('🏗️ Architect')
@@ -361,7 +329,7 @@ describe('PromptBuilder', () => {
     })
 
     it('should update default features when mode is switched', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select architect mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -384,7 +352,7 @@ describe('PromptBuilder', () => {
     })
 
     it('should handle all features enabled scenario', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -416,7 +384,7 @@ describe('PromptBuilder', () => {
     })
 
     it('should handle edge case: empty custom prompt', async () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Select mode
       const architectButton = screen.getByText('🏗️ Architect')
@@ -440,7 +408,7 @@ describe('PromptBuilder', () => {
     })
 
     it('should handle edge case: no mode selected', () => {
-      render(<PromptBuilder modes={mockModes} />)
+      render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
 
       // Generate button should be disabled
       const generateButton = screen.getByText('🚀 Generate Prompt')
@@ -455,7 +423,7 @@ describe('PromptBuilder', () => {
   describe('TypeScript Types and Interfaces', () => {
     it('should accept modes prop with correct type', () => {
       expect(() => {
-        render(<PromptBuilder modes={mockModes} />)
+        render(<PromptBuilder modes={mockModes} availableModesCount={mockModes.length} />)
       }).not.toThrow()
     })
 
@@ -470,7 +438,7 @@ describe('PromptBuilder', () => {
       }
 
       expect(() => {
-        render(<PromptBuilder modes={[completeMode]} />)
+        render(<PromptBuilder modes={[completeMode]} availableModesCount={1} />)
       }).not.toThrow()
     })
   })

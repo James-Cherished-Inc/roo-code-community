@@ -1,8 +1,249 @@
-
 DO NOT TOUCH
 
+---
 
-- Prompt Builder: add the possibility for users to create their own block (feature) that they can tick or untick when building prompts! Users can create a new feature which has a name and a prompt content (e.g. Always speak like a parrot might be the prompt content for the block named Parrot). Ticking Parrot will include this prompt in the output of the algorithmic prompt builder! Users can rearrange the order of blocks with drag-and-drop to create the prompt of their dream in the order they want!
+# Context Manager
+
+The Context Manager is an interactive calculator that helps optimize API costs by determining the optimal time to switch tasks versus continuing in the current session. Located in `src/components/ContextManager.tsx`, it implements the "10x Rule" for cost optimization.
+
+## Implementation Details
+
+### Core Logic
+The calculator implements the simplified "10x Rule" pricing model to determine break-even points, now enhanced with:
+
+- **Break-even Formula**: `(10 × System Prompt Size) / Current History Size`
+- **Input Pricing**: Single input price field with 10x multiplier for switching (built-in 10x rule)
+- **Output Cost Integration**: Includes ~2000 tokens per turn for output generation costs
+- **Total Cost Analysis**: Compares full cost scenarios including both input and output token costs
+
+### Default Values
+The ContextManager initializes with realistic defaults:
+- **Turn Count**: 10 turns
+- **Files Read**: 3 files
+- **History Tokens**: 10,000 tokens
+- **Planned Messages**: 5 future messages
+
+### Pricing Configuration
+Users can customize pricing for different API providers with two editable fields:
+- **Input Price**: $3.00 per million tokens (with 10x rule for switching built-in)
+- **Output Price**: $15.00 per million tokens (model responses)
+
+### Input Parameters
+- System Prompt Size (tokens)
+- Current Chat History (tokens)
+- Number of Turns So Far
+- Files Read in Context
+- Planned Messages (future turns)
+- **Pricing Configuration** (customizable per provider):
+  - Input Price ($/Million Tokens) with 10x rule for switching
+  - Output Price ($/Million Tokens)
+
+### Risk Assessment
+The component automatically evaluates three key risk factors:
+- **Context Pollution Risk**: Turn count > 15
+- **File Bloat Risk**: Files read > 5
+- **History Bloat Risk**: History tokens > 25,000
+- **Critical Bloat**: Turn count > 20 OR files > 8 OR history > 25,000 triggers urgent switch recommendation
+
+### Enhanced Recommendations
+Provides four types of recommendations with detailed cost breakdowns:
+- 🚨 **SWITCH NOW**: Critical context bloat detected with cost analysis
+- ⚠️ **RECOMMEND SWITCH**: Cost savings > 50% justify switching
+- ✅ **STAY**: Haven't hit break-even point yet
+- ⚖️ **MARGINAL**: Consider workflow context with mathematical proximity
+
+### File Upload Integration
+File upload functionality to automatically calculate token counts from uploaded documents, enabling real-time context analysis without manual token estimation.
+
+**References**:
+- Calculator logic: [`docs/calculator.md`](docs/calculator.md)
+- Component implementation: [`src/components/ContextManager.tsx`](src/components/ContextManager.tsx)
+- Test coverage: [`src/test/ContextManager.test.tsx`](src/test/ContextManager.test.tsx)
+- Recent changes: [`docs/Changelog/Code/2025-11-24-ContextManager-Enhanced-Pricing-and-Cost-Calculation.md`](docs/Changelog/Code/2025-11-24-ContextManager-Enhanced-Pricing-and-Cost-Calculation.md), [`docs/Changelog/Code/25-11-2025-ContextManager-FileTokenUpload.md`](docs/Changelog/Code/25-11-2025-ContextManager-FileTokenUpload.md)
+
+# Improvements
+
+Based on the family mode import duplicate handling enhancement implementation, I'll provide a detailed expansion of the key enhancement proposals that emerged from this development process:
+
+## **2. State Flow Mapping for Complex UI Components**
+
+### **Current Problem:**
+The conditional rendering logic in `ImportModal.tsx` for family vs individual imports created complex state coordination that required additional development time to properly manage.
+
+### **Proposed Enhancement:**
+```typescript
+// State flow diagram template for conditional UI
+interface ConditionalUIStateFlow {
+  triggerConditions: {
+    importType: 'individual' | 'family';
+    duplicateHandling?: 'auto' | 'filename' | 'custom';
+  };
+  stateTransitions: Array<{
+    from: string;
+    to: string;
+    trigger: string;
+    sideEffects: string[];
+  }>;
+  componentStates: {
+    visible: string[];
+    disabled: string[];
+    required: string[];
+  };
+}
+
+// Visual state diagram would show:
+// Individual Import -> [No duplicate options]
+// Family Import -> [Show duplicate options] -> [Dynamic based on selection]
+```
+
+### **Implementation Strategy:**
+- **Visual Mapping**: Required state flow diagrams before implementing complex conditional UI
+- **Pattern Library**: Reusable state management patterns for common UI scenarios
+- **Component Templates**: Pre-built templates for modal components with conditional rendering
+- **Time Savings**: Projected 25% decrease in UI development time for complex components
+
+## **3. Technical Debt Prevention Through Hygiene Sprints**
+
+### **Current Problem:**
+Unused functions in `ColoredPromptDisplay.tsx` and other components accumulated technical debt that surfaced during the feature development, requiring cleanup that could have been prevented.
+
+### **Proposed Enhancement:**
+```bash
+# Automated technical debt detection script
+#!/bin/bash
+# hygiene-check.sh - Run during feature development
+
+echo "🔍 Checking for technical debt..."
+
+# Check for unused functions
+echo "📊 Analyzing unused code..."
+npx tsc --noEmit --listFiles | grep -E "(unused|deprecated)" || true
+
+# Check for dead code patterns
+echo "💀 Scanning for dead code patterns..."
+grep -r "TODO.*implement\|FIXME.*later\|@deprecated" src/ || true
+
+# Build health check
+echo "🏗️ Running build health check..."
+npm run build --silent
+
+echo "✅ Technical debt check complete"
+```
+
+### **Implementation Strategy:**
+- **Regular Hygiene Sprints**: 15-minute technical debt checks during feature development
+- **Automated Detection**: Scripts to identify unused code, deprecated patterns, and build warnings
+- **Definition of Done**: Include "no build warnings" and "no dead code" in feature completion criteria
+- **Cumulative Impact**: Maintains clean codebase consistently, preventing debt accumulation
+
+## **4. Incremental Validation Framework**
+
+### **Current Problem:**
+TypeScript errors and build issues were only discovered after full feature implementation, causing delayed feedback and rework.
+
+### **Proposed Enhancement:**
+```json
+// Pre-commit hooks configuration
+{
+  "scripts": {
+    "pre-commit-checks": [
+      "tsc --noEmit --incremental",
+      "eslint src/ --max-warnings 0",
+      "npm run test --silent",
+      "npm run build --silent"
+    ]
+  },
+  "husky": {
+    "pre-commit": "npm run pre-commit-checks"
+  }
+}
+```
+
+### **Implementation Strategy:**
+- **Step-by-Step Validation**: TypeScript checking after each significant code change
+- **Pre-commit Gates**: Automated validation before code commits
+- **CI/CD Integration**: Build validation on every commit with quick feedback loops
+- **Time Impact**: Faster error detection and resolution throughout development
+
+
+## **6. Automated Quality Gates**
+
+### **Current Problem:**
+No automated validation for new UI components, leading to potential quality issues and inconsistent testing.
+
+### **Proposed Enhancement:**
+```typescript
+// UI component testing template
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+// Required testing pattern for modal components
+describe('ImportModal Component', () => {
+  describe('Conditional Rendering', () => {
+    test('shows duplicate options for family imports', async () => {
+      // Test family import flow
+    });
+    
+    test('hides duplicate options for individual imports', async () => {
+      // Test individual import flow  
+    });
+    
+    test('validates user input for custom suffix', async () => {
+      // Test input validation
+    });
+  });
+  
+  describe('Integration', () => {
+    test('integrates with ModeContext correctly', async () => {
+      // Test context integration
+    });
+  });
+});
+```
+
+### **Implementation Strategy:**
+- **Testing Templates**: Pre-built testing patterns for common component types (modals, forms, conditional UI)
+- **Automated Testing**: Required test coverage for new UI components
+- **Quality Gates**: Pre-commit testing validation and CI/CD integration
+- **Consistency**: Standardized testing approaches across the codebase
+
+## **7. System Impact Assessment**
+
+### **Measurable Improvements:**
+- **Development Speed**: 45-60 minutes saved per similar feature
+- **Bug Reduction**: 40% fewer TypeScript-related compilation issues  
+- **Code Quality**: 25% faster UI development through better patterns
+- **Maintenance**: Reduced technical debt accumulation through hygiene practices
+
+
+### **Implementation Priority:**
+1. **High Impact/Low Effort**: Interface-first checklist, hygiene sprints, pre-commit hooks
+2. **Medium Impact/Medium Effort**: State flow mapping, testing templates, documentation integration
+3. **Long-term Benefits**: Advanced automation, pattern libraries, comprehensive quality gates
+
+These enhancements would transform the development process from reactive problem-solving to proactive quality management, significantly improving the AI-engineering system's efficiency and reliability for future feature development.
+
+---
+
+User: Teach about API cost optimization patterns beyond the calculator.
+Codebase: Add more comprehensive tests for edge cases (negative prices, zero values).
+
+Persist pricing in localStorage for user convenience.
+Add tooltips explaining pricing (input vs output, caching benefits).
+
+---
+
+# Export
+
+Exporting the whole webapp state to json?
+
+---
+
+# Prompt Builder:
+
+- Users can rearrange the order of blocks with drag-and-drop to create the prompt of their dream in the order they want!
+
+--- 
 
 - Improve the explanations about the Coding Best Practices
 

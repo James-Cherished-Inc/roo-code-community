@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { useModes } from '../context/ModeContext';
-import type { Mode, FeatureState } from '../types';
+import type { Mode, FeatureState, FeatureDefinition } from '../types';
 import { featureCategories, features, getDefaultFeaturesForMode } from '../data/features';
 import { CustomFeatureManager } from './CustomFeatureManager';
+import ColoredPromptDisplay from './ColoredPromptDisplay';
+import { getFeatureColor } from '../utils/colorSystem';
+import FamilySelector from './FamilySelector';
+import CreateModeModal from './CreateModeModal';
 import {
   DndContext,
   closestCenter,
@@ -29,6 +33,8 @@ import { CSS } from '@dnd-kit/utilities';
 interface PromptBuilderProps {
   /** Available modes to build prompts from */
   modes: Mode[];
+  /** Total number of available modes */
+  availableModesCount: number;
 }
 
 /**
@@ -39,7 +45,7 @@ interface PromptBuilderProps {
  */
 const SortableFeatureItem: React.FC<{
   featureId: string;
-  feature: any;
+  feature: FeatureDefinition & { isCustom?: boolean };
   selectedFeatures: FeatureState;
   onFeatureToggle: (featureId: string, enabled: boolean) => void;
   isCustom?: boolean;
@@ -52,6 +58,9 @@ const SortableFeatureItem: React.FC<{
     transition,
     isDragging,
   } = useSortable({ id: featureId });
+
+  // Get color configuration for this feature with category support
+  const featureColor = getFeatureColor(featureId, feature.name, feature.category);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -67,7 +76,7 @@ const SortableFeatureItem: React.FC<{
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-start space-x-3"
+      className={`flex items-start space-x-3 p-3 rounded-lg border-l-4 transition-all duration-200 ${featureColor.background} ${featureColor.border} ${featureColor.hover} ${featureColor.shadow} shadow-sm`}
     >
       {/* Drag handle */}
       <button
@@ -94,8 +103,8 @@ const SortableFeatureItem: React.FC<{
       {/* Feature content */}
       <div className="flex-1">
         <label htmlFor={`${featureId}-checkbox`} className="cursor-pointer">
-          <span className="font-medium text-gray-900">{feature.name}</span>
-          <p className="text-sm text-gray-600">{feature.description}</p>
+          <span className={`font-medium ${featureColor.text}`}>{feature.name}</span>
+          <p className={`text-sm mt-1 ${featureColor.text} opacity-80`}>{feature.description}</p>
           {isCustom && (
             <span className="inline-flex items-center px-2 py-0.5 mt-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
               Custom
@@ -107,14 +116,16 @@ const SortableFeatureItem: React.FC<{
   );
 };
 
-const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
+const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes, availableModesCount }) => {
     const { customFeatures, reorderCustomFeatures } = useModes();
     const [selectedMode, setSelectedMode] = useState<Mode | null>(null);
     const [customPrompt, setCustomPrompt] = useState('');
     const [generatedPrompt, setGeneratedPrompt] = useState('');
+    const [enabledFeatures, setEnabledFeatures] = useState<FeatureDefinition[]>([]);
     const [selectedFeatures, setSelectedFeatures] = useState<FeatureState>({});
     const [copyMessage, setCopyMessage] = useState(false);
     const [showCustomFeatureManager, setShowCustomFeatureManager] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     // Sensors for drag and drop
     const sensors = useSensors(
@@ -182,21 +193,33 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
      let prompt = selectedMode.prompt;
 
      // Collect enabled features in drag-and-drop order (per category)
-     const enabledFeatures: (typeof features[0] | typeof customFeatures[0])[] = [];
+     const enabledFeaturesForPrompt: (typeof features[0] | typeof customFeatures[0])[] = [];
+     const enabledFeaturesForDisplay: FeatureDefinition[] = [];
+     
      featureCategories.forEach(category => {
        // Add enabled built-in features for this category
        const catBuiltIn = features.filter(f => f.category === category.id && selectedFeatures[f.id]);
-       enabledFeatures.push(...catBuiltIn);
+       enabledFeaturesForPrompt.push(...catBuiltIn);
+       enabledFeaturesForDisplay.push(...catBuiltIn);
 
        // Add enabled custom features for this category (in their reordered order)
        const catCustom = customFeatures.filter(f => f.category === category.id && selectedFeatures[f.id]);
-       enabledFeatures.push(...catCustom);
+       enabledFeaturesForPrompt.push(...catCustom);
+       // Convert CustomFeature to FeatureDefinition format for display
+       const catCustomAsFeatureDef = catCustom.map(f => ({
+         id: f.id,
+         name: f.name,
+         description: f.description,
+         category: f.category,
+         defaultEnabled: {} // Custom features don't have default enabled states
+       }));
+       enabledFeaturesForDisplay.push(...catCustomAsFeatureDef);
      });
 
      // Add enabled features as standardized instruction blocks
-     if (enabledFeatures.length > 0) {
+     if (enabledFeaturesForPrompt.length > 0) {
        prompt += '\n\n--- Feature Enhancements ---\n';
-       enabledFeatures.forEach(feature => {
+       enabledFeaturesForPrompt.forEach(feature => {
          prompt += `\n## ${feature.name}\n${feature.description}\n`;
        });
      }
@@ -207,6 +230,7 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
      }
 
      setGeneratedPrompt(prompt);
+     setEnabledFeatures(enabledFeaturesForDisplay);
    };
 
    /**
@@ -226,12 +250,20 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
    };
 
    /**
+    * Handle create mode button click
+    */
+   const handleCreate = () => {
+     setIsCreateModalOpen(true);
+   };
+
+   /**
     * Reset the builder
     */
    const reset = () => {
      setSelectedMode(null);
      setCustomPrompt('');
      setGeneratedPrompt('');
+     setEnabledFeatures([]);
      setSelectedFeatures({});
    };
 
@@ -242,10 +274,28 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
 
         {/* Mode Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Select Base Mode
-          </label>
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-sm font-medium text-gray-700">
+              Select Base Mode - {availableModesCount} mode{availableModesCount !== 1 ? 's' : ''} available
+            </label>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">Filter by family:</span>
+              <FamilySelector />
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Start from Scratch Card */}
+            <button
+              onClick={handleCreate}
+              className="w-full text-left p-2 rounded-lg transition-all duration-200 text-sm bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 font-medium"
+            >
+              <div className="font-semibold truncate">➕ Create Mode</div>
+              <div className="text-xs mt-1 truncate text-green-600">
+                Add new mode
+              </div>
+            </button>
+            
+            {/* Existing Mode Cards */}
             {modes.map((mode) => (
               <button
                 key={mode.slug}
@@ -301,6 +351,20 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
           )}
         </div>
 
+        {/* Selected Mode Info */}
+        {selectedMode && (
+          <div className="mb-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Selected Mode Details</h3>
+            <div className="bg-blue-50 p-4 rounded-md">
+              <h4 className="font-medium text-blue-900">{selectedMode.name}</h4>
+               <p className="text-blue-800 mt-1">{selectedMode.description}</p>
+               <p className="text-blue-700 text-sm mt-2">
+                 <strong>Usage:</strong> {selectedMode.usage}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Feature Toggles */}
         {selectedMode && (
             <div className="mb-6">
@@ -322,7 +386,11 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
                     // Create sortable items for both built-in and custom features
                     const allFeatures = [
                       ...categoryFeatures.map(f => ({ ...f, isCustom: false })),
-                      ...categoryCustomFeatures.map(f => ({ ...f, isCustom: true }))
+                      ...categoryCustomFeatures.map(f => ({
+                        ...f,
+                        isCustom: true,
+                        defaultEnabled: {} // Custom features don't have default enabled states
+                      }))
                     ];
 
                     return (
@@ -379,7 +447,7 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
         {generatedPrompt && (
           <div className="border-t pt-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Generated Prompt</h3>
+              <h3 className="text-lg font-medium text-gray-900">🎨 Visual Prompt Builder</h3>
               <button
                 onClick={copyToClipboard}
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
@@ -387,27 +455,18 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
                 📋 Copy to Clipboard
               </button>
             </div>
-            <div className="bg-gray-50 p-4 rounded-md">
-              <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
-                {generatedPrompt}
-              </pre>
-            </div>
+            
+            {/* New colored prompt display */}
+            <ColoredPromptDisplay
+              enabledFeatures={enabledFeatures}
+              promptText={generatedPrompt}
+              baseModeName={selectedMode?.name || ''}
+              baseModePrompt={selectedMode?.prompt || ''}
+              customInstructions={customPrompt.trim() || undefined}
+            />
           </div>
         )}
 
-        {/* Selected Mode Info */}
-        {selectedMode && (
-          <div className="border-t pt-6 mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Selected Mode Details</h3>
-            <div className="bg-blue-50 p-4 rounded-md">
-              <h4 className="font-medium text-blue-900">{selectedMode.name}</h4>
-               <p className="text-blue-800 mt-1">{selectedMode.description}</p>
-               <p className="text-blue-700 text-sm mt-2">
-                 <strong>Usage:</strong> {selectedMode.usage}
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Copy success message */}
         {copyMessage && (
@@ -416,6 +475,12 @@ const PromptBuilder: React.FC<PromptBuilderProps> = ({ modes }) => {
           </div>
         )}
       </div>
+      
+      {/* Create Mode Modal */}
+      <CreateModeModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   );
 };

@@ -53,9 +53,26 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
   const handleInputChange = (field: keyof Mode, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
 
-    // Clear error for this field when user starts typing
+    // Real-time validation for the field being changed
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+
+    // If this field has validation that can be checked immediately (like slug)
+    if (field === 'slug' && value.trim()) {
+      let fieldError = '';
+      
+      // Check uniqueness
+      if (modes.some(mode => mode.slug === value.trim())) {
+        fieldError = 'This slug is already in use. Please choose a different one.';
+      }
+      // Check format
+      else if (!/^[a-z0-9-]+$/.test(value.trim())) {
+        fieldError = 'Slug can only contain lowercase letters, numbers, and hyphens';
+      }
+
+      // Update error for this field
+      setErrors(prev => ({ ...prev, slug: fieldError || undefined }));
     }
   };
 
@@ -112,7 +129,7 @@ const CreateModeModal: React.FC<CreateModeModalProps> = ({ isOpen, onClose }) =>
       description: formData.description!.trim(),
       usage: formData.usage!.trim(),
       prompt: formData.prompt!.trim(),
-      family: selectedFamily?.id || undefined // Use selected family or undefined for no family
+      family: selectedFamily?.id || 'standalone' // Use selected family or standalone for no family
     };
 
     addMode(newMode);
