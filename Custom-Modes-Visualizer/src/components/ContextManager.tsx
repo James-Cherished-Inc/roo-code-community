@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { estimateTokens } from '../utils/tokenEstimation';
 
 /**
  * Props for the ContextManager component
@@ -6,6 +7,15 @@ import React, { useState, useEffect } from 'react';
 interface ContextManagerProps {
   /** Optional callback when a recommendation is made */
   onRecommendation?: (recommendation: ContextRecommendation) => void;
+}
+
+/**
+ * Uploaded file with token estimation
+ */
+interface UploadedFile {
+  name: string;
+  size: number;
+  tokens: number;
 }
 
 /**
@@ -17,8 +27,7 @@ interface ContextInputs {
   turnCount: number;
   filesRead: number;
   plannedMessages: number;
-  inputFullPrice: number;
-  inputCachedPrice: number;
+  inputPrice: number;
   outputPrice: number;
 }
 
@@ -62,10 +71,14 @@ const ContextManager: React.FC<ContextManagerProps> = ({ onRecommendation }) => 
     turnCount: 10,
     filesRead: 3,
     plannedMessages: 5,
-    inputFullPrice: 3.00,
-    inputCachedPrice: 0.30,
+    inputPrice: 3.00,
     outputPrice: 15.00
   });
+
+  // File upload state
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [totalFileTokens, setTotalFileTokens] = useState<number>(0);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   // Calculate results state
   const [recommendation, setRecommendation] = useState<ContextRecommendation | null>(null);
@@ -73,11 +86,15 @@ const ContextManager: React.FC<ContextManagerProps> = ({ onRecommendation }) => 
   const CACHE_MULTIPLIER = 10;
   const OUTPUT_TOKENS_PER_TURN = 2000; // Average output tokens per turn
 
+  // File upload refs
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+
   /**
    * Calculate context recommendation based on inputs
    */
   const calculateRecommendation = (): ContextRecommendation => {
-    const { systemPromptTokens, currentHistoryTokens, turnCount, filesRead, plannedMessages, inputFullPrice, inputCachedPrice, outputPrice } = inputs;
+    const { systemPromptTokens, currentHistoryTokens, turnCount, filesRead, plannedMessages, inputPrice, outputPrice } = inputs;
 
     // Calculate total context size
     const totalContext = systemPromptTokens + currentHistoryTokens;
@@ -89,8 +106,9 @@ const ContextManager: React.FC<ContextManagerProps> = ({ onRecommendation }) => 
     const outputCostPerTurn = (OUTPUT_TOKENS_PER_TURN * outputPrice) / 1000000;
 
     // Calculate input costs
-    const inputCostPerTurnStaying = (totalContext * inputCachedPrice) / 1000000;
-    const inputCostToSwitch = (systemPromptTokens * inputFullPrice) / 1000000;
+    // Use inputPrice for costPerTurnStaying (cached), inputPrice * 10 for costToSwitch (full price)
+    const inputCostPerTurnStaying = (totalContext * inputPrice) / 1000000;
+    const inputCostToSwitch = (systemPromptTokens * inputPrice * CACHE_MULTIPLIER) / 1000000;
 
     // Total costs per turn/path
     const costPerTurnStaying = inputCostPerTurnStaying + outputCostPerTurn;
@@ -158,8 +176,68 @@ const ContextManager: React.FC<ContextManagerProps> = ({ onRecommendation }) => 
    * Handle input changes
    */
   const handleInputChange = (field: keyof ContextInputs, value: string) => {
-    const numValue = parseInt(value) || 0;
+    const numValue = parseFloat(value) || 0;
     setInputs(prev => ({ ...prev, [field]: numValue }));
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    handleFiles(e.dataTransfer.files);
+  };
+
+  const handleFiles = async (files: FileList) => {
+    const validFiles: File[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const ext = file.name.toLowerCase().split('.').pop();
+      const validExts = ['txt', 'md', 'ts', 'tsx', 'js', 'jsx', 'json', 'css', 'html'];
+      if (file.size > 10 * 1024 * 1024) {
+        console.warn(`File ${file.name} is too large (>10MB), skipped`);
+        continue;
+      }
+      if (!validExts.includes(ext!) && !file.type.startsWith('text/')) {
+        console.warn(`File ${file.name} has invalid type, skipped`);
+        continue;
+      }
+      validFiles.push(file);
+    }
+    if (validFiles.length === 0) return;
+    setIsProcessing(true);
+    const promises = validFiles.map(async (file) => {
+      return new Promise<UploadedFile>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const text = e.target?.result as string;
+          const tokens = estimateTokens(text);
+          resolve({ name: file.name, size: file.size, tokens });
+        };
+        reader.readAsText(file);
+      });
+    });
+    const results = await Promise.all(promises);
+    setUploadedFiles(prev => [...prev, ...results]);
+    const total = results.reduce((sum, f) => sum + f.tokens, 0);
+    setTotalFileTokens(prev => prev + total);
+    setIsProcessing(false);
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => {
+      const newFiles = prev.filter((_, i) => i !== index);
+      const newTotal = newFiles.reduce((sum, f) => sum + f.tokens, 0);
+      setTotalFileTokens(newTotal);
+      return newFiles;
+    });
+  };
+
+  const addToHistory = () => {
+    setInputs(prev => ({ ...prev, currentHistoryTokens: prev.currentHistoryTokens + totalFileTokens }));
+    setUploadedFiles([]);
+    setTotalFileTokens(0);
   };
 
   // Auto-calculate when inputs change
@@ -282,30 +360,16 @@ const ContextManager: React.FC<ContextManagerProps> = ({ onRecommendation }) => 
           {/* Pricing Inputs */}
           <div className="md:col-span-2">
             <h4 className="text-sm font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Pricing ($/Million Tokens)</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="inputFullPrice" className="block text-xs font-medium text-gray-600 mb-1">
-                  Input Full
+                <label htmlFor="inputPrice" className="block text-xs font-medium text-gray-600 mb-1">
+                  Input
                 </label>
                 <input
                   type="number"
-                  id="inputFullPrice"
-                  value={inputs.inputFullPrice}
-                  onChange={(e) => handleInputChange('inputFullPrice', e.target.value)}
-                  min="0"
-                  step="0.01"
-                  className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label htmlFor="inputCachedPrice" className="block text-xs font-medium text-gray-600 mb-1">
-                  Input Cached
-                </label>
-                <input
-                  type="number"
-                  id="inputCachedPrice"
-                  value={inputs.inputCachedPrice}
-                  onChange={(e) => handleInputChange('inputCachedPrice', e.target.value)}
+                  id="inputPrice"
+                  value={inputs.inputPrice}
+                  onChange={(e) => handleInputChange('inputPrice', e.target.value)}
                   min="0"
                   step="0.01"
                   className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
@@ -326,6 +390,23 @@ const ContextManager: React.FC<ContextManagerProps> = ({ onRecommendation }) => 
                 />
               </div>
             </div>
+          </div>
+
+          {/* File Upload */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">File Upload for Token Estimation</label>
+            <div ref={dropZoneRef} className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-teal-400 transition-colors" onDrop={handleDrop} onDragOver={handleDragOver} onClick={() => fileInputRef.current?.click()}>
+              {isProcessing ? <div>Processing...</div> : <div>Drag & drop files or click to browse (.txt, .md, .tsx, etc.)</div>}
+              <input ref={fileInputRef} type="file" multiple accept=".txt,.md,.ts,.tsx,.js,.jsx,.json,.css,.html" className="hidden" onChange={(e) => handleFiles(e.target.files!)} />
+            </div>
+            {totalFileTokens > 0 && (
+              <div className="mt-4 space-y-2">
+                <div>Total: {totalFileTokens.toLocaleString()} tokens <button onClick={addToHistory} className="ml-2 px-3 py-1 bg-teal-500 text-white rounded text-sm">Add to History</button></div>
+                <ul>{uploadedFiles.map((f,i) => <li key={i} className={`flex justify-between p-2 rounded ${f.tokens<1000?'bg-green-50':f.tokens<5000?'bg-yellow-50':'bg-red-50'}`}>
+                  <span>{f.name} ({f.size/1024|0}KB)</span><span>{f.tokens.toLocaleString()}</span><button onClick={()=>removeFile(i)} className="ml-2 text-red-500">×</button>
+                </li>)}</ul>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -14,6 +14,19 @@ The calculator supports customizable pricing for different API providers:
 - **Input Price**: $3.00 per million tokens (with 10x rule for switching built-in)
 - **Output Price**: $15.00 per million tokens (model responses)
 
+### File Upload Integration
+**Purpose:** Enables automatic token estimation from uploaded files to accurately assess file read costs without manual entry. *Last updated: 25-11-2025 14:22*
+
+**Features:**
+- Drag & drop UI or click-to-browse in dashed border zone [`src/components/ContextManager.tsx:399`](src/components/ContextManager.tsx:399)
+- Supported formats: `.txt/.md/.ts/.tsx/.js/.jsx/.json/.css/.html` (text-based) [`src/components/ContextManager.tsx:197`](src/components/ContextManager.tsx:197)
+- 10MB per-file limit, skips oversized/invalid [`src/components/ContextManager.tsx:198`](src/components/ContextManager.tsx:198)
+- Token estimation: `estimateTokens(text)` (~4 chars/token) via FileReader + Promise.all [`src/components/ContextManager.tsx:212`](src/components/ContextManager.tsx:212) [`src/utils/tokenEstimation.ts`](src/utils/tokenEstimation.ts)
+- Preview list w/ color badges: green (<1k tokens), yellow (<5k), red (>5k) + size/remove [`src/components/ContextManager.tsx:406`](src/components/ContextManager.tsx:406)
+- **Add to History** merges `totalFileTokens` to `currentHistoryTokens`, clears list, triggers recalc [`src/components/ContextManager.tsx:238`](src/components/ContextManager.tsx:238)
+
+**Benefits:** Precise auto-counting from actual docs/code files; eliminates manual estimation errors.
+
 ### The "10x Rule" for Optimization
 
 To determine the exact break-even point, we use a mathematical heuristic based on the built-in pricing differential between **staying** (cached cost) and **switching** (full price × 10) requests.

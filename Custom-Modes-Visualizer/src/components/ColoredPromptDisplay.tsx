@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { getFeatureColor } from '../utils/colorSystem';
 import type { FeatureDefinition } from '../types';
 import PromptDisplayBlock, { type DisplayPromptBlock } from './PromptDisplayBlock';
@@ -34,41 +34,41 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
 
   /**
    * Extract base mode content from prompt text
-   * Returns the actual base mode prompt text contribution
-   */
-  const extractBaseModeContent = (text: string, _baseModeName: string): string => {
-    // Priority 1: Use the actual base mode prompt if provided
-    if (baseModePrompt) {
-      return baseModePrompt;
-    }
-    
-    // Priority 2: Extract from generated prompt text
-    const featureSectionIndex = text.indexOf('--- Feature Enhancements ---');
-    if (featureSectionIndex !== -1) {
-      return text.substring(0, featureSectionIndex).trim();
-    }
-    
-    // Fallback: Use entire text if no sections found
-    return text.trim();
-  };
+    * Returns the actual base mode prompt text contribution
+    */
+   const extractBaseModeContent = useCallback((text: string): string => {
+     // Priority 1: Use the actual base mode prompt if provided
+     if (baseModePrompt) {
+       return baseModePrompt;
+     }
+
+     // Priority 2: Extract from generated prompt text
+     const featureSectionIndex = text.indexOf('--- Feature Enhancements ---');
+     if (featureSectionIndex !== -1) {
+       return text.substring(0, featureSectionIndex).trim();
+     }
+
+     // Fallback: Use entire text if no sections found
+     return text.trim();
+   }, [baseModePrompt]);
 
   /**
    * Extract custom instructions content from prompt text
-   * Returns the actual custom instructions text contribution
-   */
-  const extractCustomContent = (text: string): string => {
-    // Priority 1: Use the actual custom instructions if provided
-    if (customInstructions) {
-      return customInstructions;
-    }
-    
-    // Priority 2: Extract from generated prompt text
-    const customSectionIndex = text.indexOf('Additional Instructions:');
-    if (customSectionIndex !== -1) {
-      return text.substring(customSectionIndex + 'Additional Instructions:'.length).trim();
-    }
-    return '';
-  };
+    * Returns the actual custom instructions text contribution
+    */
+   const extractCustomContent = useCallback((text: string): string => {
+     // Priority 1: Use the actual custom instructions if provided
+     if (customInstructions) {
+       return customInstructions;
+     }
+
+     // Priority 2: Extract from generated prompt text
+     const customSectionIndex = text.indexOf('Additional Instructions:');
+     if (customSectionIndex !== -1) {
+       return text.substring(customSectionIndex + 'Additional Instructions:'.length).trim();
+     }
+     return '';
+   }, [customInstructions]);
 
   /**
    * Create structured blocks from prompt data
@@ -83,7 +83,7 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
 
     // 1. Add base mode block
     if (baseModeName) {
-      const baseContent = extractBaseModeContent(promptText, baseModeName);
+      const baseContent = extractBaseModeContent(promptText);
       if (baseContent) {
         const baseBlock: DisplayPromptBlock = {
           id: `base-${Date.now()}`,
@@ -134,7 +134,7 @@ const ColoredPromptDisplay: React.FC<ColoredPromptDisplayProps> = ({
     }
 
     return blocks;
-  }, [promptText, enabledFeatures, baseModeName, customInstructions, baseModePrompt]);
+  }, [promptText, enabledFeatures, baseModeName, customInstructions, baseModePrompt, extractBaseModeContent, extractCustomContent]);
 
   /**
    * Build summary text for the display
